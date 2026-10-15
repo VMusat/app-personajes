@@ -1,0 +1,39 @@
+{
+  "name": "app-personajes",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "datos": "node scripts/descargar-datos.mjs",
+    "test": "vitest run",
+    "predev": "node scripts/copiar-dados.mjs",
+    "prebuild": "node scripts/copiar-dados.mjs"
+  },
+  "dependencies": {
+    "@3d-dice/dice-box": "^1.1.4",
+    "firebase": "^12.4.0",
+    "idb-keyval": "^6.2.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "yaml": "^2.8.1",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  }
+}

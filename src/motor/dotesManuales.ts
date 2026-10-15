@@ -1,0 +1,49 @@
+// Efectos de dotes que 5etools solo describe en texto.
+// La clave es «nombre|fuente» en minúsculas.
+import type { Efecto } from './efectos'
+
+export const DOTES_MANUALES: Record<string, Efecto[]> = {
+  'alert|xphb': [{ tipo: 'bono', objetivo: 'iniciativa', valor: 'pb' }],
+  'tough|xphb': [{ tipo: 'bono', objetivo: 'pgPorNivel', valor: 2 }],
+  'lucky|xphb': [{ tipo: 'recurso', nombre: 'Luck Points', usos: 'pb', recarga: 'largo' }],
+  'savage attacker|xphb': [{ tipo: 'nota', texto: 'Una vez por turno, tira dos veces los dados de daño de un arma y usa el mejor resultado.' }],
+  'healer|xphb': [{ tipo: 'nota', texto: 'Battle Medic y Healing Rerolls.' }],
+  'speedy|xphb': [{ tipo: 'velocidad', valor: 10 }],
+  'mobile|xphb': [{ tipo: 'velocidad', valor: 10 }],
+  'boon of speed|xphb': [{ tipo: 'velocidad', valor: 30 }],
+  'boon of fortitude|xphb': [{ tipo: 'bono', objetivo: 'pgMax', valor: 40 }],
+  'boon of combat prowess|xphb': [{ tipo: 'nota', texto: 'Una vez por turno, convierte un ataque fallado en impacto.' }],
+  'boon of irresistible offense|xphb': [{ tipo: 'nota', texto: 'Tus ataques ignoran la resistencia a contundente, perforante y cortante.' }],
+  'boon of truesight|xphb': [{ tipo: 'sentido', nombre: 'Truesight', valor: 60 }],
+  'boon of fate|xphb': [{ tipo: 'recurso', nombre: 'Improve Fate', usos: 1, recarga: 'corto' }],
+  'boon of recovery|xphb': [{ tipo: 'recurso', nombre: 'Last Stand', usos: 1, recarga: 'largo' }],
+  'boon of spell recall|xphb': [{ tipo: 'recurso', nombre: 'Free Casting', usos: 1, recarga: 'largo' }],
+  'boon of the night spirit|xphb': [{ tipo: 'nota', texto: 'Invisible en luz tenue u oscuridad como acción adicional.' }],
+  'boon of energy resistance|xphb': [{ tipo: 'nota', texto: 'Resistencia a dos tipos de daño elegidos (anótalos en la hoja).' }],
+  'boon of dimensional travel|xphb': [{ tipo: 'nota', texto: 'Tras la acción de Ataque o Magia, teletransporte de hasta 30 ft.' }],
+  // Estilos de combate
+  'archery|xphb': [{ tipo: 'bono', objetivo: 'ataqueDistancia', valor: 2 }],
+  'defense|xphb': [{ tipo: 'bono', objetivo: 'ca', valor: 1, condicion: 'armadura' }],
+  'dueling|xphb': [{ tipo: 'nota', texto: '+2 al daño con un arma cuerpo a cuerpo a una mano y sin otra arma.' }],
+  'great weapon fighting|xphb': [{ tipo: 'nota', texto: 'Trata 1 y 2 como 3 en los dados de daño con armas a dos manos o versátiles.' }],
+  'two-weapon fighting|xphb': [{ tipo: 'nota', texto: 'Añade el modificador al daño del ataque extra con dos armas.' }],
+  'thrown weapon fighting|xphb': [{ tipo: 'nota', texto: '+2 al daño con armas arrojadizas.' }],
+  'unarmed fighting|xphb': [{ tipo: 'ataque', nombre: 'Unarmed Strike (Unarmed Fighting)', dano: '1d6', tipoDano: 'bludgeoning', car: 'str', competente: true }],
+  'interception|xphb': [{ tipo: 'nota', texto: 'Reacción: reduce el daño a un aliado en 1d10 + PB.' }],
+  'protection|xphb': [{ tipo: 'nota', texto: 'Reacción con escudo: desventaja al ataque contra un aliado.' }],
+  'blind fighting|xphb': [{ tipo: 'sentido', nombre: 'Blindsight', valor: 10 }],
+  // Generales
+  'heavily armored|xphb': [{ tipo: 'competencia', categoria: 'armadura', valor: 'heavy' }],
+  'moderately armored|xphb': [
+    { tipo: 'competencia', categoria: 'armadura', valor: 'medium' },
+    { tipo: 'competencia', categoria: 'armadura', valor: 'shield' },
+  ],
+  'lightly armored|xphb': [
+    { tipo: 'competencia', categoria: 'armadura', valor: 'light' },
+    { tipo: 'competencia', categoria: 'armadura', valor: 'shield' },
+  ],
+  'martial weapon training|xphb': [{ tipo: 'competencia', categoria: 'arma', valor: 'martial' }],
+  'weapon master|xphb': [{ tipo: 'nota', texto: 'Maestría de un arma adicional (cambia tras un descanso largo).' }],
+  'durable|xphb': [{ tipo: 'nota', texto: 'Ventaja en salvaciones de muerte; acción adicional para gastar un dado de golpe.' }],
+  'observant|xphb': [{ tipo: 'nota', texto: 'Búsqueda rápida como acción adicional.' }],
+}

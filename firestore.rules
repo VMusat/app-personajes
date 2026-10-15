@@ -1,0 +1,46 @@
+rules_version = '2';
+// Reglas de seguridad de la app de personajes.
+// - Solo entran los miembros de la campaña (lista de emails) y los DMs (lista de uids).
+// - Cada jugador lee y edita solo sus personajes; el DM lee y edita todos.
+// - Solo el DM crea y edita objetos de la campaña.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function campana(c) {
+      return get(/databases/$(database)/documents/campanas/$(c)).data;
+    }
+    function esDM(c) {
+      return request.auth != null && request.auth.uid in campana(c).dms;
+    }
+    function esMiembro(c) {
+      return request.auth != null
+        && (esDM(c) || request.auth.token.email.lower() in campana(c).miembros);
+    }
+
+    match /campanas/{c} {
+      allow read: if esMiembro(c);
+      // Crear la campaña: quien la crea queda como único DM
+      allow create: if request.auth != null && request.resource.data.dms == [request.auth.uid];
+      allow update, delete: if esDM(c);
+
+      match /personajes/{p} {
+        allow read: if esDM(c) || (esMiembro(c) && resource.data.propietario == request.auth.uid);
+        allow create: if esMiembro(c) && request.resource.data.propietario == request.auth.uid;
+        allow update: if esDM(c)
+          || (esMiembro(c) && resource.data.propietario == request.auth.uid
+              && request.resource.data.propietario == request.auth.uid);
+        allow delete: if esDM(c) || (esMiembro(c) && resource.data.propietario == request.auth.uid);
+      }
+
+      match /objetos/{o} {
+        allow read: if esMiembro(c);
+        allow write: if esDM(c);
+      }
+
+      match /tiradas/{t} {
+        allow read: if esMiembro(c);
+        allow create: if esMiembro(c) && request.resource.data.uid == request.auth.uid;
+        allow delete: if esDM(c);
+      }
+    }
+  }
+}

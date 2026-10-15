@@ -1,0 +1,70 @@
+{
+  "nombre": "La miasma",
+  "version": 1,
+  "fuentes": ["XPHB", "XDMG", "XMM", "FRHoF", "FRAiF", "EFA", "SETTING"],
+  "fuentesNombres": {
+    "XPHB": "Player's Handbook (2024)",
+    "XDMG": "Dungeon Master's Guide (2024)",
+    "XMM": "Monster Manual (2025)",
+    "FRHoF": "Heroes of Faerûn",
+    "FRAiF": "Adventures in Faerûn",
+    "EFA": "Eberron: Forge of the Artificer",
+    "SETTING": "Setting de la miasma",
+    "CAMPAÑA": "Objeto de la campaña"
+  },
+  "clases": {
+    "Artificer|EFA": { "nombre": "Artificiero", "fuente": "Tecnología y arcana", "setting": "La clase natural de Cerinnar: ingeniería con maná y miasma domesticada." },
+    "Barbarian|XPHB": { "nombre": "Bárbaro", "fuente": "Primordial", "setting": "El maná vivo de la naturaleza, más denso donde estuvo la miasma." },
+    "Bard|XPHB": { "nombre": "Bardo", "fuente": "Arcana", "setting": "" },
+    "Cleric|XPHB": { "nombre": "Clérigo", "fuente": "Divina", "setting": "El vínculo con un Serafín o la comunión con un aspecto del alma. Los Divinos no conceden conjuros; los aspectos sí." },
+    "Druid|XPHB": { "nombre": "Druida", "fuente": "Primordial", "setting": "El maná vivo del Bosque." },
+    "Fighter|XPHB": { "nombre": "Guerrero", "fuente": "Marcial", "setting": "" },
+    "Monk|XPHB": { "nombre": "Monje", "fuente": "Marcial", "setting": "Las artes marciales son muy populares en San Luteburgo." },
+    "Paladin|XPHB": { "nombre": "Paladín", "fuente": "Divina", "setting": "El juramento se presta ante un Serafín o un aspecto del alma." },
+    "Ranger|XPHB": { "nombre": "Explorador", "fuente": "Primordial", "setting": "No todos los Montaraces son exploradores, ni todos los exploradores son Montaraces." },
+    "Rogue|XPHB": { "nombre": "Pícaro", "fuente": "Marcial", "setting": "" },
+    "Sorcerer|XPHB": { "nombre": "Hechicero", "fuente": "Innata", "setting": "Un alma marcada por algo: un Resplandor, una traza lejana, una zona de maná." },
+    "Warlock|XPHB": { "nombre": "Brujo", "fuente": "Pacto", "setting": "Los patrones son PNJs reales del setting. Un brujo es una trama andante." },
+    "Wizard|XPHB": { "nombre": "Mago", "fuente": "Arcana", "setting": "El estudio del maná, la codificación que deja la miasma." }
+  },
+  "lenguas": {
+    "comun": { "nombre": "Cerinés", "original": "Common" },
+    "estandar": [
+      { "nombre": "Sérafo" },
+      { "nombre": "Brennés" },
+      { "nombre": "Lariano" },
+      { "nombre": "Surcense" },
+      { "nombre": "Enano", "original": "Dwarvish" },
+      { "nombre": "Élfico", "original": "Elvish" },
+      { "nombre": "Gnomo", "original": "Gnomish" },
+      { "nombre": "Dracónico", "original": "Draconic" },
+      { "nombre": "Gigante", "original": "Giant" },
+      { "nombre": "Orco", "original": "Orc" },
+      { "nombre": "Goblin", "original": "Goblin" },
+      { "nombre": "Mediano", "original": "Halfling" },
+      { "nombre": "Signos de cascada", "original": "Common Sign Language" }
+    ],
+    "raras": [
+      { "nombre": "Lengua aasimar", "original": "Celestial" },
+      { "nombre": "Silvano", "original": "Sylvan" },
+      { "nombre": "Druídico", "original": "Druidic" },
+      { "nombre": "Infernal", "original": "Infernal" },
+      { "nombre": "Abisal", "original": "Abyssal" },
+      { "nombre": "Habla profunda", "original": "Deep Speech" },
+      { "nombre": "Primordial", "original": "Primordial" },
+      { "nombre": "Umbrío", "original": "Undercommon" },
+      { "nombre": "Jerga del Tajo", "original": "Thieves' Cant" }
+    ]
+  },
+  "reglasCampaña": {
+    "marcaGratisFalloPortales": {
+      "nombre": "Dote de marca gratis tras El fallo de los portales",
+      "descripcion": "Todos los PJs obtienen la marca manifiesta de su aspecto como extra. Quien ya la tenía obtiene la marca plena sin gastar la dote de nivel 4.",
+      "activaPorDefecto": false
+    }
+  },
+  "excluir": {
+    "objetos": [],
+    "dotes": ["Aberrant Dragonmark|EFA", "Greater Aberrant Mark|EFA"]
+  }
+}

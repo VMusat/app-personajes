@@ -1,0 +1,17 @@
+{
+  "Aasimar|XPHB": { "nombre": "Aasimar", "origen": "Reino Sérafo y Cerinnar", "setting": "Tocados por la luz de un Resplandor. Los linajes antiguos vienen del primer Resplandor; los nuevos linajes nacieron entre los supervivientes de Udegard tras el segundo. Sus guías celestiales serían ecos de un Serafín." },
+  "Dragonborn|XPHB": { "nombre": "Dracónido", "origen": "Tierras de Lar", "setting": "Descendientes de los guerreros de Lar que lucharon montados en dragones junto a Sandalfón: la luz del aro los fundió con sus monturas. En Lar son una casta guerrera y sacerdotal; fuera, una rareza." },
+  "Dwarf|XPHB": { "nombre": "Enano", "origen": "Brennan", "setting": "Mineros, forjadores y destiladores de las montañas de Brennan. Los primeros que fabricaron armas de fuego. Poco religiosos: rezan a Mikael por costumbre." },
+  "Elf|XPHB": { "nombre": "Elfo", "origen": "Bosque y Lar", "setting": "Un pueblo nacido del Reflejo Claro. Silvanos: siguen en el Bosque. Altos elfos: los pueblos de Lar. Drow: los que vivieron donde se cuela la Umbra; pálidos, discretos y muy raros." },
+  "Gnome|XPHB": { "nombre": "Gnomo", "origen": "Brennan, Bosque y Cerinnar", "setting": "De las rocas: inventores de los talleres enanos y de Cerinnar. Del bosque: aldeas escondidas que sobrevivieron siglos junto a la miasma." },
+  "Goliath|XPHB": { "nombre": "Goliat", "origen": "Montañas del noreste de Brennan", "setting": "Gente de las cumbres, vecinos y parientes lejanos de los gigantes." },
+  "Halfling|XPHB": { "nombre": "Mediano", "origen": "Reino Sérafo y Cerinnar", "setting": "Campesinos y viñadores del sur. Muchos emigraron con los sérafos al Distrito de Rafael." },
+  "Human|XPHB": { "nombre": "Humano", "origen": "Todas partes", "setting": "La mayoría en todos los reinos." },
+  "Orc|XPHB": { "nombre": "Orco", "origen": "Tierras del Sur", "setting": "Uno de los dos pueblos surcenses. Clanes duros y beligerantes que guerreaban entre sí hasta que la invasión sérafa les dio un enemigo común. Veneran a Camael." },
+  "Tiefling|XPHB": { "nombre": "Tiefling", "origen": "Cerinnar, el Tajo y la linde del Bosque", "setting": "Tocados por una traza oscura. Legados: abisal (acechadores sin conciencia), ctónico (la miasma que retiene a los muertos) e infernal (un antepasado pactó con un acechador con conciencia). En el Reino Sérafo los llaman «malditos»." },
+  "Changeling|EFA": { "nombre": "Cambiante (los sin rostro)", "origen": "Cualquiera", "setting": "Nacen cuando la madre ha tenido contacto con la miasma durante el embarazo: su forma no termina de determinarse. Son pocos y se les teme." },
+  "Kalashtar|EFA": { "nombre": "Kalashtar (los doblados)", "origen": "Cualquiera", "setting": "Su alma está unida a la de ellos mismos en otra traza: oyen a su otro yo. Candidatos naturales a viajero; la Consejería de Divinidad y Diversidad los vigila." },
+  "Khoravar|EFA": { "nombre": "Khoravar (semielfo)", "origen": "Cerinnar y el camino de Lar", "setting": "Hijos de elfos y humanos. Muy comunes en Cerinnar y en el camino de Lar." },
+  "Shifter|EFA": { "nombre": "Cambiaformas", "origen": "Claros del Bosque Retorcido", "setting": "Sangre del Bosque. Descienden de los pueblos nómadas de los claros. Cada familia tiene un animal reflejo. Fueron los primeros Montaraces." },
+  "Warforged|EFA": { "nombre": "Forjado", "origen": "Cerinnar", "setting": "Almas en cuerpos totalmente mecánicos, creadas por las Consejerías de Magia y Miasma y de Tecnología y Transporte. La mayoría son criados del Consejo de Cerinnar." }
+}

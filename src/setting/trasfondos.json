@@ -1,0 +1,72 @@
+{
+  "renombrar": {
+    "Acolyte|XPHB": { "nombre": "Acólito", "setting": "Novicio de la Iglesia Seráfica o servidor de un santuario de los Divinos en el Tajo." },
+    "Artisan|XPHB": { "nombre": "Artesano", "setting": "Aprendiz de uno de los Gremios de Cerinnar." },
+    "Charlatan|XPHB": { "nombre": "Charlatán", "setting": "Vendedor de amuletos de Rafael falsos y de «reliquias seráficas»." },
+    "Criminal|XPHB": { "nombre": "Criminal", "setting": "Miembro de una banda del Tajo: los Ganchos, las Calles Hundidas." },
+    "Entertainer|XPHB": { "nombre": "Artista", "setting": "Cómico de las plazas de Impacto, cantor de la leyenda de la Noche de Cerinnar." },
+    "Farmer|XPHB": { "nombre": "Granjero", "setting": "Jornalero de las viñas del Distrito de Rafael o colono de la linde del Bosque." },
+    "Guard|XPHB": { "nombre": "Guardia", "setting": "Recluta de los Capas Grises." },
+    "Guide|XPHB": { "nombre": "Guía (Montaraz)", "setting": "Montaraz del Gremio de Montaraces." },
+    "Hermit|XPHB": { "nombre": "Ermitaño", "setting": "Superviviente de la miasma que vivió años aislado; o devoto del Ermitaño (la Verdad)." },
+    "Merchant|XPHB": { "nombre": "Mercader", "setting": "Comerciante de la ruta de Lar." },
+    "Noble|XPHB": { "nombre": "Noble", "setting": "Familia sérafa venida a menos en el Distrito de Rafael, o casa de Brennan." },
+    "Sage|XPHB": { "nombre": "Sabio", "setting": "Estudiante de la Universidad de Arcanistas de Cerinnar." },
+    "Sailor|XPHB": { "nombre": "Aeronauta", "setting": "Tripulante de dirigibles del Gremio de Aeronautas." },
+    "Scribe|XPHB": { "nombre": "Escriba", "setting": "Gremio de Escribas y Trujamanes." },
+    "Soldier|XPHB": { "nombre": "Soldado", "setting": "Soldado de la frontera sur del Reino Sérafo, de los ejércitos de Brennan o de la Flota Gris de los Capas Grises." },
+    "Wayfarer|XPHB": { "nombre": "Peregrino", "setting": "Refugiado, o hijo de refugiados, criado en el Tajo." },
+    "Inquisitive|EFA": { "nombre": "Investigador", "setting": "Al estilo del detective de los primeros Divinos. Agencias privadas del Tajo." },
+    "Archaeologist|EFA": { "nombre": "Excavador de Udegard", "setting": "Buscador de reliquias en las ruinas bajo la ciudad." },
+    "House Agent|EFA": { "nombre": "Agente de un gremio", "setting": "Agente de un gremio de Cerinnar. Puede combinarse con una marca de aspecto." },
+    "Aberrant Heir|EFA": { "nombre": "Marcado invertido", "setting": "Nació con una marca del revés y lo han perseguido por ello." },
+    "Flaming Fist Mercenary|FRHoF": { "nombre": "Mercenario de los Capas Grises", "setting": "Mercenario contratado por los Capas Grises." },
+    "Knight of the Gauntlet|FRHoF": { "nombre": "Escudero de la Guardia de Taric", "setting": "Escudero de la Guardia de Taric o de la Mano de Mikael." },
+    "Purple Dragon Squire|FRHoF": { "nombre": "Escudero de la Mano de Mikael", "setting": "Escudero de la Guardia de Taric o de la Mano de Mikael." },
+    "Harper|FRHoF": { "nombre": "Agente de Divinidad y Diversidad", "setting": "Agente de una red secreta: los ojos de la Consejería de Divinidad y Diversidad." },
+    "Zhentarim Mercenary|FRHoF": { "nombre": "Matón del mercado negro", "setting": "Matón del Mercado negro de Cerinnar." },
+    "Emerald Enclave Caretaker|FRHoF": { "nombre": "Guardián del Bosque Hondo", "setting": "Guardián del Bosque Hondo." },
+    "Moonwell Pilgrim|FRHoF": { "nombre": "Peregrino del Bosque Hondo", "setting": "Peregrino del Bosque Hondo." },
+    "Dragon Cultist|FRHoF": { "nombre": "Cultista de un Oscuro", "setting": "Muy buen trasfondo para un PJ arrepentido." },
+    "Genie Touched|FRHoF": { "nombre": "Tocado por un dragón", "setting": "Nacido en las Tierras de Lar con el favor de un dragón." },
+    "Dead Magic Dweller|FRHoF": { "nombre": "Nacido en una zona sin maná", "setting": "Ver Reglas de la miasma (zonas sin maná, pendiente de canon)." },
+    "Mythalkeeper|FRHoF": { "nombre": "Eslabón", "setting": "Custodio, sin saberlo, de una pieza de la cadena que esconde una carta." },
+    "Spellfire Initiate|FRHoF": { "nombre": "Portador del fuego del Resplandor", "setting": "Portador del fuego del Resplandor." },
+    "Shadowmasters Exile|FRHoF": { "nombre": "Desertor de la Umbra", "setting": "Desertor de una orden que camina por la Umbra." },
+    "Chondathan Freebooter|FRHoF": { "nombre": "Filibustero", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
+    "Ice Fisher|FRHoF": { "nombre": "Pescador del hielo", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
+    "Rashemi Wanderer|FRHoF": { "nombre": "Errante de las cumbres", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
+    "Mulhorandi Tomb Raider|FRHoF": { "nombre": "Saqueador de tumbas", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
+    "Lords' Alliance Vassal|FRHoF": { "nombre": "Vasallo", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." }
+  },
+  "herederosDeGremio": { "nombre": "Heredero de un gremio", "setting": "Heredero de un gremio de Cerinnar. Puede combinarse con una marca de aspecto." },
+  "nuevos": [
+    {
+      "name": "Superviviente de la miasma",
+      "source": "SETTING",
+      "edition": "one",
+      "ability": [
+        { "choose": { "weighted": { "from": ["con", "wis", "cha"], "weights": [2, 1] } } },
+        { "choose": { "weighted": { "from": ["con", "wis", "cha"], "weights": [1, 1, 1] } } }
+      ],
+      "feats": [{ "marca manifiesta|setting": true }],
+      "skillProficiencies": [{ "survival": true, "insight": true }],
+      "toolProficiencies": [{ "herbalism kit": true }, { "anyGamingSet": 1 }],
+      "startingEquipment": [
+        {
+          "A": [
+            { "item": "traveler's clothes|xphb" },
+            { "special": "Un objeto de alguien que no volvió" },
+            { "item": "bottle|xphb" },
+            { "value": 3800 }
+          ],
+          "B": [{ "value": 5000 }]
+        }
+      ],
+      "entries": [
+        "Sobreviviste a la miasma, y la miasma te dejó huella: tu marca de aspecto se hizo visible.",
+        { "type": "entries", "name": "Lo que trae", "entries": ["Una cicatriz de miasma, ecos ocasionales y la atención de la Consejería de Divinidad y Diversidad y de los Oscuros."] }
+      ]
+    }
+  ]
+}

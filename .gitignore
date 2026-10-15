@@ -1,0 +1,6 @@
+node_modules
+dist
+.cache-5etools
+*.local
+.firebase
+public/assets/dice-box
