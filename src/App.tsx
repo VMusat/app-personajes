@@ -13,10 +13,11 @@ import { SubirNivel } from './ui/creador/SubirNivel'
 import { Almacen } from './ui/dm/Almacen'
 import { PanelCampaña } from './ui/dm/PanelCampaña'
 
-async function crearRepo(): Promise<Repo> {
-  if (!firebaseConfigurado()) return repoLocal()
-  const { repoFirebase } = await import('./firebase/repoFirebase')
-  return repoFirebase()
+// Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
+let promesaRepo: Promise<Repo> | undefined
+function crearRepo(): Promise<Repo> {
+  promesaRepo ??= firebaseConfigurado() ? import('./firebase/repoFirebase').then((m) => m.repoFirebase()) : Promise.resolve(repoLocal())
+  return promesaRepo
 }
 
 export default function App() {
@@ -32,13 +33,18 @@ export default function App() {
   // Almacén y usuario
   useEffect(() => {
     let cancelar = () => {}
+    let vivo = true
     void crearRepo().then((r) => {
+      if (!vivo) return
       set({ repo: r })
       cancelar = r.alCambiarUsuario(async (u) => {
         set({ usuario: u, campaña: u ? await r.campaña() : null })
       })
     })
-    return () => cancelar()
+    return () => {
+      vivo = false
+      cancelar()
+    }
   }, [set])
 
   // Suscripciones a personajes, objetos y tiradas compartidas
