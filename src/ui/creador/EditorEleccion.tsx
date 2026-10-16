@@ -28,6 +28,16 @@ export function EditorEleccion({ e, alCambiar, competentes, repetidos }: Props) 
       </legend>
       {e.cambia && <p className="sutil">Se puede cambiar {e.cambia === 'largo' ? 'tras cada descanso largo' : e.cambia === 'corto' ? 'tras cada descanso' : 'al subir de nivel'}.</p>}
       <ConjurosFijos fijos={e.meta?.fijos as ConjuroFijo[] | undefined} />
+      {e.tipo === 'idioma' && (e.meta?.conocidos as { nombre: string; origen: string }[] | undefined)?.length ? (
+        <div className="conjuros-fijos">
+          <span className="sutil">Ya conoces:</span>
+          {(e.meta!.conocidos as { nombre: string; origen: string }[]).filter((c) => !e.valor.includes(c.nombre)).map((c) => (
+            <span key={c.nombre} className="chip fijo">
+              {c.nombre} <small>{c.origen}</small>
+            </span>
+          ))}
+        </div>
+      ) : null}
       <Control e={e} alCambiar={alCambiar} competentes={competentes} repetidos={repetidos} />
     </fieldset>
   )

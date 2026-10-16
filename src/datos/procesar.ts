@@ -84,12 +84,12 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
   }
 
   // Especies
-  const settingEsp = especiesSetting as Record<string, { nombre: string; origen: string; setting: string }>
+  const settingEsp = especiesSetting as Record<string, { nombre: string; origen: string; setting: string; idiomas?: string[] }>
   const especies = (crudos['races.json']?.race ?? [])
     .filter((r: Crudo) => settingEsp[`${r.name}|${r.source}`])
     .map((r: Crudo) => {
       const s = settingEsp[`${r.name}|${r.source}`]
-      return { ...entidad(r, s.nombre, s.setting), _origen: s.origen }
+      return { ...entidad(r, s.nombre, s.setting), _origen: s.origen, _idiomas: s.idiomas ?? [] }
     })
 
   // Trasfondos: los de 5etools renombrados al setting, salvo los de las casas de Eberron (los sustituyen

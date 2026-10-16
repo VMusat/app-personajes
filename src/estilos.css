@@ -356,3 +356,6 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .detalle-origen { margin: 2px 0 8px; }
 .detalle-origen > summary { cursor: pointer; color: var(--acento); font-size: 0.9em; }
 .detalle-origen .rasgo { padding-left: 8px; }
+.tarjeta-personaje { position: relative; }
+.borrar-tarjeta { position: absolute; top: 6px; right: 6px; font-size: 1rem; opacity: 0.6; }
+.borrar-tarjeta:hover { opacity: 1; }

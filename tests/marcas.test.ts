@@ -66,3 +66,17 @@ describe('marcas de aspecto', () => {
     expect(d.especies.every((e) => e._setting) && d.clases.every((c) => c._setting)).toBe(true)
   })
 })
+
+describe('idiomas', () => {
+  it('la especie da su idioma y no se puede volver a elegir', () => {
+    const d = datosDePrueba()
+    const p = personajeVacio()
+    p.especie = 'elf|xphb'
+    const r = resolver(p, d)
+    const idiomas = r.efectos.filter((e) => e.tipo === 'competencia' && e.categoria === 'idioma').map((e) => (e as { valor: string }).valor)
+    expect(idiomas).toEqual(['Cerinés', 'Élfico'])
+    const base = r.elecciones.find((e) => e.id === 'base:idiomas')!
+    expect(base.opciones.find((o) => o.valor === 'Élfico')?.bloqueada).toMatch(/Ya lo conoces/)
+    expect((base.meta!.conocidos as { nombre: string }[]).map((c) => c.nombre)).toEqual(['Cerinés', 'Élfico'])
+  })
+})

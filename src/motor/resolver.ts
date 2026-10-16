@@ -142,6 +142,18 @@ class Ctx {
   /** Registra una elección y devuelve sus valores válidos. */
   elegir(e: Omit<Eleccion, 'valor' | 'completa'>, validar = true): string[] {
     const guardado = this.p.elecciones[e.id] ?? []
+    if (e.tipo === 'idioma') {
+      // Idiomas que ya conoce (cerinés, los de su especie, los de otros rasgos): se muestran y no se pueden repetir
+      const conocidos = this.r.efectos.filter((x) => x.tipo === 'competencia' && x.categoria === 'idioma') as { valor: string; origen?: string }[]
+      e = {
+        ...e,
+        opciones: e.opciones.map((o) => {
+          const ya = conocidos.find((c) => c.valor === o.valor)
+          return ya && !guardado.includes(o.valor) ? { ...o, bloqueada: `Ya lo conoces (${ya.origen})` } : o
+        }),
+        meta: { ...e.meta, conocidos: conocidos.map((c) => ({ nombre: c.valor, origen: c.origen ?? '' })) },
+      }
+    }
     const validos = new Set(e.opciones.map((o) => o.valor))
     const valor = validar && e.tipo !== 'texto' && e.tipo !== 'pg' && e.tipo !== 'aumento'
       ? guardado.filter((v) => validos.has(v)).slice(0, e.n)
@@ -220,8 +232,9 @@ export function resolver(p: Personaje, d: Datos): Resolucion {
   const especie = d.especies.find((e) => e._clave === p.especie)
   const trasfondo = d.trasfondos.find((t) => t._clave === p.trasfondo)
 
-  // Idiomas base: cerinés (común) y dos estándar
-  ctx.efecto({ tipo: 'competencia', categoria: 'idioma', valor: campaña.lenguas.comun.nombre }, 'Personaje')
+  // Idiomas base: cerinés (común), los propios de la especie (setting) y dos estándar
+  ctx.efecto({ tipo: 'competencia', categoria: 'idioma', valor: campaña.lenguas.comun.nombre }, 'Lengua común')
+  for (const l of (especie?._idiomas as string[]) ?? []) ctx.efecto({ tipo: 'competencia', categoria: 'idioma', valor: l }, `Especie: ${especie!._nombre}`)
   for (const v of ctx.elegir({
     id: 'base:idiomas', tipo: 'idioma', etiqueta: 'Idiomas (dos estándar)', origen: 'Personaje', nivel: 0, n: 2,
     opciones: idiomasDisponibles('estandar'),

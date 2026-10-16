@@ -13,6 +13,7 @@ import { ABREV, NOMBRE_CAR, conSigno } from '../glosario'
 import { Buscador, normalizar } from '../comun'
 import { Entradas } from '../Entradas'
 import { EditorEleccion } from './EditorEleccion'
+import { BorrarPersonaje } from '../Inicio'
 
 const PASOS = ['Concepto', 'Clase', 'Especie', 'Trasfondo', 'Características', 'Elecciones', 'Equipo', 'Resumen'] as const
 type Paso = (typeof PASOS)[number]
@@ -21,6 +22,7 @@ export function Creador({ id }: { id: string }) {
   const [p, actualizar, guardando] = usePersonaje(id)
   const datos = useEstado((s) => s.datos)!
   const [paso, setPaso] = useState<Paso>('Concepto')
+  const [borrar, setBorrar] = useState(false)
   const res = useMemo(() => (p ? resolver(p, datos) : undefined), [p, datos])
   if (!p || !res) return <p className="pantalla-centro">Personaje no encontrado.</p>
 
@@ -43,7 +45,9 @@ export function Creador({ id }: { id: string }) {
         <button className="boton secundario" onClick={() => ir({ tipo: 'inicio' })}>← Personajes</button>
         <h2>{p.nombre || 'Nuevo personaje'}</h2>
         <span className="sutil">{guardando ? 'Guardando…' : 'Guardado'}</span>
+        <button className="boton secundario" onClick={() => setBorrar(true)}>Borrar</button>
       </header>
+      {borrar && <BorrarPersonaje p={p} alCerrar={() => setBorrar(false)} alBorrar={() => ir({ tipo: 'inicio' })} />}
       <nav className="pasos">
         {PASOS.map((s, k) => (
           <button key={s} className={`paso ${s === paso ? 'activo' : ''} ${listo[s] ? 'listo' : ''}`} onClick={() => setPaso(s)}>

@@ -6,7 +6,7 @@ import { derivar, type Hoja } from '../../motor/derivar'
 import type { Personaje } from '../../motor/personaje'
 import { Contador, Modal, Pestañas } from '../comun'
 import { CONDICIONES, conSigno } from '../glosario'
-import { resumenPersonaje } from '../Inicio'
+import { BorrarPersonaje, resumenPersonaje } from '../Inicio'
 import { PestañaCombate } from './PestañaCombate'
 import { PestañaHabilidades } from './PestañaHabilidades'
 import { PestañaConjuros } from './PestañaConjuros'
@@ -28,6 +28,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
   const [pestaña, setPestaña] = useState<IdPestaña>((pestañaInicial as IdPestaña) ?? 'combate')
   const [descanso, setDescanso] = useState<'corto' | 'largo'>()
   const [menu, setMenu] = useState(false)
+  const [borrar, setBorrar] = useState(false)
   const h = useMemo(() => {
     if (!p || !datos) return undefined
     try {
@@ -81,15 +82,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
               <button onClick={() => exportarJSON(p)}>Copia de seguridad (JSON)</button>
               <button onClick={() => ir({ tipo: 'crear', id })}>Volver al asistente de creación</button>
               {puedeEditar && (
-                <button
-                  className="peligro"
-                  onClick={async () => {
-                    if (confirm(`¿Borrar a ${p.nombre} para siempre? No se puede deshacer.`)) {
-                      await repo?.borrarPersonaje(p.id)
-                      ir({ tipo: 'inicio' })
-                    }
-                  }}
-                >
+                <button className="peligro" onClick={() => setBorrar(true)}>
                   Borrar personaje
                 </button>
               )}
@@ -117,6 +110,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
         {pestaña === 'elecciones' && <PestañaElecciones {...props} />}
       </div>
 
+      {borrar && <BorrarPersonaje p={p} alCerrar={() => setBorrar(false)} alBorrar={() => ir({ tipo: 'inicio' })} />}
       {descanso && <ModalDescanso tipo={descanso} {...props} alCerrar={() => setDescanso(undefined)} />}
     </div>
   )

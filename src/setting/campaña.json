@@ -1,6 +1,6 @@
 {
   "nombre": "Herederos de la Miasma",
-  "version": 2,
+  "version": 3,
   "fuentes": ["XPHB", "XDMG", "XMM", "FRHoF", "FRAiF", "EFA", "SETTING"],
   "fuentesNombres": {
     "XPHB": "Player's Handbook (2024)",

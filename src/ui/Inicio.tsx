@@ -4,6 +4,7 @@ import { ir, useEstado } from '../estado/store'
 import { personajeVacio, type Personaje } from '../motor/personaje'
 import { derivar } from '../motor/derivar'
 import type { Datos } from '../datos/tipos'
+import { Modal } from './comun'
 
 export function resumenPersonaje(p: Personaje, d: Datos): string {
   const especie = d.especies.find((e) => e._clave === p.especie)?._nombre
@@ -114,9 +115,38 @@ export function Inicio() {
   )
 }
 
+/** Ventana de confirmación para borrar un personaje. */
+export function BorrarPersonaje({ p, alCerrar, alBorrar }: { p: Personaje; alCerrar: () => void; alBorrar?: () => void }) {
+  const repo = useEstado((s) => s.repo)
+  const [borrando, setBorrando] = useState(false)
+  return (
+    <Modal titulo="Borrar personaje" alCerrar={alCerrar}>
+      <p>¿Seguro que quieres borrar a <b>{p.nombre || 'este personaje sin nombre'}</b>? Se perderán su hoja, su inventario y sus notas. <b>No se puede deshacer.</b></p>
+      <p className="sutil">Si quieres conservar una copia, antes descarga la copia de seguridad (JSON) desde el menú ⋮ de su hoja.</p>
+      <div className="fila-botones">
+        <button
+          className="boton peligro"
+          disabled={borrando}
+          onClick={async () => {
+            setBorrando(true)
+            await repo?.borrarPersonaje(p.id)
+            alCerrar()
+            alBorrar?.()
+          }}
+        >
+          {borrando ? 'Borrando…' : 'Sí, borrar'}
+        </button>
+        <button className="boton secundario" onClick={alCerrar}>Cancelar</button>
+      </div>
+    </Modal>
+  )
+}
+
 function TarjetaPersonaje({ p }: { p: Personaje }) {
-  const { datos, objetos } = useEstado()
+  const { datos, objetos, repo, usuario } = useEstado()
+  const [borrar, setBorrar] = useState(false)
   if (!datos) return null
+  const puedeBorrar = repo?.modo === 'local' || p.propietario === usuario?.uid || repo?.esDM()
   const creado = p.niveles.length > 0 && !!p.especie && !!p.trasfondo
   let hp = ''
   let ac = ''
@@ -142,6 +172,24 @@ function TarjetaPersonaje({ p }: { p: Personaje }) {
         </div>
       ) : (
         <span className="insignia">En creación</span>
+      )}
+      {puedeBorrar && (
+        <button
+          className="boton-icono borrar-tarjeta"
+          aria-label={`Borrar a ${p.nombre || 'este personaje'}`}
+          title="Borrar personaje"
+          onClick={(e) => {
+            e.stopPropagation()
+            setBorrar(true)
+          }}
+        >
+          🗑
+        </button>
+      )}
+      {borrar && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <BorrarPersonaje p={p} alCerrar={() => setBorrar(false)} />
+        </div>
       )}
     </article>
   )
