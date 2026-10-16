@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react'
 import { ir, useEstado } from '../../estado/store'
 import { usePersonaje } from '../usePersonaje'
-import { resolver, resumenEquipo, type Eleccion } from '../../motor/resolver'
+import { resolver, resumenEquipo, tamañosEspecie, type Eleccion } from '../../motor/resolver'
 import { derivar, type Hoja } from '../../motor/derivar'
 import { abrirDetalle } from '../Detalle'
 import { CONJUNTO_ESTANDAR, COSTE_COMPRA, PUNTOS_COMPRA, costeCompra, modificador, nuevoId, sumar4d6, type Personaje } from '../../motor/personaje'
@@ -178,6 +178,7 @@ function PasoEspecie({ p, datos, actualizar }: { p: Personaje; datos: Datos; act
           <button className="tarjeta-boton" onClick={() => actualizar((x) => void (x.especie = e._clave))}>
             <h3>{e._nombre}</h3>
             <p className="sutil">Origen: {e._origen} · Velocidad {typeof e.speed === 'number' ? e.speed : e.speed?.walk} ft{e.darkvision ? ` · Darkvision ${e.darkvision} ft` : ''}</p>
+            <p className="sutil">Tamaño: {tamañosEspecie(e).map((t) => `${t.nombre}${t.altura ? ` (${t.altura})` : ''}`).join(' o ')}{tamañosEspecie(e).length > 1 ? ', a elegir' : ''}</p>
             <p>{e._setting}</p>
           </button>
           <button className="enlace" onClick={() => setVer(ver === e._clave ? undefined : e._clave)}>{ver === e._clave ? 'Ocultar rasgos' : 'Ver rasgos'}</button>

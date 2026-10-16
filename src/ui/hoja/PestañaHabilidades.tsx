@@ -52,6 +52,7 @@ export function PestañaHabilidades({ p, h }: PropsPestaña) {
         ))}
       </ul>
       <p><b>Percepción pasiva</b> {h.percepcionPasiva}</p>
+      {h.resolucion.tamaño && <p><b>Tamaño</b> {h.resolucion.tamaño.nombre}{h.resolucion.tamaño.altura ? ` (unos ${h.resolucion.tamaño.altura})` : ''}</p>}
       {h.sentidos.length > 0 && <p><b>Sentidos:</b> {h.sentidos.map((s) => `${s.nombre} ${s.valor} ft`).join(', ')}</p>}
       {Object.keys(h.velocidad).length > 1 && (
         <p><b>Velocidades:</b> {Object.entries(h.velocidad).map(([k, v]) => `${{ andar: 'Walk', nado: 'Swim', vuelo: 'Fly', trepar: 'Climb', excavar: 'Burrow' }[k] ?? k} ${v} ft`).join(', ')}</p>

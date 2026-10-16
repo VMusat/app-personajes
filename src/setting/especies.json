@@ -3,9 +3,7 @@
     "nombre": "Aasimar",
     "origen": "Reino Sérafo y Cerinnar",
     "setting": "Llevan en la sangre la luz de un Resplandor. Los linajes más antiguos se remontan al primer Resplandor, y la nobleza sérafa presume de ellos; los nuevos linajes nacieron entre los supervivientes del segundo, y fueron ellos quienes bautizaron Cerinnar en lengua aasimar, la lengua de los Serafines, que conocen de forma innata.",
-    "idiomas": [
-      "Lengua aasimar"
-    ]
+    "idiomas": []
   },
   "Dragonborn|XPHB": {
     "nombre": "Dracónido",
@@ -19,9 +17,7 @@
     "nombre": "Enano",
     "origen": "Brennan",
     "setting": "Mineros, forjadores y destiladores de las montañas de Brennan. Fueron los primeros en fabricar armas de fuego, y suyo es el famoso Fuego de Brennan. Son poco religiosos: rezan a Mikael más por costumbre que por fe. Su lengua es casi una lengua muerta; los de pueblo hablan brennés, y los de ciudad, cerinés.",
-    "idiomas": [
-      "Enano"
-    ]
+    "idiomas": []
   },
   "Elf|XPHB": {
     "nombre": "Elfo",
@@ -35,9 +31,7 @@
     "nombre": "Gnomo",
     "origen": "Brennan, Bosque Retorcido y Cerinnar",
     "setting": "Los gnomos de las rocas son inventores en los talleres enanos y en Cerinnar, y anotan sus planos en gnomo para que nadie se los copie. Los gnomos del bosque viven en aldeas escondidas del Bosque que sobrevivieron siglos junto a la miasma.",
-    "idiomas": [
-      "Gnomo"
-    ]
+    "idiomas": []
   },
   "Goliath|XPHB": {
     "nombre": "Goliat",
@@ -51,9 +45,7 @@
     "nombre": "Mediano",
     "origen": "Reino Sérafo y Cerinnar",
     "setting": "Campesinos y viñadores del sur del Reino Sérafo, con un dialecto propio muy cerrado. Muchos emigraron a Cerinnar tras las guerras y hoy cultivan las terrazas del Distrito de Rafael.",
-    "idiomas": [
-      "Mediano"
-    ]
+    "idiomas": []
   },
   "Human|XPHB": {
     "nombre": "Humano",
@@ -91,9 +83,7 @@
     "nombre": "Khoravar (semielfo)",
     "origen": "Cerinnar y el camino de Lar",
     "setting": "Hijos de elfos y humanos, muy comunes en Cerinnar y a lo largo del camino que une la ciudad con las Tierras de Lar. Suelen moverse con soltura entre dos mundos.",
-    "idiomas": [
-      "Élfico"
-    ]
+    "idiomas": []
   },
   "Shifter|EFA": {
     "nombre": "Cambiaformas",

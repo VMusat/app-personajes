@@ -80,3 +80,23 @@ describe('idiomas', () => {
     expect((base.meta!.conocidos as { nombre: string }[]).map((c) => c.nombre)).toEqual(['Cerinés', 'Élfico'])
   })
 })
+
+describe('tamaños de especie', () => {
+  it('las especies con dos tamaños piden elegir y muestran la altura', () => {
+    const d = datosDePrueba()
+    const p = personajeVacio()
+    p.especie = 'human|xphb'
+    const e = resolver(p, d).elecciones.find((x) => x.id === 'esp:tamaño')!
+    expect(e.opciones.map((o) => `${o.etiqueta}: ${o.detalle}`)).toEqual(['Small: Unos 2–4 ft de altura', 'Medium: Unos 4–7 ft de altura'])
+    p.elecciones['esp:tamaño'] = ['S']
+    expect(resolver(p, d).tamaño?.nombre).toBe('Small')
+    p.especie = 'goliath|xphb'
+    expect(resolver(p, d).tamaño).toEqual({ valor: 'M', nombre: 'Medium', altura: '7–8 ft' })
+    expect(resolver(p, d).elecciones.some((x) => x.id === 'esp:tamaño')).toBe(false)
+  })
+  it('solo dracónidos, elfos, goliats y orcos tienen idioma de especie', () => {
+    const d = datosDePrueba()
+    const conIdioma = d.especies.filter((e) => (e._idiomas as string[]).length).map((e) => `${e.name}: ${e._idiomas}`)
+    expect(conIdioma.sort()).toEqual(['Dragonborn: Dracónico', 'Elf: Élfico', 'Goliath: Gigante', 'Orc: Orco'])
+  })
+})

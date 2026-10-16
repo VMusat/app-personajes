@@ -108,6 +108,8 @@ export interface Resolucion {
   equipo: { origen: string; items: Crudo[] }[]
   /** PG ganados por nivel (sin CON). */
   pgPorNivel: number[]
+  /** Tamaño de la especie (elegido si la especie permite varios). */
+  tamaño?: { valor: 'S' | 'M'; nombre: string; altura?: string }
 }
 
 const NOMBRE_CAR: Record<Caracteristica, string> = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' }
@@ -136,6 +138,7 @@ class Ctx {
       listasAmpliadas: {},
       equipo: [],
       pgPorNivel: [],
+      tamaño: undefined,
     }
   }
 
@@ -260,9 +263,16 @@ function procesarEspecie(ctx: Ctx, e: Entidad) {
     }
   }
   if (e.darkvision) ctx.efecto({ tipo: 'sentido', nombre: 'Darkvision', valor: e.darkvision }, origen)
-  if (Array.isArray(e.size) && e.size.length > 1) {
-    ctx.elegir({ id: 'esp:tamaño', tipo: 'opcion', etiqueta: 'Tamaño', origen, nivel: 0, n: 1, opciones: e.size.map((s: string) => ({ valor: s, etiqueta: s === 'S' ? 'Small' : 'Medium' })) })
-  }
+  // Tamaño: algunas especies dejan elegir entre Medium y Small (en 2024 no cambia las reglas de combate,
+  // pero sí el espacio que ocupa, a quién puede agarrar y cómo lo ve el mundo)
+  const tamaños = tamañosEspecie(e)
+  if (tamaños.length > 1) {
+    const [v] = ctx.elegir({
+      id: 'esp:tamaño', tipo: 'opcion', etiqueta: 'Tamaño', origen, nivel: 0, n: 1,
+      opciones: tamaños.map((t) => ({ valor: t.valor, etiqueta: t.nombre, detalle: t.altura ? `Unos ${t.altura} de altura` : undefined })),
+    })
+    ctx.r.tamaño = tamaños.find((t) => t.valor === v)
+  } else ctx.r.tamaño = tamaños[0]
   // Variante (linaje / legado / ascendencia)
   const nombres = (e.additionalSpells ?? []).map((b: Crudo) => b.name).filter(Boolean)
   let bloques: Crudo[] = e.additionalSpells ?? []
@@ -274,6 +284,16 @@ function procesarEspecie(ctx: Ctx, e: Entidad) {
   procesarAdicionales(ctx, bloques, 'esp', origen, ctx.r.nivel, 0)
   // Dotes de la especie (humano: una dote de origen)
   procesarDotesDe(ctx, e.feats, 'esp', origen, 0)
+}
+
+/** Tamaños posibles de una especie, con la altura que da 5etools («Medium (about 4-7 feet tall)»). */
+export function tamañosEspecie(e: Crudo): { valor: 'S' | 'M'; nombre: string; altura?: string }[] {
+  const texto = JSON.stringify(e.sizeEntry ?? '')
+  return ((e.size as string[]) ?? ['M']).map((s) => {
+    const nombre = s === 'S' ? 'Small' : s === 'M' ? 'Medium' : s
+    const m = new RegExp(`${nombre} \\(about ([^)]+?) feet tall\\)`).exec(texto)
+    return { valor: s as 'S' | 'M', nombre, altura: m ? `${m[1].replace(/[-–]/, '–')} ft` : undefined }
+  })
 }
 
 function procesarTrasfondo(ctx: Ctx, t: Entidad) {
