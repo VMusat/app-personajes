@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react'
 import { ir, useEstado } from '../../estado/store'
 import { usePersonaje } from '../usePersonaje'
 import { resolver, resumenEquipo, type Eleccion } from '../../motor/resolver'
-import { derivar } from '../../motor/derivar'
+import { derivar, type Hoja } from '../../motor/derivar'
+import { abrirDetalle } from '../Detalle'
 import { CONJUNTO_ESTANDAR, COSTE_COMPRA, PUNTOS_COMPRA, costeCompra, modificador, nuevoId, sumar4d6, type Personaje } from '../../motor/personaje'
 import { ASPECTOS } from '../../setting/marcas'
 import { CARACTERISTICAS, type Caracteristica, type Crudo, type Datos } from '../../datos/tipos'
@@ -60,7 +61,7 @@ export function Creador({ id }: { id: string }) {
         {paso === 'Características' && (
           <PasoCaracteristicas p={p} actualizar={actualizar} aumento={res.elecciones.find((e) => e.id === 'tra:aumento')} fijar={fijarEleccion} aumentos={res.aumentos} />
         )}
-        {paso === 'Elecciones' && <ListaElecciones elecciones={res.elecciones.filter(enPasoElecciones)} p={p} datos={datos} fijar={fijarEleccion} />}
+        {paso === 'Elecciones' && <ListaElecciones elecciones={res.elecciones.filter(enPasoElecciones)} p={p} datos={datos} fijar={fijarEleccion} origenesSinEleccion />}
         {paso === 'Equipo' && <PasoEquipo res={res.elecciones.filter((e) => e.tipo === 'equipo')} fijar={fijarEleccion} />}
         {paso === 'Resumen' && <PasoResumen p={p} datos={datos} actualizar={actualizar} pendientes={res.elecciones.filter((e) => !e.completa && (e.opciones.length || e.tipo === 'aumento'))} />}
       </section>
@@ -321,7 +322,14 @@ function intercambiar(x: Personaje, c: Caracteristica, v: number) {
   b[c] = v
 }
 
-export function ListaElecciones({ elecciones, p, datos, fijar }: { elecciones: Eleccion[]; p: Personaje; datos: Datos; fijar: (id: string, v: string[]) => void }) {
+export function ListaElecciones({ elecciones, p, datos, fijar, origenesSinEleccion = false }: {
+  elecciones: Eleccion[]
+  p: Personaje
+  datos: Datos
+  fijar: (id: string, v: string[]) => void
+  /** Añade también la especie, el trasfondo y las dotes sin elecciones, para poder ver lo que otorgan. */
+  origenesSinEleccion?: boolean
+}) {
   const hoja = useMemo(() => {
     try {
       return derivar(p, datos)
@@ -335,20 +343,72 @@ export function ListaElecciones({ elecciones, p, datos, fijar }: { elecciones: E
     if (!grupos.has(e.origen)) grupos.set(e.origen, [])
     grupos.get(e.origen)!.push(e)
   }
+  // Orígenes que no piden nada pero otorgan rasgos o conjuros (una dote fija, la marca, la especie...)
+  let orden = [...grupos.keys()]
+  if (origenesSinEleccion && hoja) {
+    const insertarTras = (nuevo: string, padre?: string) => {
+      if (orden.includes(nuevo)) return
+      const i = padre ? orden.indexOf(padre) : -1
+      orden = i >= 0 ? [...orden.slice(0, i + 1), nuevo, ...orden.slice(i + 1)] : [...orden, nuevo]
+    }
+    const r = hoja.resolucion
+    const esp = datos.especies.find((x) => x._clave === p.especie)
+    const tra = datos.trasfondos.find((x) => x._clave === p.trasfondo)
+    if (esp) insertarTras(`Especie: ${esp._nombre}`, 'Personaje')
+    if (tra) insertarTras(`Trasfondo: ${tra._nombre}`, esp ? `Especie: ${esp._nombre}` : 'Personaje')
+    for (const x of r.rasgos) if ((x.tipo === 'dote' || x.tipo === 'marca') && x.nivel <= 1) insertarTras(`Dote: ${x.nombre}`, x.origen)
+  }
   // Valores repetidos entre elecciones del mismo tipo (p. ej. el mismo conjuro dos veces)
   const repetidos = (e: Eleccion) => new Set(elecciones.filter((x) => x.id !== e.id && x.tipo === e.tipo).flatMap((x) => x.valor))
-  if (!elecciones.length) return <p className="sutil">No hay nada que elegir aquí.</p>
+  if (!orden.length) return <p className="sutil">No hay nada que elegir aquí.</p>
   return (
     <div className="lista-elecciones">
-      {[...grupos.entries()].map(([origen, es]) => (
+      {orden.map((origen) => (
         <section key={origen} className="grupo-elecciones">
           <h3>{origen}</h3>
-          {es.map((e) => (
+          {hoja && <DetalleOrigen origen={origen} hoja={hoja} />}
+          {(grupos.get(origen) ?? []).map((e) => (
             <EditorEleccion key={e.id} e={e} alCambiar={(v) => fijar(e.id, v)} competentes={competentes} repetidos={repetidos(e)} />
           ))}
         </section>
       ))}
     </div>
+  )
+}
+
+/** Plegable con los rasgos y conjuros que otorga un origen (especie, trasfondo, dote, marca, nivel de clase). */
+function DetalleOrigen({ origen, hoja }: { origen: string; hoja: Hoja }) {
+  const rasgos = hoja.resolucion.rasgos.filter(
+    (r) =>
+      ((r.tipo === 'especie' || r.tipo === 'trasfondo' || r.tipo === 'clase' || r.tipo === 'subclase') && r.origen === origen) ||
+      ((r.tipo === 'dote' || r.tipo === 'marca') && origen === `Dote: ${r.nombre}`),
+  )
+  const conjuros = hoja.conjuros.filter((c) => c.origen === origen)
+  if (!rasgos.length && !conjuros.length) return null
+  return (
+    <details className="detalle-origen">
+      <summary>Ver qué otorga{conjuros.length ? ` (${conjuros.length} conjuro${conjuros.length > 1 ? 's' : ''})` : ''}</summary>
+      {conjuros.length > 0 && (
+        <div className="conjuros-fijos">
+          <span className="sutil">Conjuros:</span>
+          {conjuros.map((c) => (
+            <button type="button" key={c.conjuro._clave} className="chip fijo" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: c.conjuro._clave })}>
+              {c.conjuro.name}{' '}
+              <small>
+                {c.conjuro.level === 0 ? 'truco' : `nivel ${c.conjuro.level}`}
+                {c.usos === 'voluntad' ? ' · a voluntad' : c.usos ? ` · ${c.usos}/${c.recarga === 'corto' ? 'Short Rest' : 'Long Rest'}` : c.siempre && c.conjuro.level > 0 ? ' · siempre preparado' : ''}
+              </small>
+            </button>
+          ))}
+        </div>
+      )}
+      {rasgos.map((r, i) => (
+        <details key={`${r.nombre}${i}`} className="rasgo">
+          <summary>{r.nombre}</summary>
+          <Entradas entries={r.entries} />
+        </details>
+      ))}
+    </details>
   )
 }
 

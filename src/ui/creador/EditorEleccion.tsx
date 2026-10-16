@@ -1,6 +1,6 @@
 // Control genérico para cualquier elección que genera el motor (habilidades, dotes, conjuros, subclase, PG...).
 import { useMemo, useState } from 'react'
-import type { Eleccion, Opcion } from '../../motor/resolver'
+import type { ConjuroFijo, Eleccion, Opcion } from '../../motor/resolver'
 import { useEstado } from '../../estado/store'
 import { abrirDetalle } from '../Detalle'
 import { Buscador, normalizar } from '../comun'
@@ -27,6 +27,7 @@ export function EditorEleccion({ e, alCambiar, competentes, repetidos }: Props) 
         {!e.completa && <span className="insignia aviso">Pendiente</span>}
       </legend>
       {e.cambia && <p className="sutil">Se puede cambiar {e.cambia === 'largo' ? 'tras cada descanso largo' : e.cambia === 'corto' ? 'tras cada descanso' : 'al subir de nivel'}.</p>}
+      <ConjurosFijos fijos={e.meta?.fijos as ConjuroFijo[] | undefined} />
       <Control e={e} alCambiar={alCambiar} competentes={competentes} repetidos={repetidos} />
     </fieldset>
   )
@@ -42,7 +43,23 @@ function Control({ e, alCambiar, competentes, repetidos }: Props) {
   return <ListaMultiple e={e} alCambiar={alCambiar} competentes={competentes} repetidos={repetidos} buscador={muchas} />
 }
 
+/** Conjuros que ya tiene por otra vía: no cuentan para el límite de esta elección. */
+function ConjurosFijos({ fijos }: { fijos?: ConjuroFijo[] }) {
+  if (!fijos?.length) return null
+  return (
+    <div className="conjuros-fijos">
+      <span className="sutil">Ya los tienes (no cuentan para el límite):</span>
+      {fijos.map((x) => (
+        <button type="button" key={x.clave} className="chip fijo" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: x.clave })} title={`${x.origen} · ${x.como}`}>
+          {x.nombre} <small>{x.como} · {x.origen}</small>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function avisoOpcion(e: Eleccion, o: Opcion, competentes?: Set<string>, repetidos?: Set<string>): string | undefined {
+  if (o.bloqueada && !e.valor.includes(o.valor)) return o.bloqueada
   if (e.tipo === 'habilidad' && competentes?.has(o.valor) && !e.valor.includes(o.valor)) return 'ya competente'
   if (e.tipo === 'pericia' && e.meta?.soloCompetentes && competentes && !competentes.has(o.valor)) return 'sin competencia'
   if (repetidos?.has(o.valor) && !e.valor.includes(o.valor)) return 'ya elegido'
@@ -78,7 +95,7 @@ function ListaUnica({ e, alCambiar, competentes, repetidos }: Props) {
         return (
           <div key={o.valor} className={`opcion ${e.valor[0] === o.valor ? 'elegida' : ''}`}>
             <label>
-              <input type="radio" name={e.id} checked={e.valor[0] === o.valor} onChange={() => alCambiar([o.valor])} />
+              <input type="radio" name={e.id} checked={e.valor[0] === o.valor} disabled={!!o.bloqueada && e.valor[0] !== o.valor} onChange={() => alCambiar([o.valor])} />
               <span className="opcion-texto">
                 <b>{o.etiqueta}</b>
                 {aviso && <span className="insignia aviso">{aviso}</span>}
@@ -157,9 +174,10 @@ function ListaMultiple({ e, alCambiar, competentes, repetidos, buscador }: Props
             {ops.map((o) => {
               const marcado = e.valor.includes(o.valor)
               const aviso = avisoOpcion(e, o, competentes, repetidos)
+              const off = !marcado && (!!o.bloqueada || (lleno && e.n > 1))
               return (
-                <label key={o.valor} className={`opcion compacta ${marcado ? 'elegida' : ''} ${!marcado && lleno && e.n > 1 ? 'deshabilitada' : ''}`}>
-                  <input type={e.n === 1 ? 'radio' : 'checkbox'} name={e.id} checked={marcado} disabled={!marcado && lleno && e.n > 1} onChange={() => alternar(o.valor)} />
+                <label key={o.valor} className={`opcion compacta ${marcado ? 'elegida' : ''} ${off ? 'deshabilitada' : ''}`}>
+                  <input type={e.n === 1 ? 'radio' : 'checkbox'} name={e.id} checked={marcado} disabled={off} onChange={() => alternar(o.valor)} />
                   <span className="opcion-texto">
                     {o.etiqueta}
                     {aviso && <span className="insignia aviso">{aviso}</span>}

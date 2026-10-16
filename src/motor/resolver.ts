@@ -22,6 +22,18 @@ export interface Opcion {
   etiqueta: string
   detalle?: string
   grupo?: string
+  /** No se puede elegir porque ya se tiene por otra vía (p. ej. un conjuro de la especie o de una dote). */
+  bloqueada?: string
+}
+
+/** Conjuro que el personaje ya tiene por otra vía, para mostrarlo en las listas de su clase. */
+export interface ConjuroFijo {
+  clave: string
+  nombre: string
+  nivel: number
+  origen: string
+  /** «siempre preparado», «en tu libro», «1/Long Rest»... */
+  como: string
 }
 
 export type TipoEleccionMotor =
@@ -986,10 +998,28 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
   const lista = new Set([...(ctx.r.listasAmpliadas[c.name] ?? []), ...(ctx.r.listasAmpliadas['*'] ?? [])])
   const deLista = (cj: Conjuro) => cj._clases.includes(lz.lista) || lista.has(cj._clave)
 
+  // Conjuros que ya tiene por especie, trasfondo, dotes, subclase o rasgos: aparecen como ya aprendidos
+  // (no cuentan para el límite) y no se pueden volver a elegir en las listas de la clase
+  const fijos: ConjuroFijo[] = []
+  for (const x of ctx.r.conjuros) {
+    if (!x.siempre && !x.enLibro) continue
+    if (fijos.some((y) => y.clave === x.clave)) continue
+    const cj = d.conjuros.find((y) => y._clave === x.clave)
+    if (!cj) continue
+    const como = x.enLibro ? 'en tu libro' : x.usos === 'voluntad' ? 'a voluntad' : x.usos ? `siempre preparado, ${x.usos === 'pb' ? 'PB' : x.usos}/${x.recarga === 'corto' ? 'Short Rest' : 'Long Rest'} sin espacio` : cj.level === 0 ? 'conocido' : 'siempre preparado'
+    fijos.push({ clave: x.clave, nombre: cj.name, nivel: cj.level, origen: x.origen, como })
+  }
+  const yaTiene = (cj: Conjuro) => {
+    const fx = fijos.find((y) => y.clave === cj._clave)
+    return fx ? `Ya lo tienes (${fx.origen})` : undefined
+  }
+  const opcion = (cj: Conjuro, grupo?: string): Opcion => ({ valor: cj._clave, etiqueta: cj.name, grupo, bloqueada: yaTiene(cj) })
+
   if (nTrucos) {
     ctx.elegir({
       id: `${id}:trucos`, tipo: 'trucos', etiqueta: 'Cantrips', origen, nivel: nivelPj, n: nTrucos, cambia: 'nivel',
-      opciones: d.conjuros.filter((cj) => cj.level === 0 && deLista(cj)).map((cj) => ({ valor: cj._clave, etiqueta: cj.name })),
+      opciones: d.conjuros.filter((cj) => cj.level === 0 && deLista(cj)).map((cj) => opcion(cj)),
+      meta: { fijos: fijos.filter((x) => x.nivel === 0) },
     }).forEach((v) => ctx.r.conjuros.push({ clave: v, origen, siempre: true, clase: c.name }))
   }
 
@@ -999,7 +1029,8 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
     const n = (fuente.spellsKnownProgressionFixed as number[]).slice(0, L).reduce((a, b) => a + b, 0)
     libro = ctx.elegir({
       id: `${id}:libro`, tipo: 'libro', etiqueta: 'Spellbook', origen, nivel: nivelPj, n, cambia: 'nivel',
-      opciones: d.conjuros.filter((cj) => cj.level >= 1 && cj.level <= maxNivel && deLista(cj)).map((cj) => ({ valor: cj._clave, etiqueta: cj.name, grupo: `Nivel ${cj.level}` })),
+      opciones: d.conjuros.filter((cj) => cj.level >= 1 && cj.level <= maxNivel && deLista(cj)).map((cj) => opcion(cj, `Nivel ${cj.level}`)),
+      meta: { fijos: fijos.filter((x) => x.nivel > 0) },
     })
   }
 
@@ -1011,7 +1042,9 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
     ctx.elegir({
       id: `${id}:preparados`, tipo: 'preparados', etiqueta: 'Prepared Spells', origen, nivel: nivelPj, n: nPrep,
       cambia: fuente.preparedSpellsChange === 'level' ? 'nivel' : 'largo',
-      opciones: desde.filter((cj) => cj.level >= 1 && cj.level <= maxNivel).map((cj) => ({ valor: cj._clave, etiqueta: cj.name, grupo: `Nivel ${cj.level}` })),
+      // Los del libro que da la subclase sí se pueden preparar: solo se bloquean los siempre preparados
+      opciones: desde.filter((cj) => cj.level >= 1 && cj.level <= maxNivel).map((cj) => ({ ...opcion(cj, `Nivel ${cj.level}`), bloqueada: fijos.some((y) => y.clave === cj._clave && y.como !== 'en tu libro') ? yaTiene(cj) : undefined })),
+      meta: { fijos: fijos.filter((x) => x.nivel > 0 && x.como !== 'en tu libro') },
     }).forEach((v) => ctx.r.conjuros.push({ clave: v, origen, siempre: false, clase: c.name }))
   }
 
@@ -1021,7 +1054,7 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
     for (const [nivelConj, n] of Object.entries(porNivel as Crudo)) {
       ctx.elegir({
         id: `${id}:arcano:${nivelConj}`, tipo: 'conjuro', etiqueta: `Mystic Arcanum (level ${nivelConj})`, origen, nivel: nivelPj, n: n as number,
-        opciones: d.conjuros.filter((cj) => cj.level === Number(nivelConj) && deLista(cj)).map((cj) => ({ valor: cj._clave, etiqueta: cj.name })),
+        opciones: d.conjuros.filter((cj) => cj.level === Number(nivelConj) && deLista(cj)).map((cj) => opcion(cj)),
       }).forEach((v) => ctx.r.conjuros.push({ clave: v, origen: `${origen}: Mystic Arcanum`, siempre: true, usos: 1, recarga: 'largo', clase: c.name }))
     }
   }
