@@ -46,4 +46,21 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   'weapon master|xphb': [{ tipo: 'nota', texto: 'Maestría de un arma adicional (cambia tras un descanso largo).' }],
   'durable|xphb': [{ tipo: 'nota', texto: 'Ventaja en salvaciones de muerte; acción adicional para gastar un dado de golpe.' }],
   'observant|xphb': [{ tipo: 'nota', texto: 'Búsqueda rápida como acción adicional.' }],
+  // Dotes con usos limitados
+  'boon of exquisite radiance|frhof': [{ tipo: 'recurso', nombre: 'Boon of Exquisite Radiance', usos: 1, recarga: 'largo' }],
+  'boon of fluid forms|frhof': [{ tipo: 'recurso', nombre: 'Boon of Fluid Forms', usos: 1, recarga: 'largo' }],
+  'boon of terror|frhof': [{ tipo: 'recurso', nombre: 'Boon of Terror', usos: 1, recarga: 'corto' }],
+  'boon of the soul drinker|frhof': [{ tipo: 'recurso', nombre: 'Boon of the Soul Drinker', usos: 1, recarga: 'corto' }],
+  'cult of the dragon initiate|frhof': [{ tipo: 'recurso', nombre: 'Cult of the Dragon Initiate', usos: 1, recarga: 'corto' }],
+  'fairy trickster|frhof': [{ tipo: 'recurso', nombre: 'Fairy Trickster', usos: 'pb', recarga: 'largo' }],
+  'genie magic|frhof': [{ tipo: 'recurso', nombre: 'Genie Magic', usos: 1, recarga: 'largo' }],
+  'lordly resolve|frhof': [{ tipo: 'recurso', nombre: 'Lordly Resolve', usos: 1, recarga: 'largo' }],
+  'mage slayer|xphb': [{ tipo: 'recurso', nombre: 'Mage Slayer: Guarded Mind', usos: 1, recarga: 'corto' }],
+  'mythal touched|frhof': [{ tipo: 'recurso', nombre: 'Mythal Touched', usos: 'pb', recarga: 'largo' }],
+  'purple dragon commandant|frhof': [{ tipo: 'recurso', nombre: 'Purple Dragon Commandant', usos: 'pb', recarga: 'largo' }],
+  'purple dragon rook|frhof': [{ tipo: 'recurso', nombre: 'Purple Dragon Rook', usos: 1, recarga: 'largo' }],
+  'spellfire spark|frhof': [{ tipo: 'recurso', nombre: 'Spellfire Spark (Bonus Action)', usos: 'pb', recarga: 'largo' }],
+  'ritual caster|xphb': [{ tipo: 'recurso', nombre: 'Ritual Caster: Quick Ritual', usos: 1, recarga: 'largo' }],
+  // Invocaciones y otros rasgos opcionales con usos
+  'gift of the protectors|xphb': [{ tipo: 'recurso', nombre: 'Gift of the Protectors', usos: 1, recarga: 'largo' }],
 }

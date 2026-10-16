@@ -4,7 +4,7 @@
 // porque el recurso se identifica por su nombre.
 import type { Efecto } from './efectos'
 
-const r = (nombre: string, usos: string | number, recarga: 'largo' | 'corto', extra: Partial<Extract<Efecto, { tipo: 'recurso' }>> = {}): Efecto =>
+const r = (nombre: string, usos: string | number, recarga: 'largo' | 'corto' | 'nunca', extra: Partial<Extract<Efecto, { tipo: 'recurso' }>> = {}): Efecto =>
   ({ tipo: 'recurso', nombre, usos, recarga, ...extra }) as Efecto
 
 export const MECANICAS: Record<string, Efecto[]> = {
@@ -17,7 +17,6 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Bard||5|Font of Inspiration': [r('Bardic Inspiration', 'max(1,cha)', 'corto', { dado: 'col:Bardic_Die' })],
   'Cleric||2|Channel Divinity': [r('Channel Divinity', 'col:Channel_Divinity', 'largo', { recargaCorta: 1 })],
   'Paladin||3|Channel Divinity': [r('Channel Divinity', 'col:Channel_Divinity', 'largo', { recargaCorta: 1 })],
-  'Paladin||1|Lay On Hands': [r('Lay On Hands (HP pool)', '5*nivel:Paladin', 'largo')],
   'Paladin||1|Lay on Hands': [r('Lay On Hands (HP pool)', '5*nivel:Paladin', 'largo')],
   'Druid||2|Wild Shape': [r('Wild Shape', 'col:Wild_Shape', 'largo', { recargaCorta: 1 })],
   'Fighter||1|Second Wind': [r('Second Wind', 'col:Second_Wind', 'largo', { recargaCorta: 1, dado: '1d10' })],
@@ -46,4 +45,132 @@ export const MECANICAS: Record<string, Efecto[]> = {
     { tipo: 'caracteristica', car: 'dex', valor: 4, max: 25 },
     { tipo: 'caracteristica', car: 'wis', valor: 4, max: 25 },
   ],
+
+  // ── Usos limitados revisados rasgo a rasgo (clases y subclases)
+  'Artificer||6|Magic Item Tinker': [r('Magic Item Tinker', 1, 'largo')],
+  'Artificer||11|Spell-Storing Item': [r('Spell-Storing Item (usos del conjuro guardado)', '2*max(1,int)', 'largo')],
+  'Artificer||14|Advanced Artifice': [r('Flash of Genius', 'max(1,int)', 'largo', { recargaCorta: 1 })],
+  'Artificer||20|Soul of Artifice': [r('Flash of Genius', 'max(1,int)', 'corto')],
+  'Artificer|Alchemist|9|Restorative Reagents': [r('Restorative Reagents', 'max(1,int)', 'largo')],
+  'Artificer|Alchemist|15|Chemical Mastery': [r('Chemical Mastery', 1, 'largo')],
+  'Artificer|Armorer|3|Dreadnaught': [r('Dreadnaught: Giant Stature', 'max(1,int)', 'largo')],
+  'Artificer|Armorer|15|Perfected Armor': [r('Perfected Armor', 'max(1,int)', 'largo')],
+  'Artificer|Artillerist|3|Eldritch Cannon': [r('Eldritch Cannon', 1, 'largo')],
+  'Artificer|Battle Smith|9|Arcane Jolt': [r('Arcane Jolt', 'max(1,int)', 'largo')],
+  'Artificer|Cartographer|3|Mapping Magic': [r('Mapping Magic', 'max(1,int)', 'largo')],
+  'Artificer|Cartographer|15|Superior Atlas': [r('Superior Atlas', 1, 'largo')],
+  'Barbarian||15|Persistent Rage': [r('Persistent Rage', 1, 'largo')],
+  'Barbarian|Berserker|14|Intimidating Presence': [r('Intimidating Presence', 1, 'largo')],
+  'Barbarian|Zealot|10|Zealous Presence': [r('Zealous Presence', 1, 'largo')],
+  'Barbarian|Zealot|14|Rage of the Gods': [r('Rage of the Gods', 1, 'largo')],
+  'Bard|Glamour|3|Beguiling Magic': [r('Beguiling Magic', 1, 'largo')],
+  'Bard|Glamour|6|Mantle of Majesty': [r('Mantle of Majesty', 1, 'largo')],
+  'Bard|Glamour|14|Unbreakable Majesty': [r('Unbreakable Majesty', 1, 'corto')],
+  'Bard|Moon|6|Blessing of Moonlight': [r('Blessing of Moonlight', 1, 'largo')],
+  'Cleric|Light|3|Warding Flare': [r('Warding Flare', 'max(1,wis)', 'largo')],
+  'Cleric|Light|6|Improved Warding Flare': [r('Warding Flare', 'max(1,wis)', 'corto')],
+  'Cleric|Light|17|Corona of Light': [r('Corona of Light', 'max(1,wis)', 'largo')],
+  'Cleric|War|3|War Priest': [r('War Priest', 'max(1,wis)', 'corto')],
+  'Cleric|Knowledge|17|Divine Foreknowledge': [r('Divine Foreknowledge', 1, 'largo')],
+  'Druid|Land|6|Natural Recovery': [r('Natural Recovery', 1, 'largo')],
+  'Druid|Moon|10|Moonlight Step': [r('Moonlight Step', 'max(1,wis)', 'largo')],
+  'Druid|Stars|3|Star Map': [{ tipo: 'conjuro', conjuro: 'guiding bolt|xphb', siempre: true, usos: 'max(1,wis)', recarga: 'largo' }],
+  'Druid|Stars|6|Cosmic Omen': [r('Cosmic Omen', 'max(1,wis)', 'largo', { dado: '1d6' })],
+  'Fighter|Battle Master|7|Know Your Enemy': [r('Know Your Enemy', 1, 'largo')],
+  'Fighter|Banneret|3|Group Recovery': [r('Group Recovery', 1, 'corto')],
+  'Fighter|Psi Warrior|3|Telekinetic Movement': [r('Telekinetic Movement', 1, 'corto')],
+  'Fighter|Psi Warrior|7|Psi-Powered Leap': [r('Psi-Powered Leap', 1, 'corto')],
+  'Fighter|Psi Warrior|15|Bulwark of Force': [r('Bulwark of Force', 1, 'largo')],
+  'Fighter|Psi Warrior|18|Telekinetic Master': [r('Telekinetic Master', 1, 'largo')],
+  'Monk||2|Uncanny Metabolism': [r('Uncanny Metabolism', 1, 'largo')],
+  'Monk|Mercy|17|Hand of Ultimate Mercy': [r('Hand of Ultimate Mercy', 1, 'largo')],
+  'Monk|Open Hand|6|Wholeness of Body': [r('Wholeness of Body', 'max(1,wis)', 'largo')],
+  'Paladin|Devotion|20|Holy Nimbus': [r('Holy Nimbus', 1, 'largo')],
+  'Paladin|Glory|15|Glorious Defense': [r('Glorious Defense', 'max(1,cha)', 'largo')],
+  'Paladin|Glory|20|Living Legend': [r('Living Legend', 1, 'largo')],
+  'Paladin|Ancients|15|Undying Sentinel': [r('Undying Sentinel', 1, 'largo')],
+  'Paladin|Ancients|20|Elder Champion': [r('Elder Champion', 1, 'largo')],
+  'Paladin|Vengeance|20|Avenging Angel': [r('Avenging Angel', 1, 'largo')],
+  'Paladin|Noble Genies|15|Elemental Rebuke': [r('Elemental Rebuke', 'max(1,cha)', 'largo')],
+  'Paladin|Noble Genies|20|Noble Scion': [r('Noble Scion', 1, 'largo')],
+  'Ranger||10|Tireless': [r('Tireless', 'max(1,wis)', 'largo', { dado: '1d8' })],
+  "Ranger||14|Nature's Veil": [r("Nature's Veil", 'max(1,wis)', 'largo')],
+  'Ranger|Gloom Stalker|3|Dread Ambusher': [r('Dread Ambusher', 'max(1,wis)', 'largo', { dado: '2d6' })],
+  'Ranger|Winter Walker|7|Fortifying Soul': [r('Fortifying Soul', 1, 'largo', { dado: '1d10' })],
+  'Ranger|Winter Walker|11|Chilling Retribution': [r('Chilling Retribution', 'max(1,wis)', 'largo')],
+  'Ranger|Winter Walker|15|Frozen Haunt': [r('Frozen Haunt', 1, 'largo')],
+  'Rogue||20|Stroke of Luck': [r('Stroke of Luck', 1, 'corto')],
+  'Rogue|Arcane Trickster|17|Spell Thief': [r('Spell Thief', 1, 'largo')],
+  'Rogue|Soulknife|13|Psychic Veil': [r('Psychic Veil', 1, 'largo')],
+  'Rogue|Soulknife|17|Rend Mind': [r('Rend Mind', 1, 'largo')],
+  'Rogue|Scion of the Three|3|Bloodthirst': [r('Bloodthirst', 'max(1,int)', 'largo')],
+  'Rogue|Scion of the Three|17|Dread Incarnate': [r('Bloodthirst', 'max(1,int)', 'largo', { recargaCorta: 1 })],
+  'Sorcerer||5|Sorcerous Restoration': [r('Sorcerous Restoration', 1, 'largo')],
+  'Sorcerer|Aberrant|18|Warping Implosion': [r('Warping Implosion', 1, 'largo')],
+  'Sorcerer|Clockwork|3|Restore Balance': [r('Restore Balance', 'max(1,cha)', 'largo')],
+  'Sorcerer|Clockwork|14|Trance of Order': [r('Trance of Order', 1, 'largo')],
+  'Sorcerer|Clockwork|18|Clockwork Cavalcade': [r('Clockwork Cavalcade', 1, 'largo')],
+  'Sorcerer|Draconic|14|Dragon Wings': [r('Dragon Wings', 1, 'largo')],
+  'Sorcerer|Wild Magic|3|Tides of Chaos': [r('Tides of Chaos', 1, 'largo')],
+  'Sorcerer|Wild Magic|18|Tamed Surge': [r('Tamed Surge', 1, 'largo')],
+  'Warlock||9|Contact Patron': [{ tipo: 'conjuro', conjuro: 'contact other plane|xphb', siempre: true, usos: 1, recarga: 'largo' }],
+  'Warlock|Archfey|10|Beguiling Defenses': [r('Beguiling Defenses', 1, 'largo')],
+  'Warlock|Celestial|3|Healing Light': [r('Healing Light (d6)', '1+nivel:Warlock', 'largo', { dado: '1d6' })],
+  'Warlock|Celestial|14|Searing Vengeance': [r('Searing Vengeance', 1, 'largo')],
+  "Warlock|Fiend|6|Dark One's Own Luck": [r("Dark One's Own Luck", 'max(1,cha)', 'largo', { dado: '1d10' })],
+  'Warlock|Fiend|14|Hurl Through Hell': [r('Hurl Through Hell', 1, 'largo')],
+  'Warlock|Great Old One|6|Clairvoyant Combatant': [r('Clairvoyant Combatant', 1, 'corto')],
+  'Wizard|Abjurer|3|Arcane Ward': [r('Arcane Ward (HP)', '2*nivel:Wizard+int', 'largo')],
+  'Wizard|Diviner|3|Portent': [r('Portent', 2, 'largo', { dado: '1d20' })],
+  'Wizard|Diviner|14|Greater Portent': [r('Portent', 3, 'largo', { dado: '1d20' })],
+  'Wizard|Diviner|10|The Third Eye': [r('The Third Eye', 1, 'corto')],
+  'Wizard|Illusionist|10|Illusory Self': [r('Illusory Self', 1, 'corto')],
+  'Wizard|Bladesinger|3|Bladesong': [r('Bladesong', 'max(1,int)', 'largo')],
+}
+
+// ── Especies: usos limitados, opciones y rasgos que solo llegan a cierto nivel de personaje.
+// Clave «Especie|Rasgo». Los dados admiten fórmulas entre llaves: «{pb}d4».
+export interface MecanicaEspecie {
+  efectos?: Efecto[]
+  /** Nivel de personaje a partir del cual se obtiene. */
+  nivelMin?: number
+  /** Opción a elegir al crear el personaje, con los efectos de cada una. */
+  eleccion?: { etiqueta: string; opciones: Record<string, Efecto[]> }
+}
+
+export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
+  'Aasimar|Healing Hands': { efectos: [r('Healing Hands', 1, 'largo', { dado: '{pb}d4' })] },
+  'Aasimar|Celestial Revelation': { nivelMin: 3, efectos: [r('Celestial Revelation', 1, 'largo')] },
+  'Dragonborn|Breath Weapon': { efectos: [r('Breath Weapon', 'pb', 'largo', { dado: '{escala(nivel,1,1,5,2,11,3,17,4)}d10' })] },
+  'Dragonborn|Draconic Flight': { nivelMin: 5, efectos: [r('Draconic Flight', 1, 'largo')] },
+  'Dwarf|Stonecunning': { efectos: [r('Stonecunning', 'pb', 'largo')] },
+  'Goliath|Giant Ancestry': {
+    eleccion: {
+      etiqueta: 'Giant Ancestry',
+      opciones: {
+        "Cloud's Jaunt": [r("Cloud's Jaunt", 'pb', 'largo')],
+        "Fire's Burn": [r("Fire's Burn", 'pb', 'largo', { dado: '1d10' })],
+        "Frost's Chill": [r("Frost's Chill", 'pb', 'largo', { dado: '1d6' })],
+        "Hill's Tumble": [r("Hill's Tumble", 'pb', 'largo')],
+        "Stone's Endurance": [r("Stone's Endurance", 'pb', 'largo', { dado: '1d12+{con}' })],
+        "Storm's Thunder": [r("Storm's Thunder", 'pb', 'largo', { dado: '1d8' })],
+      },
+    },
+  },
+  'Goliath|Large Form': { nivelMin: 5, efectos: [r('Large Form', 1, 'largo')] },
+  'Khoravar|Lethargy Resilience': { efectos: [r('Lethargy Resilience (1d4 Long Rests)', 1, 'nunca')] },
+  'Orc|Adrenaline Rush': { efectos: [r('Adrenaline Rush', 'pb', 'corto')] },
+  'Orc|Relentless Endurance': { efectos: [r('Relentless Endurance', 1, 'largo')] },
+  'Shifter|Shifting': {
+    efectos: [r('Shifting', 'pb', 'largo')],
+    eleccion: {
+      etiqueta: 'Shifting',
+      opciones: {
+        Beasthide: [{ tipo: 'nota', texto: 'Beasthide: al cambiar, +1d6 HP temporales extra y +1 AC mientras dure.' }],
+        Longtooth: [{ tipo: 'ataque', nombre: 'Longtooth (shifted)', dano: '1d6', tipoDano: 'piercing', car: 'str', competente: true }],
+        Swiftstride: [{ tipo: 'nota', texto: 'Swiftstride: al cambiar, +10 ft de Speed y movimiento de 10 ft como Reaction.' }],
+        Wildhunt: [{ tipo: 'nota', texto: 'Wildhunt: al cambiar, ventaja en las pruebas de WIS y nadie tiene ventaja contra ti salvo que estés Incapacitated.' }],
+      },
+    },
+  },
 }

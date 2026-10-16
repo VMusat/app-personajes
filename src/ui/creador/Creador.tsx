@@ -14,6 +14,7 @@ import { Buscador, normalizar } from '../comun'
 import { Entradas } from '../Entradas'
 import { EditorEleccion } from './EditorEleccion'
 import { BorrarPersonaje } from '../Inicio'
+import { aplicarEquipo } from '../equipo'
 
 const PASOS = ['Concepto', 'Clase', 'Especie', 'Trasfondo', 'Características', 'Elecciones', 'Equipo', 'Resumen'] as const
 type Paso = (typeof PASOS)[number]
@@ -443,19 +444,7 @@ function PasoResumen({ p, datos, actualizar, pendientes }: { p: Personaje; datos
   const terminar = () => {
     if (!hoja) return
     actualizar((x) => {
-      if (!x.detalles.equipoAplicado) {
-        for (const g of hoja.resolucion.equipo) {
-          for (const it of g.items) {
-            if (it.value) x.monedas.gp += it.value / 100
-            else if (it.item) {
-              const o = datos.objetos.find((ob) => ob._clave === claveDeRef(it.item))
-              x.inventario.push({ id: nuevoId(), origen: o ? '5etools' : 'libre', ref: o?._clave, nombre: it.displayName ?? o?.name ?? it.item.split('|')[0], cantidad: it.quantity ?? 1 })
-            } else if (it.special) x.inventario.push({ id: nuevoId(), origen: 'libre', nombre: it.special, cantidad: 1 })
-            else if (it.equipmentType) x.inventario.push({ id: nuevoId(), origen: 'libre', nombre: `(${it.equipmentType})`, cantidad: 1, notas: 'Elige el objeto concreto' })
-          }
-        }
-        x.detalles.equipoAplicado = 'sí'
-      }
+      aplicarEquipo(x, hoja, datos)
       x.estado.pgActuales = hoja.pgMax
     })
     ir({ tipo: 'hoja', id: p.id })

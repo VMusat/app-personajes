@@ -47,7 +47,7 @@ export type Efecto = { origen?: string; condicion?: string } & (
     }
   | { tipo: 'trucosExtra'; clase: string; valor: number }
   | { tipo: 'listaConjuros'; clase: string; conjuros: string[] }
-  | { tipo: 'recurso'; nombre: string; usos: Formula; recarga: Recarga; dado?: string; recargaCorta?: Formula }
+  | { tipo: 'recurso'; nombre: string; usos: Formula; recarga: Recarga; dado?: string; recargaCorta?: Formula; /** Rasgo, dote o especie al que pertenece. */ rasgo?: string }
   | {
       tipo: 'ataque'
       nombre: string

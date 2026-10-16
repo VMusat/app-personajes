@@ -100,3 +100,27 @@ describe('tamaños de especie', () => {
     expect(conIdioma.sort()).toEqual(['Dragonborn: Dracónico', 'Elf: Élfico', 'Goliath: Gigante', 'Orc: Orco'])
   })
 })
+
+describe('recursos de especie y dotes', () => {
+  it('Healing Hands del aasimar con PBd4, y Breath Weapon escala con el nivel', async () => {
+    const { derivar: der } = await import('../src/motor/derivar')
+    const d = datosDePrueba()
+    const p = personajeVacio()
+    p.especie = 'aasimar|xphb'
+    p.trasfondo = 'sage|xphb'
+    for (let i = 0; i < 5; i++) p.niveles.push({ clase: 'cleric|xphb' })
+    autocompletar(p, d)
+    const h = der(p, d)
+    const hh = h.recursos.find((r) => r.nombre === 'Healing Hands')!
+    expect(hh).toMatchObject({ max: 1, dado: '3d4', rasgo: 'Healing Hands' })
+    expect(h.recursos.some((r) => r.nombre === 'Celestial Revelation')).toBe(true)
+    p.especie = 'dragonborn|xphb'
+    autocompletar(p, d)
+    expect(der(p, d).recursos.find((r) => r.nombre === 'Breath Weapon')).toMatchObject({ max: 3, dado: '2d10' })
+  })
+  it('la marca plena invertida deja elegir la característica', () => {
+    const d = datosDePrueba()
+    const f = d.dotes.find((x) => x.name === 'Marca plena invertida (Envidia)')!
+    expect(f.ability[0].choose.from).toHaveLength(6)
+  })
+})

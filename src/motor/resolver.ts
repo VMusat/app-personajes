@@ -11,7 +11,7 @@ import type { Personaje } from './personaje'
 import { modificador } from './personaje'
 import { RASGOS_MANUALES, claveManual, type EleccionManual } from './rasgosManuales'
 import { DOTES_MANUALES } from './dotesManuales'
-import { MECANICAS } from './mecanicas'
+import { MECANICAS, MECANICAS_ESPECIE } from './mecanicas'
 import { filtrarConjuros, parsearFiltro, resolverBloque, type FiltroConjuros } from './conjurosAdicionales'
 import { evaluar } from './formula'
 import campaña from '../setting/campaña.json'
@@ -250,10 +250,24 @@ export function resolver(p: Personaje, d: Datos): Resolucion {
   return ctx.r
 }
 
+/** Marca un recurso con el rasgo, dote o especie del que sale (para mostrarlo junto al rasgo). */
+const conRasgo = (e: Efecto, rasgo: string): Efecto => (e.tipo === 'recurso' && !e.rasgo ? { ...e, rasgo } : e)
+
 function procesarEspecie(ctx: Ctx, e: Entidad) {
   const origen = `Especie: ${e._nombre}`
   for (const x of e.entries ?? []) {
-    if (typeof x === 'object' && x.name) ctx.r.rasgos.push({ nombre: x.name, origen, nivel: 0, entries: x.entries ?? [], tipo: 'especie' })
+    if (typeof x !== 'object' || !x.name) continue
+    const m = MECANICAS_ESPECIE[`${e.name}|${x.name}`]
+    if (m?.nivelMin && ctx.r.nivel < m.nivelMin) continue
+    ctx.r.rasgos.push({ nombre: x.name, origen, nivel: m?.nivelMin ?? 0, entries: x.entries ?? [], tipo: 'especie' })
+    for (const ef of m?.efectos ?? []) ctx.efecto(conRasgo(ef, x.name), origen)
+    if (m?.eleccion) {
+      const [v] = ctx.elegir({
+        id: `esp:${x.name}`, tipo: 'opcion', etiqueta: m.eleccion.etiqueta, origen, nivel: 0, n: 1,
+        opciones: Object.keys(m.eleccion.opciones).map((k) => ({ valor: k, etiqueta: k })),
+      })
+      for (const ef of m.eleccion.opciones[v] ?? []) ctx.efecto(conRasgo(ef, x.name), origen)
+    }
   }
   ctx.efecto({ tipo: 'velocidad', valor: typeof e.speed === 'number' ? e.speed : e.speed?.walk ?? 30, fijar: true }, origen)
   if (typeof e.speed === 'object') {
@@ -462,8 +476,8 @@ function procesarDote(ctx: Ctx, f: Entidad, id: string, origen: string, nivel: n
     bloques = bloques.filter((b) => b.name === elegido)
   }
   procesarAdicionales(ctx, bloques, id, o, ctx.r.nivel, nivel)
-  for (const e of [...(DOTES_MANUALES[f._clave] ?? []), ...((f._efectos as Efecto[]) ?? [])]) ctx.efecto(e, o)
-  for (const rc of (f._recursos as Crudo[]) ?? []) ctx.efecto({ tipo: 'recurso', nombre: rc.nombre, usos: rc.usos, recarga: rc.recarga }, o)
+  for (const e of [...(DOTES_MANUALES[f._clave] ?? []), ...((f._efectos as Efecto[]) ?? [])]) ctx.efecto(conRasgo(e, f._nombre), o)
+  for (const rc of (f._recursos as Crudo[]) ?? []) ctx.efecto({ tipo: 'recurso', nombre: rc.nombre, usos: rc.usos, recarga: rc.recarga, rasgo: f._nombre }, o)
   if (f._usosMarcaPlena) {
     // La marca plena convierte el conjuro gratis de la marca en PB usos por descanso largo
     for (const c of ctx.r.conjuros) if (c.origen === `Dote: ${f._usosMarcaPlena.de}` && c.usos === 1) c.usos = 'pb'
@@ -857,7 +871,7 @@ function procesarRasgo(ctx: Ctx, r: Rasgo, nivelPj: number, info: InfoClase, niv
   }
 
   // Tabla manual y mecánicas
-  for (const e of MECANICAS[claveManual(r)] ?? []) ctx.efecto(concretar(e, vars, c, info, nivelesClase[c.name]), origen)
+  for (const e of MECANICAS[claveManual(r)] ?? []) ctx.efecto(conRasgo(concretar(e, vars, c, info, nivelesClase[c.name]), r.name), origen)
   const m = RASGOS_MANUALES[claveManual(r)]
   if (m) {
     for (const e of m.efectos ?? []) ctx.efecto(concretar(e, vars, c, info, nivelesClase[c.name]), origen)
@@ -1006,6 +1020,7 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
       ctx.r.opcionales.push(o)
       ctx.r.rasgos.push({ nombre: o.name, origen: `${origen}: ${ofp.name}`, nivel: nivelPj, entries: o.entries ?? [], tipo: 'opcional' })
       procesarProficiencias(ctx, o, `${id}:opc:${o._clave}`, o.name, nivelPj)
+      for (const e of DOTES_MANUALES[o._clave] ?? []) ctx.efecto(conRasgo(e, o.name), o.name)
       procesarAdicionales(ctx, o.additionalSpells ?? [], `${id}:opc:${o._clave}`, o.name, L, nivelPj, c.name)
     }
   }

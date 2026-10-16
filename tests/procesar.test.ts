@@ -47,3 +47,12 @@ describe('datos procesados', () => {
     expect(faltan).toEqual([])
   })
 })
+
+describe('equipo inicial', () => {
+  it('el oro se corrige con el texto del libro (opción A del clérigo: 7 GP)', () => {
+    const d = datosDePrueba()
+    const cl = d.clases.find((c) => c.name === 'Cleric')!
+    expect(cl.startingEquipment.defaultData[0].A.at(-1).value).toBe(700)
+    expect(cl.startingEquipment.defaultData[0].B.at(-1).value).toBe(11000)
+  })
+})

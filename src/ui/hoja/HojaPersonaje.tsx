@@ -16,6 +16,9 @@ import { PestañaNotas } from './PestañaNotas'
 import { PestañaElecciones } from './PestañaElecciones'
 import { exportarJSON, exportarObsidian } from './exportar'
 import { aspectoEsInvertido } from '../../motor/resolver'
+import { Entradas } from '../Entradas'
+import DISOLUCION from '../../setting/disolucion.json'
+import { aplicarEquipo, equipoPendiente } from '../equipo'
 
 export type Act = (f: (p: Personaje) => void) => void
 export type PropsPestaña = { p: Personaje; h: Hoja; actualizar: Act }
@@ -91,6 +94,12 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
         </div>
       </header>
 
+      {equipoPendiente(p, h) && (
+        <div className="aviso-banda equipo">
+          Aún no has añadido el equipo inicial de tu clase y tu trasfondo.{' '}
+          <button className="boton" onClick={() => actualizar((x) => aplicarEquipo(x, h, datos))}>Añadir al inventario</button>
+        </div>
+      )}
       {pendientes.length > 0 && (
         <button className="aviso-banda" onClick={() => setPestaña('elecciones')}>
           Hay {pendientes.length} elecciones pendientes. Pulsa para completarlas.
@@ -116,8 +125,47 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
   )
 }
 
+/** Desplegables con el efecto completo de las condiciones, el Exhaustion y la Disolución activos. */
+function EfectosEstado({ p }: { p: Personaje; h: Hoja }) {
+  const datos = useEstado((s) => s.datos)
+  const condicion = (n: string) => datos?.condiciones.find((c) => c.name === n)
+  const agot = p.estado.agotamiento
+  const dis = p.estado.disolucion
+  if (!p.estado.condiciones.length && !agot && !dis) return null
+  return (
+    <div className="efectos-estado">
+      {p.estado.condiciones.map((c) => (
+        <details key={c}>
+          <summary>{c}</summary>
+          <Entradas entries={condicion(c)?.entries} />
+        </details>
+      ))}
+      {agot > 0 && (
+        <details>
+          <summary>
+            Exhaustion {agot}: {agot >= 6 ? 'el personaje muere' : `−${2 * agot} a las tiradas d20 y −${5 * agot} ft de Speed`}
+          </summary>
+          <Entradas entries={condicion('Exhaustion')?.entries} />
+        </details>
+      )}
+      {dis > 0 && (
+        <details>
+          <summary>Disolución {dis}: {DISOLUCION.niveles[dis - 1]}</summary>
+          <p><b>Efectos acumulados:</b></p>
+          <ol>{DISOLUCION.niveles.slice(0, dis).map((t, i) => <li key={i}>{t}</li>)}</ol>
+          {DISOLUCION.general.map((t, i) => <p key={`g${i}`} className="sutil">{t}</p>)}
+          <p><b>Recuperarse:</b></p>
+          <ul>{DISOLUCION.recuperacion.map((t, i) => <li key={i}>{t}</li>)}</ul>
+        </details>
+      )}
+    </div>
+  )
+}
+
 function BarraVital({ p, h, actualizar }: PropsPestaña) {
   const tirar = useEstado((s) => s.tirar)
+  const datos = useEstado((s) => s.datos)
+  const condicion = (n: string) => datos?.condiciones.find((c) => c.name === n)
   const [cantidad, setCantidad] = useState('')
   const [condiciones, setCondiciones] = useState(false)
   const hp = p.estado.pgActuales ?? h.pgMax
@@ -224,6 +272,7 @@ function BarraVital({ p, h, actualizar }: PropsPestaña) {
           </button>
         )}
       </div>
+      <EfectosEstado p={p} h={h} />
       {condiciones && (
         <Modal titulo="Condiciones" alCerrar={() => setCondiciones(false)}>
           <div className="rejilla-condiciones">
@@ -238,6 +287,12 @@ function BarraVital({ p, h, actualizar }: PropsPestaña) {
               </label>
             ))}
           </div>
+          {p.estado.condiciones.map((c) => (
+            <div key={c} className="detalle-condicion">
+              <h4>{c}</h4>
+              <Entradas entries={condicion(c)?.entries} />
+            </div>
+          ))}
         </Modal>
       )}
     </section>

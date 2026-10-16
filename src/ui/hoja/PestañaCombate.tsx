@@ -163,7 +163,6 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
         {h.inmunidades.length > 0 && <p><b>Inmunidades:</b> {h.inmunidades.map(titulo).join(', ')}</p>}
         {h.inmunidadesCondicion.length > 0 && <p><b>Inmune a condiciones:</b> {h.inmunidadesCondicion.map(titulo).join(', ')}</p>}
         {h.bonosCondicionales.map((b, i) => <p key={i} className="sutil">{b.texto} — {b.origen}</p>)}
-        {h.penalizacionD20 < 0 && <p className="error">Exhaustion: {h.penalizacionD20} a todas las tiradas de d20 (ya aplicado a los botones).</p>}
       </section>
     </div>
   )

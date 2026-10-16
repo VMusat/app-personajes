@@ -45,6 +45,25 @@ function resolverCopia(e: Crudo, lista: Crudo[]): Crudo {
   return res
 }
 
+/**
+ * Corrige el oro del equipo inicial con el texto del libro: 5etools tiene algún valor mal
+ * (la opción A del clérigo da 7 GP en el libro y 70 en los datos).
+ */
+function corregirOro(bloques: Crudo[] | undefined, texto: unknown): Crudo[] | undefined {
+  if (!bloques) return bloques
+  const t = JSON.stringify(texto ?? '')
+  return bloques.map((b) => {
+    const r: Crudo = { ...b }
+    for (const k of Object.keys(b)) {
+      const m = new RegExp(`\\(${k}\\)[^;(]*?(\\d+) GP`).exec(t)
+      if (!m) continue
+      const cp = Number(m[1]) * 100
+      r[k] = (b[k] as Crudo[]).map((it) => (it.value !== undefined ? { ...it, value: cp } : it))
+    }
+    return r
+  })
+}
+
 function entidad<T extends Entidad>(e: Crudo, nombre?: string, setting?: string): T {
   return { ...e, _clave: claveEntidad(e.name, e.source), _nombre: nombre ?? e.name, _setting: setting } as T
 }
@@ -65,7 +84,8 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
       if (!FUENTES_CLASE.includes(c.source)) continue
       const s = settingClases[`${c.name}|${c.source}`]
       if (!s) continue
-      clases.push({ ...entidad<Clase>(c, s.nombre, s.setting), _fuentePoder: s.fuente })
+      const ce = c.startingEquipment ? { ...c.startingEquipment, defaultData: corregirOro(c.startingEquipment.defaultData, c.startingEquipment.entries) } : undefined
+      clases.push({ ...entidad<Clase>({ ...c, startingEquipment: ce }, s.nombre, s.setting), _fuentePoder: s.fuente })
     }
     for (const sc of archivo.subclass ?? []) {
       if (!FUENTES_SUBCLASE.includes(sc.source) || !FUENTES_CLASE.includes(sc.classSource)) continue
@@ -103,7 +123,8 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
       .filter((b: Crudo) => !excluidoTrasfondo(b))
       .map((b: Crudo) => {
         const s = ren[`${b.name}|${b.source}`]
-        return s ? entidad(b, s.nombre, s.setting) : entidad(b)
+        const b2 = { ...b, startingEquipment: corregirOro(b.startingEquipment, b.entries) }
+        return s ? entidad(b2, s.nombre, s.setting) : entidad(b2)
       }),
     ...trasfondosSetting.nuevos.map((b) => entidad(b as Crudo, b.name, b._setting)),
   ].sort((x, y) => x._nombre.localeCompare(y._nombre, 'es'))

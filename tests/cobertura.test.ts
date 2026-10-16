@@ -79,3 +79,14 @@ describe('cobertura de rasgos', () => {
     })
   }
 })
+
+describe('mecánicas de usos', () => {
+  it('todas las claves de MECANICAS existen en los datos', async () => {
+    const { MECANICAS, MECANICAS_ESPECIE } = await import('../src/motor/mecanicas')
+    const d = datosDePrueba()
+    const claves = new Set(Object.values(d.rasgos).map((r) => claveManual(r)))
+    expect(Object.keys(MECANICAS).filter((k) => !claves.has(k))).toEqual([])
+    const especies = new Set(d.especies.flatMap((e) => (e.entries ?? []).filter((x: { name?: string }) => typeof x === 'object' && x.name).map((x: { name: string }) => `${e.name}|${x.name}`)))
+    expect(Object.keys(MECANICAS_ESPECIE).filter((k) => !especies.has(k))).toEqual([])
+  })
+})

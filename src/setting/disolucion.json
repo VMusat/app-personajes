@@ -1,0 +1,20 @@
+{
+  "_nota": "Reglas de la miasma: Disolución (exposición a la miasma). Regla de la casa, pendiente de probar en mesa.",
+  "general": [
+    "Cada hora (o cada escena intensa) dentro de la miasma: salvación de WIS. Si fallas, recibes daño Psychic y ganas un nivel de Disolución. Si tienes éxito, recibes la mitad del daño y ningún nivel.",
+    "Bruma: DC 10, 1d6 · Niebla: DC 15, 3d6 · Corazón: DC 20, 9d6.",
+    "Un viajero que guíe al grupo le da ventaja en las salvaciones."
+  ],
+  "niveles": [
+    "Ecos constantes: ves el lugar en otras épocas.",
+    "Desventaja en las pruebas de Perception e Insight: no sabes cuándo estás.",
+    "Efecto a corto plazo: Frightened, Incapacitated o Stunned durante 1d10 minutos, con alucinaciones de otros lugares y otras épocas.",
+    "Efecto a largo plazo: desventaja en un tipo de pruebas durante 1d10 × 10 horas.",
+    "Asimilación: el personaje se pierde en la miasma. Es el fin, salvo que alguien lo saque en el siguiente asalto."
+  ],
+  "recuperacion": [
+    "Un Long Rest fuera de la miasma quita un nivel.",
+    "Calm Emotions y Lesser Restoration suprimen los efectos de los niveles 3 y 4, pero no quitan niveles. Greater Restoration quita uno.",
+    "Quien llega al nivel 3 y sobrevive gana una cicatriz de miasma y pasa a ser superviviente."
+  ]
+}

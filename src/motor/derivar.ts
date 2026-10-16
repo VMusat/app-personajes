@@ -56,6 +56,8 @@ export interface RecursoHoja {
   recargaCorta?: number
   dado?: string
   origen: string
+  /** Rasgo, dote o especie del que sale. */
+  rasgo?: string
 }
 
 export interface Hoja {
@@ -383,8 +385,11 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
     if (e.tipo !== 'recurso') continue
     const id = `rec:${e.nombre}`
     const i = recursos.findIndex((x) => x.id === id)
-    const rec: RecursoHoja = { id, nombre: e.nombre, max: Math.max(0, ev(e.usos)), recarga: e.recarga, recargaCorta: e.recargaCorta !== undefined ? ev(e.recargaCorta) : undefined, dado: e.dado, origen: e.origen ?? '' }
-    if (i >= 0) recursos[i] = rec
+    // Dados con fórmulas entre llaves: «{pb}d4», «1d12+{con}»
+    const dado = e.dado?.replace(/{([^}]+)}/g, (_, f) => String(ev(f)))
+    const rec: RecursoHoja = { id, nombre: e.nombre, max: Math.max(0, ev(e.usos)), recarga: e.recarga, recargaCorta: e.recargaCorta !== undefined ? ev(e.recargaCorta) : undefined, dado, origen: e.origen ?? '', rasgo: e.rasgo }
+    // Si un rasgo posterior mejora el mismo recurso (Improved Warding Flare...), se queda con el rasgo original
+    if (i >= 0) recursos[i] = { ...rec, rasgo: recursos[i].rasgo ?? rec.rasgo }
     else recursos.push(rec)
   }
   for (const m of p.recursosManuales) recursos.push({ id: `man:${m.id}`, nombre: m.nombre, max: m.max, recarga: m.recarga, origen: 'Manual' })

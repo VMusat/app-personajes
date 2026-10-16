@@ -26,20 +26,48 @@ function danoConjuro(c: Crudo, nivelLanzado: number, nivelPj: number): string | 
 }
 
 export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
+  const datos = useEstado((s) => s.datos)
   const tirar = useEstado((s) => s.tirar)
   const [lanzando, setLanzando] = useState<ConjuroHoja>()
   const [preparar, setPreparar] = useState(false)
   const [filtro, setFiltro] = useState<'preparados' | 'todos'>('preparados')
   const gastados = p.estado.gastados
+  // Elecciones de conjuros preparados de cada clase (para preparar y quitar desde la lista)
+  const prepElecciones = h.resolucion.elecciones.filter((e) => e.tipo === 'preparados')
+  const eleccionDe = (clave: string) => prepElecciones.find((e) => e.opciones.some((o) => o.valor === clave && !o.bloqueada))
   const porNivel = useMemo(() => {
     const m = new Map<number, ConjuroHoja[]>()
-    for (const c of h.conjuros) {
-      if (filtro === 'preparados' && !c.preparado && !c.siempre && c.conjuro.level > 0) continue
+    const meter = (c: ConjuroHoja) => {
       if (!m.has(c.conjuro.level)) m.set(c.conjuro.level, [])
       m.get(c.conjuro.level)!.push(c)
     }
+    for (const c of h.conjuros) {
+      if (filtro === 'preparados' && !c.preparado && !c.siempre && c.conjuro.level > 0) continue
+      meter(c)
+    }
+    // «Todos»: también los conjuros de la lista de la clase que podrías preparar y no tienes preparados
+    if (filtro === 'todos') {
+      for (const e of prepElecciones) {
+        const l = h.lanzamiento.find((x) => e.id === `cls:${x.clase}:preparados`)
+        for (const o of e.opciones) {
+          if (o.bloqueada || h.conjuros.some((c) => c.conjuro._clave === o.valor)) continue
+          const cj = datos?.conjuros.find((x) => x._clave === o.valor)
+          if (cj && l) meter({ conjuro: cj, origen: l.nombre, preparado: false, siempre: false, cd: l.cd, ataque: l.ataque, car: l.car })
+        }
+      }
+    }
+    for (const lista of m.values()) lista.sort((a, b) => a.conjuro.name.localeCompare(b.conjuro.name))
     return [...m.entries()].sort((a, b) => a[0] - b[0])
-  }, [h.conjuros, filtro])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [h, filtro])
+  const alternarPreparado = (clave: string) => {
+    const e = eleccionDe(clave)
+    if (!e) return
+    actualizar((x) => {
+      const v = x.elecciones[e.id] ?? []
+      x.elecciones[e.id] = v.includes(clave) ? v.filter((k) => k !== clave) : v.length < e.n ? [...v, clave] : v
+    })
+  }
   const eleccionesPreparar = h.resolucion.elecciones.filter((e) => ['preparados', 'trucos', 'libro'].includes(e.tipo))
   const nPreparados = (clase: string) => (p.elecciones[`cls:${clase}:preparados`] ?? []).length
 
@@ -114,7 +142,18 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
                     <Contador valor={gastados[c.idRecurso] ?? 0} max={c.usos} alCambiar={(v) => actualizar((x) => void (x.estado.gastados[c.idRecurso!] = v))} />
                   </span>
                 )}
-                <button className="boton-mini" onClick={() => setLanzando(c)}>Lanzar</button>
+                {(() => {
+                  const e = nivel > 0 && !c.siempre ? eleccionDe(c.conjuro._clave) : undefined
+                  if (!e) return null
+                  const preparado = e.valor.includes(c.conjuro._clave)
+                  if (e.cambia !== 'largo') return preparado ? null : <span className="insignia" title="Estos conjuros se cambian al subir de nivel">No preparado</span>
+                  return (
+                    <button className="boton-mini" disabled={!preparado && e.valor.length >= e.n} onClick={() => alternarPreparado(c.conjuro._clave)} title={!preparado && e.valor.length >= e.n ? `Ya tienes ${e.n} preparados` : ''}>
+                      {preparado ? 'Quitar' : 'Preparar'}
+                    </button>
+                  )
+                })()}
+                {(c.preparado || c.siempre || nivel === 0) && <button className="boton-mini" onClick={() => setLanzando(c)}>Lanzar</button>}
               </li>
             ))}
           </ul>

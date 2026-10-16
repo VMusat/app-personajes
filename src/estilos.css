@@ -359,3 +359,9 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .tarjeta-personaje { position: relative; }
 .borrar-tarjeta { position: absolute; top: 6px; right: 6px; font-size: 1rem; opacity: 0.6; }
 .borrar-tarjeta:hover { opacity: 1; }
+.aviso-banda.equipo { cursor: default; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.efectos-estado { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; }
+.efectos-estado details { background: var(--fondo-2); border: 1px solid var(--borde); border-left: 3px solid var(--aviso); border-radius: 8px; padding: 4px 10px; }
+.efectos-estado summary { cursor: pointer; font-weight: 600; }
+.detalle-condicion { border-top: 1px solid var(--borde); margin-top: 8px; }
+.usos-rasgo { margin: 4px 0 8px; background: var(--fondo-2); border-radius: 8px; padding: 0 8px; }

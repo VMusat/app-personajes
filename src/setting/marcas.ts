@@ -197,11 +197,11 @@ export function generarDotesMarca(dotesOficiales: Crudo[]): Crudo[] {
       res.push(
         base(nombreMarcaPlenaInvertida(a.invertida), 'G', {
           prerequisite: [{ level: 4, feat: [`${nomInv.toLowerCase()}|setting`] }],
-          ability: [{ con: 1 }],
+          ability: [{ choose: { from: ['str', 'dex', 'con', 'int', 'wis', 'cha'] } }],
           _recursos: [{ nombre: 'Inspiración invertida', usos: 'pb', recarga: 'largo' }],
           entries: [
             `Tu marca de ${a.invertida} alcanza su plenitud. Obtienes estos beneficios:`,
-            bloque('Aumento de característica', 'Tu CON aumenta en 1, hasta un máximo de 20.'),
+            bloque('Aumento de característica', 'Aumenta en 1 una característica a tu elección, hasta un máximo de 20.'),
             bloque('Fortaleza mejorada', 'Cuando usas la Fortaleza invertida, tiras {@dice 1d6} en lugar de {@dice 1d4}, y recuperas su uso al terminar un Short Rest o un Long Rest.'),
             bloque(
               'Inspiración invertida',
