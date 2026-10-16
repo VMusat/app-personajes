@@ -1,6 +1,6 @@
-# La miasma · App de personajes
+# Herederos de la Miasma · App de personajes
 
-Creación y gestión de personajes de D&D 2024 para la campaña de la miasma. Funciona en el navegador (GitHub Pages): los jugadores no instalan nada.
+Creación y gestión de personajes de D&D 2024 para la campaña Herederos de la Miasma. Funciona en el navegador (GitHub Pages): los jugadores no instalan nada.
 
 - **Reglas:** se descargan al abrir la app desde el mirror público de 5etools (versión fijada en `src/datos/fuentes.ts`) y se guardan en caché. El repositorio no contiene texto de los libros.
 - **Setting:** `src/setting/` adapta las reglas al mundo de la campaña (especies, trasfondos, subclases, marcas de aspecto, lenguas), a partir de las notas `Reglas/` de la bóveda de Obsidian.

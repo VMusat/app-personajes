@@ -166,7 +166,7 @@ export const RASGOS_MANUALES: Record<string, RasgoManual> = {
     ],
   },
   'Bard|Moon|3|Primal Lore': {
-    efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: 'Druidic' }],
+    efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: 'Druídico' }],
     elecciones: [{ id: 'habilidad', tipo: 'habilidad', etiqueta: 'Primal Lore', n: 1, de: ['animal handling', 'insight', 'medicine', 'nature', 'perception', 'survival'] }],
     sinEleccion: 'El truco de druida está en additionalSpells',
   },
@@ -225,7 +225,7 @@ export const RASGOS_MANUALES: Record<string, RasgoManual> = {
   },
 
   // ── Druida
-  'Druid||1|Druidic': { efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: 'Druidic' }] },
+  'Druid||1|Druidic': { efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: 'Druídico' }] },
   'Druid||1|Primal Order': { sinEleccion: 'Opciones estructuradas (Magician o Warden)' },
   'Druid||1|Magician': {
     efectos: [
@@ -382,7 +382,7 @@ export const RASGOS_MANUALES: Record<string, RasgoManual> = {
   'Rogue||1|Expertise': { elecciones: [pericia(2)] },
   'Rogue||1|Sneak Attack': enJuego(),
   'Rogue||1|Thieves\' Cant': {
-    efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: "Thieves' Cant" }],
+    efectos: [{ tipo: 'competencia', categoria: 'idioma', valor: 'Jerga del Tajo' }],
     elecciones: [{ id: 'idioma', tipo: 'idioma', etiqueta: "Thieves' Cant", n: 1, de: 'todas' }],
   },
   'Rogue||1|Weapon Mastery': { elecciones: [maestria(2)] },

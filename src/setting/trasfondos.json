@@ -1,50 +1,50 @@
 {
+  "_nota": "Trasfondos del mundo (Reglas/Trasfondos del mundo). Las descripciones son públicas: sin secretos ni metajuego.",
+  "excluir": ["House Agent|EFA", "Aberrant Heir|EFA", "/^House .* Heir$/"],
   "renombrar": {
-    "Acolyte|XPHB": { "nombre": "Acólito", "setting": "Novicio de la Iglesia Seráfica o servidor de un santuario de los Divinos en el Tajo." },
-    "Artisan|XPHB": { "nombre": "Artesano", "setting": "Aprendiz de uno de los Gremios de Cerinnar." },
-    "Charlatan|XPHB": { "nombre": "Charlatán", "setting": "Vendedor de amuletos de Rafael falsos y de «reliquias seráficas»." },
-    "Criminal|XPHB": { "nombre": "Criminal", "setting": "Miembro de una banda del Tajo: los Ganchos, las Calles Hundidas." },
-    "Entertainer|XPHB": { "nombre": "Artista", "setting": "Cómico de las plazas de Impacto, cantor de la leyenda de la Noche de Cerinnar." },
-    "Farmer|XPHB": { "nombre": "Granjero", "setting": "Jornalero de las viñas del Distrito de Rafael o colono de la linde del Bosque." },
-    "Guard|XPHB": { "nombre": "Guardia", "setting": "Recluta de los Capas Grises." },
-    "Guide|XPHB": { "nombre": "Guía (Montaraz)", "setting": "Montaraz del Gremio de Montaraces." },
-    "Hermit|XPHB": { "nombre": "Ermitaño", "setting": "Superviviente de la miasma que vivió años aislado; o devoto del Ermitaño (la Verdad)." },
-    "Merchant|XPHB": { "nombre": "Mercader", "setting": "Comerciante de la ruta de Lar." },
-    "Noble|XPHB": { "nombre": "Noble", "setting": "Familia sérafa venida a menos en el Distrito de Rafael, o casa de Brennan." },
-    "Sage|XPHB": { "nombre": "Sabio", "setting": "Estudiante de la Universidad de Arcanistas de Cerinnar." },
-    "Sailor|XPHB": { "nombre": "Aeronauta", "setting": "Tripulante de dirigibles del Gremio de Aeronautas." },
-    "Scribe|XPHB": { "nombre": "Escriba", "setting": "Gremio de Escribas y Trujamanes." },
-    "Soldier|XPHB": { "nombre": "Soldado", "setting": "Soldado de la frontera sur del Reino Sérafo, de los ejércitos de Brennan o de la Flota Gris de los Capas Grises." },
-    "Wayfarer|XPHB": { "nombre": "Peregrino", "setting": "Refugiado, o hijo de refugiados, criado en el Tajo." },
-    "Inquisitive|EFA": { "nombre": "Investigador", "setting": "Al estilo del detective de los primeros Divinos. Agencias privadas del Tajo." },
-    "Archaeologist|EFA": { "nombre": "Excavador de Udegard", "setting": "Buscador de reliquias en las ruinas bajo la ciudad." },
-    "House Agent|EFA": { "nombre": "Agente de un gremio", "setting": "Agente de un gremio de Cerinnar. Puede combinarse con una marca de aspecto." },
-    "Aberrant Heir|EFA": { "nombre": "Marcado invertido", "setting": "Nació con una marca del revés y lo han perseguido por ello." },
-    "Flaming Fist Mercenary|FRHoF": { "nombre": "Mercenario de los Capas Grises", "setting": "Mercenario contratado por los Capas Grises." },
-    "Knight of the Gauntlet|FRHoF": { "nombre": "Escudero de la Guardia de Taric", "setting": "Escudero de la Guardia de Taric o de la Mano de Mikael." },
-    "Purple Dragon Squire|FRHoF": { "nombre": "Escudero de la Mano de Mikael", "setting": "Escudero de la Guardia de Taric o de la Mano de Mikael." },
-    "Harper|FRHoF": { "nombre": "Agente de Divinidad y Diversidad", "setting": "Agente de una red secreta: los ojos de la Consejería de Divinidad y Diversidad." },
-    "Zhentarim Mercenary|FRHoF": { "nombre": "Matón del mercado negro", "setting": "Matón del Mercado negro de Cerinnar." },
-    "Emerald Enclave Caretaker|FRHoF": { "nombre": "Guardián del Bosque Hondo", "setting": "Guardián del Bosque Hondo." },
-    "Moonwell Pilgrim|FRHoF": { "nombre": "Peregrino del Bosque Hondo", "setting": "Peregrino del Bosque Hondo." },
-    "Dragon Cultist|FRHoF": { "nombre": "Cultista de un Oscuro", "setting": "Muy buen trasfondo para un PJ arrepentido." },
-    "Genie Touched|FRHoF": { "nombre": "Tocado por un dragón", "setting": "Nacido en las Tierras de Lar con el favor de un dragón." },
-    "Dead Magic Dweller|FRHoF": { "nombre": "Nacido en una zona sin maná", "setting": "Ver Reglas de la miasma (zonas sin maná, pendiente de canon)." },
-    "Mythalkeeper|FRHoF": { "nombre": "Eslabón", "setting": "Custodio, sin saberlo, de una pieza de la cadena que esconde una carta." },
-    "Spellfire Initiate|FRHoF": { "nombre": "Portador del fuego del Resplandor", "setting": "Portador del fuego del Resplandor." },
-    "Shadowmasters Exile|FRHoF": { "nombre": "Desertor de la Umbra", "setting": "Desertor de una orden que camina por la Umbra." },
-    "Chondathan Freebooter|FRHoF": { "nombre": "Filibustero", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
-    "Ice Fisher|FRHoF": { "nombre": "Pescador del hielo", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
-    "Rashemi Wanderer|FRHoF": { "nombre": "Errante de las cumbres", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
-    "Mulhorandi Tomb Raider|FRHoF": { "nombre": "Saqueador de tumbas", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." },
-    "Lords' Alliance Vassal|FRHoF": { "nombre": "Vasallo", "setting": "Cambiando la región por Brennan, Lar o el Reino Sérafo." }
+    "Acolyte|XPHB": { "nombre": "Acólito", "setting": "Te criaste al servicio de la fe. Puede que fueras novicio de la Iglesia Seráfica, entre incienso y liturgia en lengua aasimar, o que cuidaras uno de los santuarios callejeros de los Divinos que hay en cada esquina del Tajo." },
+    "Artisan|XPHB": { "nombre": "Artesano", "setting": "Aprendiste un oficio en uno de los muchos gremios de Cerinnar: canteros, faroleros, destiladores, ascensoristas… Sabes lo que vale el trabajo bien hecho y lo que cuesta pagar las cuotas del gremio." },
+    "Charlatan|XPHB": { "nombre": "Charlatán", "setting": "Te ganabas la vida con la palabra fácil: amuletos de Rafael que no protegen de nada, «reliquias seráficas» de dudosa procedencia y promesas a la medida de cada cliente. En el Anillo del Mercado de Impacto nunca faltan incautos." },
+    "Criminal|XPHB": { "nombre": "Criminal", "setting": "Creciste en las bandas del Tajo, donde el mercado negro hace la mayoría de sus negocios. Conoces los callejones del Fondo, las pasarelas de las paredes y a quién no hay que deberle dinero." },
+    "Entertainer|XPHB": { "nombre": "Artista", "setting": "Actuabas para el público de las plazas de Impacto: cómico, músico o cantor de leyendas como la Noche de Cerinnar. Sabes leer a una multitud y hacer que te mire." },
+    "Farmer|XPHB": { "nombre": "Granjero", "setting": "Trabajaste la tierra: en las viñas en terraza y los campos del Distrito de Rafael, o en una granja de colonos en la linde del Bosque Retorcido, donde la cosecha depende tanto del tiempo como de la miasma." },
+    "Guard|XPHB": { "nombre": "Guardia", "setting": "Fuiste recluta de los Capas Grises, la guardia de Cerinnar. Conoces la disciplina del cuartel, el peso del revólver mecánico y la capa gris que todo el mundo reconoce (y que siempre acaba mojada)." },
+    "Guide|XPHB": { "nombre": "Guía (Montaraz)", "setting": "Eres Montaraz: guías caravanas y viajeros por los caminos del Bosque Retorcido. Con la miasma retirada el oficio casi desapareció; ahora que vuelve a avanzar, quien sabe moverse por el Bosque vuelve a ser imprescindible." },
+    "Hermit|XPHB": { "nombre": "Ermitaño", "setting": "Viviste años apartado del mundo: en un claro perdido del Bosque, en un monasterio de montaña o en soledad voluntaria, buscando una verdad que solo se encuentra en silencio." },
+    "Merchant|XPHB": { "nombre": "Mercader", "setting": "Comerciabas por las rutas que unen los reinos, sobre todo la de Lar: telas, vinos sérafos, maquinaria de Cerinnar. Hablas varias lenguas y sabes que todo tiene un precio." },
+    "Noble|XPHB": { "nombre": "Noble", "setting": "Vienes de una familia con título: una casa sérafa exiliada en las fincas del Distrito de Rafael, que conserva su orgullo aunque su reino ya no sea lo que fue, o una familia acomodada de las ciudades de Brennan." },
+    "Sage|XPHB": { "nombre": "Sabio", "setting": "Estudiaste en la Universidad de Arcanistas de Cerinnar, en Partido, o en una de las Facultades de la otra montaña. A los estudiantes de la Universidad los llaman «los Humos»." },
+    "Sailor|XPHB": { "nombre": "Aeronauta", "setting": "Formaste parte de la tripulación de un dirigible o un globo de carga del Gremio de Aeronautas, en el astillero del Distrito de Mikael. Conoces el viento, las cuerdas y la ciudad vista desde arriba." },
+    "Scribe|XPHB": { "nombre": "Escriba", "setting": "Te formaste en el Gremio de Escribas y Trujamanes, que tiene el monopolio de la traducción en la ciudad de los mil idiomas. Copias, traduces y sabes que un documento bien redactado puede valer más que una espada." },
+    "Soldier|XPHB": { "nombre": "Soldado", "setting": "Serviste en un ejército: en la frontera sur del Reino Sérafo, en las tropas de las ciudades de Brennan o en la Flota Gris de los Capas Grises. Has visto lo que hay más allá de los mapas." },
+    "Wayfarer|XPHB": { "nombre": "Peregrino", "setting": "Eres refugiado, o hijo de refugiados, y te criaste en el Tajo, el distrito que levantaron quienes no tenían adónde ir. Sabes sobrevivir con poco y en él tienes vecinos de todos los rincones del mundo." },
+    "Inquisitive|EFA": { "nombre": "Investigador", "setting": "Trabajas resolviendo misterios para quien pueda pagarlo: maridos desaparecidos, deudas, robos. Las agencias privadas del Tajo cubren lo que los Capas Grises no tienen tiempo de mirar." },
+    "Archaeologist|EFA": { "nombre": "Excavador de Udegard", "setting": "Buscas reliquias en las ruinas de la antigua Udegard, sobre la que se levanta Cerinnar. Bajo las calles quedan restos de una ciudad que muy pocos recuerdan." },
+    "Flaming Fist Mercenary|FRHoF": { "nombre": "Mercenario de los Capas Grises", "setting": "Fuiste mercenario a sueldo: los Capas Grises contratan refuerzos cuando el trabajo los desborda, y otros pagan bien por escolta y músculo." },
+    "Knight of the Gauntlet|FRHoF": { "nombre": "Escudero de la Guardia de Taric", "setting": "Serviste como escudero en la Guardia de Taric, la organización de defensa del Reino Sérafo. Te educaron en la disciplina, la fe y el deber." },
+    "Purple Dragon Squire|FRHoF": { "nombre": "Escudero de una orden", "setting": "Fuiste escudero de una orden militar de Brennan o del Reino Sérafo, con sus juramentos, sus blasones y sus viejas rivalidades." },
+    "Harper|FRHoF": { "nombre": "Informante", "setting": "Formaste parte de una red discreta de informantes al servicio del Consejo de Cerinnar: escuchar, recordar y pasar mensajes sin llamar la atención." },
+    "Zhentarim Mercenary|FRHoF": { "nombre": "Matón del mercado negro", "setting": "Trabajaste para el mercado negro de Cerinnar: cobros, protección y encargos que no se anotan en ningún libro." },
+    "Emerald Enclave Caretaker|FRHoF": { "nombre": "Guardián del Bosque", "setting": "Cuidaste de los rincones salvajes del Bosque Retorcido y de quienes viven en sus claros, entre leñadores, Montaraces y leyendas del Bosque Hondo." },
+    "Moonwell Pilgrim|FRHoF": { "nombre": "Peregrino del Bosque Hondo", "setting": "Seguiste las leyendas del Bosque Hondo, la tierra mágica que algunos Montaraces dicen haber visto entre los árboles y que nunca vuelven a encontrar." },
+    "Dragon Cultist|FRHoF": { "nombre": "Cultista de un Oscuro", "setting": "Perteneciste al culto de uno de los Oscuros, las figuras que encarnan la cara invertida de los aspectos. Has dejado (o eso dices) aquella vida atrás." },
+    "Genie Touched|FRHoF": { "nombre": "Tocado por un dragón", "setting": "Naciste en las Tierras de Lar, la única tierra con dragones, y uno de ellos te marcó con su favor. En Lar eso se considera una señal." },
+    "Dead Magic Dweller|FRHoF": { "nombre": "Hijo de tierra sin maná", "setting": "Creciste en una de las ciudades donde el maná natural casi se ha agotado, como San Judeburgo o San Luteburgo. Allí la gente vive de la fe, la técnica y los propios brazos." },
+    "Mythalkeeper|FRHoF": { "nombre": "Custodio", "setting": "Tu familia te confió la custodia de algo (un objeto, un lugar, un secreto) sin explicarte del todo por qué. Lo proteges igualmente." },
+    "Spellfire Initiate|FRHoF": { "nombre": "Portador del fuego del Resplandor", "setting": "Llevas dentro una chispa de luz que absorbe la magia y la devuelve. Los que la conocen la llaman fuego del Resplandor, y es tan rara como codiciada." },
+    "Shadowmasters Exile|FRHoF": { "nombre": "Desertor de la Umbra", "setting": "Desertaste de una orden que se mueve por la Umbra, el reflejo oscuro del mundo. Sus antiguos hermanos no olvidan a quien se marcha." },
+    "Chondathan Freebooter|FRHoF": { "nombre": "Filibustero", "setting": "Navegaste como corsario o contrabandista por las costas de Brennan, Lar o el Reino Sérafo, ahora que el mar vuelve a estar libre de miasma." },
+    "Ice Fisher|FRHoF": { "nombre": "Pescador del hielo", "setting": "Vienes de las cumbres heladas del norte de Brennan o de Lar, donde se vive de la pesca bajo el hielo y del frío se aprende la paciencia." },
+    "Rashemi Wanderer|FRHoF": { "nombre": "Errante de las cumbres", "setting": "Recorriste las montañas del noreste de Brennan, junto a los goliats y los últimos gigantes, aprendiendo sus costumbres." },
+    "Mulhorandi Tomb Raider|FRHoF": { "nombre": "Saqueador de tumbas", "setting": "Saqueaste criptas y ruinas antiguas del Reino Sérafo y de las tierras que la miasma tuvo cubiertas durante siglos." },
+    "Lords' Alliance Vassal|FRHoF": { "nombre": "Vasallo", "setting": "Serviste a un señor de Brennan, de Lar o del Reino Sérafo, como mensajero, agente o mano derecha." }
   },
-  "herederosDeGremio": { "nombre": "Heredero de un gremio", "setting": "Heredero de un gremio de Cerinnar. Puede combinarse con una marca de aspecto." },
   "nuevos": [
     {
       "name": "Superviviente de la miasma",
       "source": "SETTING",
       "edition": "one",
+      "_setting": "Estuviste dentro de la miasma y saliste. Te dejó una cicatriz de colores de arcoíris, la piel lisa como el nácar y, desde entonces, tu marca de aspecto se ve en tu piel.",
       "ability": [
         { "choose": { "weighted": { "from": ["con", "wis", "cha"], "weights": [2, 1] } } },
         { "choose": { "weighted": { "from": ["con", "wis", "cha"], "weights": [1, 1, 1] } } }
@@ -53,19 +53,65 @@
       "skillProficiencies": [{ "survival": true, "insight": true }],
       "toolProficiencies": [{ "herbalism kit": true }, { "anyGamingSet": 1 }],
       "startingEquipment": [
-        {
-          "A": [
-            { "item": "traveler's clothes|xphb" },
-            { "special": "Un objeto de alguien que no volvió" },
-            { "item": "bottle|xphb" },
-            { "value": 3800 }
-          ],
-          "B": [{ "value": 5000 }]
-        }
+        { "A": [{ "item": "traveler's clothes|xphb" }, { "special": "Un objeto de alguien que no volvió" }, { "item": "bottle|xphb" }, { "value": 3800 }], "B": [{ "value": 5000 }] }
       ],
       "entries": [
-        "Sobreviviste a la miasma, y la miasma te dejó huella: tu marca de aspecto se hizo visible.",
-        { "type": "entries", "name": "Lo que trae", "entries": ["Una cicatriz de miasma, ecos ocasionales y la atención de la Consejería de Divinidad y Diversidad y de los Oscuros."] }
+        { "type": "list", "style": "list-hang-notitle", "items": [
+          { "type": "item", "name": "Ability Scores:", "entry": "Constitution, Wisdom, Charisma" },
+          { "type": "item", "name": "Feat:", "entry": "Marca manifiesta (la de tu aspecto)" },
+          { "type": "item", "name": "Skill Proficiencies:", "entry": "Survival and Insight" },
+          { "type": "item", "name": "Tool Proficiencies:", "entry": "Herbalism Kit or one kind of Gaming Set" },
+          { "type": "item", "name": "Equipment:", "entry": "Choose A or B: (A) Traveler's Clothes, un objeto de alguien que no volvió, Bottle, 38 GP; or (B) 50 GP" }
+        ] },
+        "Llevas una cicatriz de miasma. A veces ves cosas que no están, como si el lugar recordara otras épocas."
+      ]
+    },
+    {
+      "name": "Marcado manifiesto",
+      "source": "SETTING",
+      "edition": "one",
+      "_setting": "Tu marca de aspecto se ve en tu piel desde que naciste. Los devotos de los Divinos lo consideran una bendición; la Iglesia Seráfica, una superstición peligrosa. Muchos gremios de Cerinnar prefieren contratar a marcados de un aspecto afín a su oficio, y la Consejería de Divinidad y Diversidad lleva un registro voluntario de marcados.",
+      "ability": [
+        { "choose": { "weighted": { "from": ["str", "int", "cha"], "weights": [2, 1] } } },
+        { "choose": { "weighted": { "from": ["str", "int", "cha"], "weights": [1, 1, 1] } } }
+      ],
+      "feats": [{ "marca manifiesta|setting": true }],
+      "skillProficiencies": [{ "investigation": true, "persuasion": true }],
+      "toolProficiencies": [{ "anyArtisansTool": 1 }],
+      "startingEquipment": [{ "A": [{ "equipmentType": "toolArtisan" }, { "item": "fine clothes|xphb" }, { "value": 2000 }], "B": [{ "value": 5000 }] }],
+      "entries": [
+        { "type": "list", "style": "list-hang-notitle", "items": [
+          { "type": "item", "name": "Ability Scores:", "entry": "Strength, Intelligence, Charisma" },
+          { "type": "item", "name": "Feat:", "entry": "Marca manifiesta (la de tu aspecto)" },
+          { "type": "item", "name": "Skill Proficiencies:", "entry": "Investigation and Persuasion" },
+          { "type": "item", "name": "Tool Proficiencies:", "entry": "Choose one kind of Artisan's Tools" },
+          { "type": "item", "name": "Equipment:", "entry": "Choose A or B: (A) Artisan's Tools (same as above), Fine Clothes, 20 GP; or (B) 50 GP" }
+        ] },
+        "Puede que trabajes para un gremio que valora tu marca, que seas heredero de una familia de marcados o que simplemente hayas aprendido a vivir con las miradas."
+      ]
+    },
+    {
+      "name": "Marcado invertido",
+      "source": "SETTING",
+      "edition": "one",
+      "_setting": "Naciste con la marca del revés: el dibujo invertido y un tacto frío. No hace malvado a nadie, pero mucha gente desconfía de quien la lleva, y te ha tocado aprender a esconderla o a plantar cara.",
+      "ability": [
+        { "choose": { "weighted": { "from": ["str", "con", "cha"], "weights": [2, 1] } } },
+        { "choose": { "weighted": { "from": ["str", "con", "cha"], "weights": [1, 1, 1] } } }
+      ],
+      "feats": [{ "marca invertida|setting": true }],
+      "skillProficiencies": [{ "history": true, "intimidation": true }],
+      "toolProficiencies": [{ "disguise kit": true }],
+      "startingEquipment": [{ "A": [{ "item": "dagger|xphb" }, { "item": "disguise kit|xphb" }, { "item": "costume|xphb" }, { "item": "traveler's clothes|xphb" }, { "value": 1600 }], "B": [{ "value": 5000 }] }],
+      "entries": [
+        { "type": "list", "style": "list-hang-notitle", "items": [
+          { "type": "item", "name": "Ability Scores:", "entry": "Strength, Constitution, Charisma" },
+          { "type": "item", "name": "Feat:", "entry": "Marca invertida (la de tu aspecto invertido)" },
+          { "type": "item", "name": "Skill Proficiencies:", "entry": "History and Intimidation" },
+          { "type": "item", "name": "Tool Proficiencies:", "entry": "Disguise Kit" },
+          { "type": "item", "name": "Equipment:", "entry": "Choose A or B: (A) Dagger, Disguise Kit, Costume, Traveler's Clothes, 16 GP; or (B) 50 GP" }
+        ] },
+        "Este trasfondo requiere un aspecto del alma invertido."
       ]
     }
   ]

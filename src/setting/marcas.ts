@@ -1,7 +1,19 @@
-// Genera las dotes de marca de aspecto del setting (ver Reglas/Marcas de aspecto en la bóveda)
-// en el mismo formato que las dotes de 5etools, para que el motor las trate igual que cualquier otra.
+// Genera las dotes de marca de aspecto (ver Reglas/Marcas de aspecto en la bóveda).
+// Todas las marcas siguen la misma plantilla de la casa, en el formato de dotes de 5etools para que el motor
+// las trate como cualquier otra dote:
+//  - Marca manifiesta: Intuición de la marca (+1d4), rasgos propios, Magia de la marca y Conjuros de la marca.
+//  - Marca plena: +1 a una característica, Intuición mejorada (d6) y la mejora propia del aspecto.
+//  - Marca invertida (y plena invertida): la estructura de Aberrant Dragonmark con conjuros fijos y metamagia.
 import marcas from './marcas.json'
 import type { Crudo } from '../datos/tipos'
+
+interface Extra {
+  nombre: string
+  texto: string
+  efectos?: Crudo[]
+  recurso?: { nombre: string; usos: number | string; recarga: string }
+  usosPB?: boolean
+}
 
 export interface Aspecto {
   n: string
@@ -9,19 +21,25 @@ export interface Aspecto {
   realidad: string
   derecho: string
   invertida: string
-  oficial?: string
-  nueva?: {
+  manifiesta: {
     habilidades: string[]
+    herramientas?: string
     truco?: string
     gratis: string[]
-    gratisAlternativa?: string
-    nivel3: string
+    /** Cada conjuro gratis tiene su propio uso. */
+    cada?: boolean
+    /** Los conjuros gratis comparten un único uso (se elige al lanzar). */
+    compartido?: boolean
+    nivel3?: string
+    extras?: Extra[]
     lista: Record<string, string[]>
   }
+  /** Mejoras de la marca plena; «pb» = los conjuros gratis se pueden lanzar PB veces por Long Rest. */
+  plena: Extra[] | 'pb'
 }
 
 export const ASPECTOS: Aspecto[] = marcas.aspectos as Aspecto[]
-const INVERTIDAS = marcas.invertidas as Record<string, { truco: string; conjuro: string; metamagia: string }>
+const INVERTIDAS = marcas.invertidas as Record<string, { truco: string; conjuro: string; metamagia: string; nota?: string }>
 const NOMBRES_HAB = marcas.nombresHabilidad as Record<string, string>
 
 export const nombreMarcaManifiesta = (aspecto: string) => `Marca manifiesta (${aspecto})`
@@ -33,7 +51,7 @@ export const nombreMarcaPlenaInvertida = (aspecto: string) => `Marca plena inver
 export function esDoteSustituida(f: Crudo): boolean {
   return (
     f.source === 'EFA' &&
-    (/^(Greater )?Mark of /.test(f.name) || ['Aberrant Dragonmark', 'Greater Aberrant Mark', 'Boon of Siberys'].includes(f.name))
+    (/^(Greater )?Mark of /.test(f.name) || ['Aberrant Dragonmark', 'Greater Aberrant Mark', 'Boon of Siberys', 'Potent Dragonmark'].includes(f.name))
   )
 }
 
@@ -41,186 +59,167 @@ const titulo = (ref: string) =>
   ref
     .split('|')[0]
     .replace(/\b\w/g, (c) => c.toUpperCase())
-    .replace(/\b(Of|And|The|From)\b/g, (w) => w.toLowerCase())
+    .replace(/\b(Of|And|Or|The|From)\b/g, (w) => w.toLowerCase())
 const spell = (ref: string) => `{@spell ${titulo(ref)}|XPHB}`
+const lista = (xs: string[], y = 'y') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${y} ${xs[xs.length - 1]}`)
+const bloque = (name: string, ...entries: unknown[]) => ({ type: 'entries', name, entries })
 
-/** Cambia en el texto las menciones a la dote original por la del setting. */
-function renombrarTexto(x: unknown, de: string, a: string): unknown {
-  if (typeof x === 'string') return x.split(`{@feat ${de}|EFA}`).join(a).split(de).join(a)
-  if (Array.isArray(x)) return x.map((e) => renombrarTexto(e, de, a))
-  if (x && typeof x === 'object') {
-    const o: Crudo = {}
-    for (const [k, v] of Object.entries(x)) o[k] = renombrarTexto(v, de, a)
-    return o
-  }
-  return x
+function textoMagia(m: Aspecto['manifiesta'], nombre: string): string[] {
+  const t: string[] = []
+  const truco = m.truco ? `Conoces el truco ${spell(m.truco)}. ` : ''
+  const cierre = 'También puedes lanzarlo con tus espacios de conjuro del nivel adecuado. INT, WIS o CHA es tu característica para los conjuros de esta marca (elígela al tomar la dote).'
+  if (m.gratis.length) {
+    const gr = lista(m.gratis.map(spell), m.compartido ? 'o' : 'y')
+    const usos = m.compartido
+      ? 'Puedes lanzar uno de ellos (eliges cada vez) una vez sin gastar espacio'
+      : m.cada || m.gratis.length > 1
+        ? 'Puedes lanzar cada uno una vez sin gastar espacio'
+        : 'Puedes lanzarlo una vez sin gastar espacio'
+    t.push(`${truco}Siempre tienes preparado ${gr}. ${usos}, y recuperas ese uso al terminar un Long Rest. ${cierre}`)
+    if (m.nivel3) t.push(`Al llegar a nivel 3 de personaje, también tienes siempre preparado ${spell(m.nivel3)} y puedes lanzarlo de la misma forma.`)
+  } else if (m.nivel3) {
+    t.push(`${truco}Al llegar a nivel 3 de personaje, siempre tienes preparado ${spell(m.nivel3)}. Puedes lanzarlo una vez sin gastar espacio, y recuperas ese uso al terminar un Long Rest. ${cierre}`)
+  } else if (truco) t.push(truco.trim())
+  return t.length ? t : [`Los conjuros de ${nombre} se añaden a tu lista.`]
 }
 
-function base(nombre: string, categoria: string, extra: Crudo): Crudo {
-  return { name: nombre, source: 'SETTING', category: categoria, ...extra }
+function textoIntuicion(m: Aspecto['manifiesta'], dado: string): string {
+  const habs = m.habilidades.map((h) => NOMBRES_HAB[h] ?? h)
+  const partes = [habs.length ? `una prueba de ${lista(habs, 'o')}` : '', m.herramientas ? `una prueba con ${m.herramientas}` : ''].filter(Boolean)
+  return `Cuando haces ${partes.join(' o ')}, puedes tirar {@dice ${dado}} y sumar el resultado.`
 }
+
+function tablaConjuros(nombre: string, l: Record<string, string[]>) {
+  return bloque(
+    'Conjuros de la marca',
+    'Si tienes el rasgo Spellcasting o Pact Magic, estos conjuros se añaden a la lista de conjuros de tu clase.',
+    { type: 'table', caption: nombre, colLabels: ['Nivel', 'Conjuros'], rows: Object.entries(l).map(([k, v]) => [k.slice(1), v.map(spell).join(', ')]) },
+  )
+}
+
+const base = (name: string, category: string, extra: Crudo): Crudo => ({ name, source: 'SETTING', category, ...extra })
 
 export function generarDotesMarca(dotesOficiales: Crudo[]): Crudo[] {
-  const oficial = (n: string) => dotesOficiales.find((f) => f.name === n && f.source === 'EFA')
   const res: Crudo[] = []
 
   for (const a of ASPECTOS) {
+    const m = a.manifiesta
     const manif = nombreMarcaManifiesta(a.derecho)
     const plena = nombreMarcaPlena(a.derecho)
     const marcaAsp = { aspecto: a.derecho, carta: `${a.n} · ${a.carta}`, invertida: false }
 
-    if (a.oficial) {
-      const of = oficial(`Mark of ${a.oficial}`)
-      const ofG = oficial(`Greater Mark of ${a.oficial}`)
-      if (of) {
-        res.push(
-          base(manif, 'O', {
-            ...renombrarTexto(of, `Mark of ${a.oficial}`, manif) as Crudo,
-            name: manif,
-            source: 'SETTING',
-            category: 'O',
-            prerequisite: [{ aspecto: a.derecho }],
-            _marca: { ...marcaAsp, tipo: 'manifiesta', original: `Mark of ${a.oficial}` },
-          }),
-        )
-      }
-      if (ofG) {
-        res.push({
-          ...(renombrarTexto(renombrarTexto(ofG, `Mark of ${a.oficial}`, manif), `Greater ${manif}`, plena) as Crudo),
-          name: plena,
-          source: 'SETTING',
-          category: 'G',
-          prerequisite: [{ level: 4, feat: [`${manif.toLowerCase()}|setting`] }],
-          _marca: { ...marcaAsp, tipo: 'plena', original: `Greater Mark of ${a.oficial}` },
-        })
-      }
-    } else if (a.nueva) {
-      const nv = a.nueva
-      const habs = nv.habilidades.map((h) => NOMBRES_HAB[h] ?? h)
-      const gratisTxt = nv.gratisAlternativa
-        ? `${spell(nv.gratis[0])} o ${spell(nv.gratisAlternativa)} (eliges cada vez)`
-        : nv.gratis.map(spell).join(' y ')
-      const prepGratis = nv.gratisAlternativa ? [...nv.gratis, nv.gratisAlternativa] : nv.gratis
-      const expanded: Crudo = {}
-      for (const [k, v] of Object.entries(nv.lista)) expanded[k] = v
-      const lista = Object.entries(nv.lista)
-        .map(([k, v]) => [k.slice(1), v.map(spell).join(', ')])
-      res.push(
-        base(manif, 'O', {
-          prerequisite: [{ aspecto: a.derecho }],
-          additionalSpells: [
-            {
-              ability: { choose: ['int', 'wis', 'cha'] },
-              ...(nv.truco ? { known: { _: [`${nv.truco}#c`] } } : {}),
-              prepared: { _: { daily: { '1': prepGratis } }, '3': { daily: { '1': [nv.nivel3] } } },
-              expanded,
-            },
-          ],
-          _efectos: [{ tipo: 'dadoHabilidad', habilidades: nv.habilidades, dado: '1d4', origen: manif }],
-          entries: [
-            'You gain the following benefits.',
-            {
-              type: 'entries',
-              name: `Intuición de ${a.derecho}`,
-              entries: [
-                `When you make an ability check using ${habs.join(' or ')}, you can roll {@dice 1d4} and add the number rolled to the ability check.`,
-              ],
-            },
-            {
-              type: 'entries',
-              name: `Don de ${a.derecho}`,
-              entries: [
-                `${nv.truco ? `You know the ${spell(nv.truco)} cantrip. ` : ''}You always have ${gratisTxt} prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a {@variantrule Long Rest|XPHB}. You can also cast it using any spell slots you have of the appropriate level. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).`,
-                `When you reach character level 3, you also always have the ${spell(nv.nivel3)} spell prepared and can cast it the same way.`,
-              ],
-            },
-            {
-              type: 'entries',
-              name: 'Spells of the Mark',
-              entries: [
-                `If you have the Spellcasting or Pact Magic class feature, the spells on the ${manif} table are added to that feature's spell list.`,
-                { type: 'table', caption: manif, colLabels: ['Spell Level', 'Spells'], rows: lista },
-              ],
-            },
-          ],
-          _marca: { ...marcaAsp, tipo: 'manifiesta' },
-        }),
-      )
-      res.push(
-        base(plena, 'G', {
-          prerequisite: [{ level: 4, feat: [`${manif.toLowerCase()}|setting`] }],
-          ability: [{ choose: { from: ['str', 'dex', 'con', 'int', 'wis', 'cha'] } }],
-          _efectos: [{ tipo: 'dadoHabilidad', habilidades: nv.habilidades, dado: '1d6', origen: plena, sustituye: manif }],
-          _usosMarcaPlena: { de: manif },
-          entries: [
-            'You gain the following benefits.',
-            { type: 'entries', name: 'Ability Score Increase', entries: ['Increase one ability score of your choice by 1, to a maximum of 20.'] },
-            { type: 'entries', name: `Intuición de ${a.derecho} mejorada`, entries: [`When you use the ${habs.join('/')} benefit of your ${manif} feat, you can roll {@dice 1d6} instead of {@dice 1d4}.`] },
-            { type: 'entries', name: 'Don mejorado', entries: [`You can cast the free spell of your ${manif} feat without a spell slot a number of times equal to your {@variantrule Proficiency|XPHB|Proficiency Bonus}, and you regain all expended uses when you finish a {@variantrule Long Rest|XPHB}.`] },
-          ],
-          _marca: { ...marcaAsp, tipo: 'plena' },
-        }),
-      )
-    }
-
-    // Marca invertida: la dote Aberrant Dragonmark con el truco y el conjuro fijados por el aspecto invertido.
-    const inv = INVERTIDAS[a.invertida]
-    const ab = oficial('Aberrant Dragonmark')
-    const nomInv = nombreMarcaInvertida(a.invertida)
-    if (inv && ab) {
-      const entradas = (ab.entries as Crudo[]).map((e) =>
-        typeof e === 'object' && e.name === 'Aberrant Magic'
-          ? {
-              type: 'entries',
-              name: 'Aberrant Magic',
-              entries: [
-                `You know the ${spell(inv.truco)} cantrip. You always have the ${spell(inv.conjuro)} spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a {@variantrule Short Rest|XPHB|Short} or {@variantrule Long Rest|XPHB}. You can also cast this spell using any spell slots you have. Constitution is your spellcasting ability for these spells.`,
-              ],
-            }
-          : e,
-      )
-      entradas.push({
-        type: 'entries',
-        name: 'Metamagia invertida',
-        entries: [
-          `Once per {@variantrule Long Rest|XPHB}, you can apply the {@optfeature ${inv.metamagia}|XPHB} Metamagic option to the cantrip or the spell of this feat, without spending Sorcery Points.`,
+    // ── Marca manifiesta
+    const prepared: Crudo = {}
+    if (m.gratis.length) prepared._ = { daily: { [m.compartido ? '1' : '1e']: m.gratis } }
+    if (m.nivel3) prepared['3'] = { daily: { '1': [m.nivel3] } }
+    const extras = m.extras ?? []
+    res.push(
+      base(manif, 'O', {
+        prerequisite: [{ aspecto: a.derecho }],
+        additionalSpells: [
+          {
+            ability: { choose: ['int', 'wis', 'cha'] },
+            ...(m.truco ? { known: { _: [`${m.truco}#c`] } } : {}),
+            ...(Object.keys(prepared).length ? { prepared } : {}),
+            expanded: m.lista,
+          },
         ],
-      })
+        _efectos: [
+          ...(m.habilidades.length ? [{ tipo: 'dadoHabilidad', habilidades: m.habilidades, dado: '1d4', origen: manif }] : []),
+          ...extras.flatMap((x) => x.efectos ?? []),
+        ],
+        _recursos: extras.filter((x) => x.recurso).map((x) => x.recurso),
+        entries: [
+          `La marca de ${a.derecho} (${a.n} · ${a.carta}) se ha hecho visible en tu piel. Obtienes estos beneficios:`,
+          bloque('Intuición de la marca', textoIntuicion(m, '1d4')),
+          ...extras.map((x) => bloque(x.nombre, x.texto)),
+          bloque('Magia de la marca', ...textoMagia(m, manif)),
+          tablaConjuros(manif, m.lista),
+        ],
+        _marca: { ...marcaAsp, tipo: 'manifiesta' },
+      }),
+    )
+
+    // ── Marca plena
+    const mejoras: Extra[] =
+      a.plena === 'pb'
+        ? [{ nombre: 'Magia mejorada', texto: `Puedes lanzar sin gastar espacio los conjuros de la Magia de la marca tantas veces como tu PB, y recuperas todos los usos al terminar un Long Rest.`, usosPB: true }]
+        : a.plena
+    res.push(
+      base(plena, 'G', {
+        prerequisite: [{ level: 4, feat: [`${manif.toLowerCase()}|setting`] }],
+        ability: [{ choose: { from: ['str', 'dex', 'con', 'int', 'wis', 'cha'] } }],
+        _efectos: m.habilidades.length ? [{ tipo: 'dadoHabilidad', habilidades: m.habilidades, dado: '1d6', origen: plena, sustituye: manif }] : [],
+        _recursos: mejoras.filter((x) => x.recurso).map((x) => x.recurso),
+        ...(mejoras.some((x) => x.usosPB) ? { _usosMarcaPlena: { de: manif } } : {}),
+        entries: [
+          `Tu marca de ${a.derecho} alcanza su plenitud. Obtienes estos beneficios:`,
+          bloque('Aumento de característica', 'Aumenta en 1 una característica a tu elección, hasta un máximo de 20.'),
+          bloque('Intuición mejorada', `Cuando usas la Intuición de la marca, tiras {@dice 1d6} en lugar de {@dice 1d4}.`),
+          ...mejoras.map((x) => bloque(x.nombre, x.texto)),
+        ],
+        _marca: { ...marcaAsp, tipo: 'plena' },
+      }),
+    )
+
+    // ── Marca invertida: estructura de Aberrant Dragonmark con conjuros fijos y una metamagia
+    const inv = INVERTIDAS[a.invertida]
+    if (inv) {
+      const nomInv = nombreMarcaInvertida(a.invertida)
+      const marcaInv = { aspecto: a.invertida, carta: `${a.n} · ${a.carta} (invertida)`, invertida: true }
       res.push(
         base(nomInv, 'O', {
           prerequisite: [{ aspecto: a.invertida }],
           additionalSpells: [{ ability: 'con', known: { _: [`${inv.truco}#c`] }, prepared: { _: { rest: { '1': [inv.conjuro] } } } }],
-          entries: entradas,
           _recursos: [
-            { nombre: 'Aberrant Fortitude', usos: 1, recarga: 'largo' },
-            { nombre: `Metamagia: ${inv.metamagia}`, usos: 1, recarga: 'largo' },
+            { nombre: 'Fortaleza invertida', usos: 1, recarga: 'largo' },
+            { nombre: `Metamagia invertida (${inv.metamagia})`, usos: 1, recarga: 'largo' },
           ],
-          _marca: { aspecto: a.invertida, carta: `${a.n} · ${a.carta} (invertida)`, invertida: true, tipo: 'manifiesta' },
+          entries: [
+            `La marca de ${a.invertida} (${a.n} · ${a.carta}, del revés) se ha hecho visible en tu piel: fría al tacto y con el dibujo invertido. Obtienes estos beneficios:`,
+            bloque('Fortaleza invertida', 'Cuando fallas una salvación de CON, puedes usar tu Reaction para tirar {@dice 1d4} y sumarlo a la salvación, lo que puede convertir el fallo en éxito. Una vez por Long Rest.'),
+            bloque(
+              'Magia invertida',
+              `Conoces el truco ${spell(inv.truco)} y siempre tienes preparado ${spell(inv.conjuro)}. Puedes lanzar ${spell(inv.conjuro)} una vez sin gastar espacio, y recuperas ese uso al terminar un Short Rest o un Long Rest. También puedes lanzarlo con tus espacios de conjuro. CON es tu característica para los conjuros de esta marca.`,
+            ),
+            bloque(
+              'Oleada invertida',
+              `Cuando lanzas ${spell(inv.conjuro)} con esta marca, puedes gastar uno de tus Hit Point Dice y tirarlo. Si sale par, ganas tantos HP temporales como el resultado. Si sale impar, una criatura a 30 ft de ti (que no seas tú) sufre ese daño de Force; si no hay ninguna, lo sufres tú.`,
+            ),
+            bloque(
+              'Metamagia invertida',
+              `Una vez por Long Rest puedes aplicar la opción de Metamagia {@optfeature ${inv.metamagia}|XPHB} al truco o al conjuro de esta marca, sin gastar Sorcery Points.${inv.nota ? ` ${inv.nota}` : ''}`,
+            ),
+          ],
+          _marca: { ...marcaInv, tipo: 'manifiesta' },
         }),
       )
-      const abG = oficial('Greater Aberrant Mark')
-      if (abG) {
-        res.push({
-          ...(renombrarTexto(abG, 'Aberrant Dragonmark', nomInv) as Crudo),
-          name: nombreMarcaPlenaInvertida(a.invertida),
-          source: 'SETTING',
-          category: 'G',
+      res.push(
+        base(nombreMarcaPlenaInvertida(a.invertida), 'G', {
           prerequisite: [{ level: 4, feat: [`${nomInv.toLowerCase()}|setting`] }],
-          _marca: { aspecto: a.invertida, carta: `${a.n} · ${a.carta} (invertida)`, invertida: true, tipo: 'plena' },
-        })
-      }
+          ability: [{ con: 1 }],
+          _recursos: [{ nombre: 'Inspiración invertida', usos: 'pb', recarga: 'largo' }],
+          entries: [
+            `Tu marca de ${a.invertida} alcanza su plenitud. Obtienes estos beneficios:`,
+            bloque('Aumento de característica', 'Tu CON aumenta en 1, hasta un máximo de 20.'),
+            bloque('Fortaleza mejorada', 'Cuando usas la Fortaleza invertida, tiras {@dice 1d6} en lugar de {@dice 1d4}, y recuperas su uso al terminar un Short Rest o un Long Rest.'),
+            bloque(
+              'Inspiración invertida',
+              'Cuando lanzas un truco, puedes tirar uno o dos de tus Hit Point Dice sin gastar. Ganas tantos HP temporales como el resultado más tu modificador de CON, y una criatura a tu elección a 30 ft (que no seas tú) sufre ese daño de Force. Esos dados quedan gastados. Usos: tu PB por Long Rest.',
+            ),
+          ],
+          _marca: { ...marcaInv, tipo: 'plena' },
+        }),
+      )
     }
   }
 
-  // Don épico: Boon of Siberys renombrado Eco del Divino.
-  const sib = oficial('Boon of Siberys')
+  // Don épico: Boon of Siberys renombrado Eco del Divino
+  const sib = dotesOficiales.find((f) => f.name === 'Boon of Siberys' && f.source === 'EFA')
   if (sib) {
-    res.push({
-      ...(renombrarTexto(sib, 'Boon of Siberys', 'Eco del Divino') as Crudo),
-      name: 'Eco del Divino',
-      source: 'SETTING',
-      prerequisite: [{ level: 19 }],
-    })
+    const ren = (x: unknown): unknown =>
+      typeof x === 'string' ? x.split('Boon of Siberys').join('Eco del Divino').replace(/Siberys Dragonmark Spells/g, 'Eco del Divino') : Array.isArray(x) ? x.map(ren) : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, ren(v)])) : x
+    res.push({ ...(ren(sib) as Crudo), name: 'Eco del Divino', source: 'SETTING', prerequisite: [{ level: 19 }] })
   }
   return res
 }

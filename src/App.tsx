@@ -16,7 +16,9 @@ import { PanelCampaña } from './ui/dm/PanelCampaña'
 // Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
 let promesaRepo: Promise<Repo> | undefined
 function crearRepo(): Promise<Repo> {
-  promesaRepo ??= firebaseConfigurado() ? import('./firebase/repoFirebase').then((m) => m.repoFirebase()) : Promise.resolve(repoLocal())
+  // ?local en la URL fuerza el modo local (útil para probar sin iniciar sesión)
+  const local = !firebaseConfigurado() || new URLSearchParams(location.search).has('local')
+  promesaRepo ??= local ? Promise.resolve(repoLocal()) : import('./firebase/repoFirebase').then((m) => m.repoFirebase())
   return promesaRepo
 }
 

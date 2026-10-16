@@ -21,7 +21,7 @@ export function Inicio() {
   if (!usuario) {
     return (
       <div className="pantalla-centro portada">
-        <h1 className="titulo-app">La miasma</h1>
+        <h1 className="titulo-app">Herederos de la Miasma</h1>
         <p className="subtitulo">Personajes de D&amp;D 2024 para la campaña</p>
         <button className="boton grande" onClick={() => repo.entrar().catch((e: Error) => setError(e.message))}>Entrar con Google</button>
         {error && <p className="error">{error}</p>}
@@ -42,7 +42,7 @@ export function Inicio() {
             className="boton"
             onClick={async () => {
               try {
-                await repo.crearCampaña('La miasma')
+                await repo.crearCampaña('Herederos de la Miasma')
                 set({ campaña: await repo.campaña() })
               } catch (e) {
                 setError((e as Error).message)
@@ -73,7 +73,7 @@ export function Inicio() {
   return (
     <div className="inicio">
       <header className="cabecera-app">
-        <h1 className="titulo-app pequeño">La miasma</h1>
+        <h1 className="titulo-app pequeño">Herederos de la Miasma</h1>
         <div className="fila">
           {repo.modo === 'local' && <span className="insignia" title="Firebase no está configurado: los datos se guardan solo en este navegador">Modo local</span>}
           {esDM && <span className="insignia dm">DM</span>}

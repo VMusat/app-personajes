@@ -1,6 +1,6 @@
 {
-  "nombre": "La miasma",
-  "version": 1,
+  "nombre": "Herederos de la Miasma",
+  "version": 2,
   "fuentes": ["XPHB", "XDMG", "XMM", "FRHoF", "FRAiF", "EFA", "SETTING"],
   "fuentesNombres": {
     "XPHB": "Player's Handbook (2024)",
@@ -9,62 +9,55 @@
     "FRHoF": "Heroes of Faerûn",
     "FRAiF": "Adventures in Faerûn",
     "EFA": "Eberron: Forge of the Artificer",
-    "SETTING": "Setting de la miasma",
+    "SETTING": "Herederos de la Miasma",
     "CAMPAÑA": "Objeto de la campaña"
   },
   "clases": {
-    "Artificer|EFA": { "nombre": "Artificiero", "fuente": "Tecnología y arcana", "setting": "La clase natural de Cerinnar: ingeniería con maná y miasma domesticada." },
-    "Barbarian|XPHB": { "nombre": "Bárbaro", "fuente": "Primordial", "setting": "El maná vivo de la naturaleza, más denso donde estuvo la miasma." },
-    "Bard|XPHB": { "nombre": "Bardo", "fuente": "Arcana", "setting": "" },
-    "Cleric|XPHB": { "nombre": "Clérigo", "fuente": "Divina", "setting": "El vínculo con un Serafín o la comunión con un aspecto del alma. Los Divinos no conceden conjuros; los aspectos sí." },
-    "Druid|XPHB": { "nombre": "Druida", "fuente": "Primordial", "setting": "El maná vivo del Bosque." },
-    "Fighter|XPHB": { "nombre": "Guerrero", "fuente": "Marcial", "setting": "" },
-    "Monk|XPHB": { "nombre": "Monje", "fuente": "Marcial", "setting": "Las artes marciales son muy populares en San Luteburgo." },
-    "Paladin|XPHB": { "nombre": "Paladín", "fuente": "Divina", "setting": "El juramento se presta ante un Serafín o un aspecto del alma." },
-    "Ranger|XPHB": { "nombre": "Explorador", "fuente": "Primordial", "setting": "No todos los Montaraces son exploradores, ni todos los exploradores son Montaraces." },
-    "Rogue|XPHB": { "nombre": "Pícaro", "fuente": "Marcial", "setting": "" },
-    "Sorcerer|XPHB": { "nombre": "Hechicero", "fuente": "Innata", "setting": "Un alma marcada por algo: un Resplandor, una traza lejana, una zona de maná." },
-    "Warlock|XPHB": { "nombre": "Brujo", "fuente": "Pacto", "setting": "Los patrones son PNJs reales del setting. Un brujo es una trama andante." },
-    "Wizard|XPHB": { "nombre": "Mago", "fuente": "Arcana", "setting": "El estudio del maná, la codificación que deja la miasma." }
+    "Artificer|EFA": { "nombre": "Artificiero", "fuente": "Tecnología y arcana", "setting": "La clase natural de Cerinnar: ingenieros que unen el maná con la técnica para construir lo que la magia sola no puede. De sus talleres salen prótesis, pájaros mecánicos, armas y los inventos que la ciudad comercia con medio mundo." },
+    "Barbarian|XPHB": { "nombre": "Bárbaro", "fuente": "Primordial", "setting": "Su furia bebe del maná vivo de la naturaleza, más denso donde estuvo la miasma. Hay bárbaros en los clanes orcos de las Tierras del Sur, en los pueblos del Bosque y entre los fanáticos de un Serafín o de un Divino." },
+    "Bard|XPHB": { "nombre": "Bardo", "fuente": "Arcana", "setting": "Su música y su palabra moldean el maná. Los hay eruditos de la Universidad, cronistas de los Capas Grises, bailarines de las calles del Tajo o cantores tocados por el Bosque Hondo." },
+    "Cleric|XPHB": { "nombre": "Clérigo", "fuente": "Divina", "setting": "El poder divino llega de dos formas: por el vínculo con un Serafín, que presta su luz a sus devotos, o por la comunión con un aspecto del alma, la cualidad que encarna cada Divino. Los Divinos no conceden conjuros; los aspectos sí." },
+    "Druid|XPHB": { "nombre": "Druida", "fuente": "Primordial", "setting": "Guardianes del maná vivo del Bosque Retorcido y de lo que crece en él. Hablan druídico, su lengua secreta, y algunos leen los aspectos en las 22 constelaciones del cielo." },
+    "Fighter|XPHB": { "nombre": "Guerrero", "fuente": "Marcial", "setting": "Soldados, mercenarios, oficiales y duelistas: el oficio de las armas se aprende en los Capas Grises, en los ejércitos de los reinos o en la calle. En las ciudades sin maná, como San Luteburgo, es el camino más común." },
+    "Monk|XPHB": { "nombre": "Monje", "fuente": "Marcial", "setting": "Disciplina del cuerpo y de la mente. Hay monasterios de Zadquiel en el sur, hospicios del Tajo y escuelas en San Luteburgo, donde las artes marciales son muy populares." },
+    "Paladin|XPHB": { "nombre": "Paladín", "fuente": "Divina", "setting": "Guerreros que juran ante un Serafín o ante un aspecto del alma, y de ese juramento sacan su poder. Hay caballeros seráficos, paladines dracónicos de Lar y campeones de un Divino." },
+    "Ranger|XPHB": { "nombre": "Explorador", "fuente": "Primordial", "setting": "Rastreadores y cazadores de los lugares salvajes. No todos los Montaraces son exploradores ni todos los exploradores son Montaraces, pero ninguno se pierde en el Bosque Retorcido." },
+    "Rogue|XPHB": { "nombre": "Pícaro", "fuente": "Marcial", "setting": "Ladrones, espías, asesinos y buscavidas. El mercado negro de Cerinnar y las bandas del Tajo son su escuela; los servicios secretos de los reinos, su mejor cliente." },
+    "Sorcerer|XPHB": { "nombre": "Hechicero", "fuente": "Innata", "setting": "Su magia no se estudia: nace con ellos, porque algo marcó su alma. Puede ser la luz de un Resplandor, la sangre de los dragones de Lar o haber nacido en una zona de maná." },
+    "Warlock|XPHB": { "nombre": "Brujo", "fuente": "Pacto", "setting": "Su poder viene de un trato con alguien poderoso de verdad: un señor del Bosque Hondo, un Serafín o un Divino, algo oscuro o las voces que algunos dicen oír en la miasma. Todo pacto tiene un precio." },
+    "Wizard|XPHB": { "nombre": "Mago", "fuente": "Arcana", "setting": "Estudiosos del maná, la huella que la miasma deja en la realidad. En Cerinnar la magia se enseña y se regula en la Universidad de Arcanistas, con sus cuatro facultades: Abjuración, Adivinación, Evocación e Ilusión." }
   },
   "lenguas": {
-    "comun": { "nombre": "Cerinés", "original": "Common" },
+    "comun": { "nombre": "Cerinés", "original": "Common", "donde": "La lengua franca de Cerinnar y de medio mundo, cooficial en Brennan, Lar y el Reino Sérafo." },
     "estandar": [
-      { "nombre": "Sérafo" },
-      { "nombre": "Brennés" },
-      { "nombre": "Lariano" },
-      { "nombre": "Surcense" },
-      { "nombre": "Enano", "original": "Dwarvish" },
-      { "nombre": "Élfico", "original": "Elvish" },
-      { "nombre": "Gnomo", "original": "Gnomish" },
-      { "nombre": "Dracónico", "original": "Draconic" },
-      { "nombre": "Gigante", "original": "Giant" },
-      { "nombre": "Orco", "original": "Orc" },
-      { "nombre": "Goblin", "original": "Goblin" },
-      { "nombre": "Mediano", "original": "Halfling" },
-      { "nombre": "Signos de cascada", "original": "Common Sign Language" }
+      { "nombre": "Sérafo", "donde": "El Reino Sérafo. Quien lo habla entiende el antiguo sérafo de los archivos y las ruinas." },
+      { "nombre": "Brennés", "donde": "Brennan. De él vienen casi todas las palabras de oficio de los gremios de Cerinnar." },
+      { "nombre": "Lariano", "donde": "Humanos y altos elfos de las Tierras de Lar." },
+      { "nombre": "Surcense", "donde": "Humanos de las Tierras del Sur, con un acento inconfundible." },
+      { "nombre": "Enano", "original": "Dwarvish", "donde": "Casi una lengua muerta; la conservan pocos enanos." },
+      { "nombre": "Élfico", "original": "Elvish", "donde": "Los elfos, entre ellos." },
+      { "nombre": "Gnomo", "original": "Gnomish", "donde": "Inventores gnomos; casi solo se escribe, para anotar planos." },
+      { "nombre": "Dracónico", "original": "Draconic", "donde": "Dragones y dracónidos de Lar; lengua litúrgica del culto a Sandalfón." },
+      { "nombre": "Gigante", "original": "Giant", "donde": "Gigantes y goliats de las montañas del noreste de Brennan." },
+      { "nombre": "Orco", "original": "Orc", "donde": "Orcos de las Tierras del Sur." },
+      { "nombre": "Goblin", "original": "Goblin", "donde": "Goblinoides del Bosque Hondo." },
+      { "nombre": "Mediano", "original": "Halfling", "donde": "Dialecto campesino de los medianos del sur del Reino Sérafo." },
+      { "nombre": "Signos de cascada", "original": "Common Sign Language", "donde": "Lengua de signos de la Caída; la usan ascensoristas, portaleros y Capas Grises." }
     ],
     "raras": [
-      { "nombre": "Lengua aasimar", "original": "Celestial" },
-      { "nombre": "Silvano", "original": "Sylvan" },
-      { "nombre": "Druídico", "original": "Druidic" },
-      { "nombre": "Infernal", "original": "Infernal" },
-      { "nombre": "Abisal", "original": "Abyssal" },
-      { "nombre": "Habla profunda", "original": "Deep Speech" },
-      { "nombre": "Primordial", "original": "Primordial" },
-      { "nombre": "Umbrío", "original": "Undercommon" },
-      { "nombre": "Jerga del Tajo", "original": "Thieves' Cant" }
+      { "nombre": "Lengua aasimar", "original": "Celestial", "donde": "La lengua de los Serafines; liturgia de la Iglesia Seráfica. Los aasimar la conocen de forma innata." },
+      { "nombre": "Silvano", "original": "Sylvan", "donde": "La lengua del Bosque Hondo y de los feéricos. Algunos Montaraces la chapurrean." },
+      { "nombre": "Druídico", "original": "Druidic", "donde": "La lengua secreta de los druidas del Bosque." },
+      { "nombre": "Infernal", "original": "Infernal", "donde": "Lengua de criaturas oscuras; la aprenden los cultistas de los Oscuros." },
+      { "nombre": "Abisal", "original": "Abyssal", "donde": "Los aullidos de los acechadores: apenas es una lengua." },
+      { "nombre": "Habla profunda", "original": "Deep Speech", "donde": "Los susurros que algunos dicen oír en la miasma." },
+      { "nombre": "Primordial", "original": "Primordial", "donde": "La lengua de los elementales." },
+      { "nombre": "Umbrío", "original": "Undercommon", "donde": "Drow y gentes de los lugares donde se cuela la Umbra." },
+      { "nombre": "Jerga del Tajo", "original": "Thieves' Cant", "donde": "El habla de los Ganchos y las bandas del Tajo." }
     ]
-  },
-  "reglasCampaña": {
-    "marcaGratisFalloPortales": {
-      "nombre": "Dote de marca gratis tras El fallo de los portales",
-      "descripcion": "Todos los PJs obtienen la marca manifiesta de su aspecto como extra. Quien ya la tenía obtiene la marca plena sin gastar la dote de nivel 4.",
-      "activaPorDefecto": false
-    }
   },
   "excluir": {
     "objetos": [],
-    "dotes": ["Aberrant Dragonmark|EFA", "Greater Aberrant Mark|EFA"]
+    "dotes": []
   }
 }

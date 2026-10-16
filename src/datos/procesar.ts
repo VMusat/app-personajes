@@ -92,26 +92,25 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
       return { ...entidad(r, s.nombre, s.setting), _origen: s.origen }
     })
 
-  // Trasfondos
+  // Trasfondos: los de 5etools renombrados al setting, salvo los de las casas de Eberron (los sustituyen
+  // los trasfondos propios Marcado manifiesto y Marcado invertido)
   const ren = trasfondosSetting.renombrar as Record<string, { nombre: string; setting: string }>
+  const excluidoTrasfondo = (b: Crudo) =>
+    trasfondosSetting.excluir.some((x) => (x.startsWith('/') ? new RegExp(x.slice(1, -1)).test(b.name) : x === `${b.name}|${b.source}`))
   const trasfondos = [
     ...(crudos['backgrounds.json']?.background ?? [])
       .filter(enFuentes(FUENTES_PERSONAJE))
+      .filter((b: Crudo) => !excluidoTrasfondo(b))
       .map((b: Crudo) => {
         const s = ren[`${b.name}|${b.source}`]
-        if (s) return entidad(b, s.nombre, s.setting)
-        if (/^House .* Heir$/.test(b.name)) {
-          const casa = b.name.replace(/^House | Heir$/g, '')
-          return entidad(b, `${trasfondosSetting.herederosDeGremio.nombre} (${casa})`, trasfondosSetting.herederosDeGremio.setting)
-        }
-        return entidad(b)
+        return s ? entidad(b, s.nombre, s.setting) : entidad(b)
       }),
-    ...trasfondosSetting.nuevos.map((b) => entidad(b as Crudo, b.name, 'Trasfondo propio del setting.')),
-  ]
+    ...trasfondosSetting.nuevos.map((b) => entidad(b as Crudo, b.name, b._setting)),
+  ].sort((x, y) => x._nombre.localeCompare(y._nombre, 'es'))
 
   // Dotes: se quitan las prerrequisitos de campaña (Eberron, Faerûn) y se añaden las marcas del setting.
   const dotesCrudas: Crudo[] = crudos['feats.json']?.feat ?? []
-  const excluidas = new Set(campaña.excluir.dotes.map((d) => d.toLowerCase()))
+  const excluidas = new Set((campaña.excluir.dotes as string[]).map((d) => d.toLowerCase()))
   const dotes = [
     ...dotesCrudas
       .filter(enFuentes(FUENTES_PERSONAJE))

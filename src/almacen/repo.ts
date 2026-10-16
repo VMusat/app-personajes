@@ -87,7 +87,7 @@ export function repoLocal(): Repo {
     async entrar() {},
     async salir() {},
     async campaña() {
-      return leer<InfoCampaña>('campaña', { nombre: 'La miasma', dms: ['local'], miembros: [] })
+      return leer<InfoCampaña>('campaña', { nombre: 'Herederos de la Miasma', dms: ['local'], miembros: [] })
     },
     async crearCampaña(nombre) {
       escribir('campaña', { nombre, dms: ['local'], miembros: [] })

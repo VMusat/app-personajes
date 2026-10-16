@@ -183,9 +183,9 @@ function opcionesHerramienta(tipo: string): string[] {
 
 function idiomasDisponibles(tipo: 'estandar' | 'todas'): Opcion[] {
   const l = campaña.lenguas
-  const est = l.estandar.map((x) => ({ valor: x.nombre, etiqueta: x.nombre, grupo: 'Estándar' }))
+  const est = l.estandar.map((x) => ({ valor: x.nombre, etiqueta: x.nombre, detalle: x.donde, grupo: 'Estándar' }))
   if (tipo === 'estandar') return est
-  return [...est, ...l.raras.map((x) => ({ valor: x.nombre, etiqueta: x.nombre, grupo: 'Raras' }))]
+  return [...est, ...l.raras.map((x) => ({ valor: x.nombre, etiqueta: x.nombre, detalle: x.donde, grupo: 'Raras' }))]
 }
 
 /** Traduce un idioma de 5etools al del setting. */
@@ -260,7 +260,7 @@ function procesarTrasfondo(ctx: Ctx, t: Entidad) {
   const dotes = (t.feats ?? []) as Crudo[]
   const original = dotes.flatMap((f) => Object.keys(f))[0]
   const marca = ctx.p.aspecto ? marcaManifiesta(ctx.d, ctx.p.aspecto) : undefined
-  if (original && marca && original !== 'marca manifiesta|setting') {
+  if (original && marca && !original.endsWith('|setting')) {
     const dOrig = buscarDote(ctx.d, original)
     const [v] = ctx.elegir({
       id: 'tra:dote', tipo: 'alternativa', etiqueta: 'Dote de origen', origen, nivel: 0, n: 1,
@@ -277,18 +277,22 @@ function procesarTrasfondo(ctx: Ctx, t: Entidad) {
   if (t.startingEquipment) procesarEquipo(ctx, t.startingEquipment, 'tra:equipo', origen)
 }
 
-/** Regla de campaña: marca gratis tras El fallo de los portales. */
+/**
+ * Regla de campaña (secreta para los jugadores hasta que ocurre): al llegar a nivel 4 la marca despierta.
+ * Quien no tenía marca manifiesta la obtiene; quien ya la tenía obtiene la marca plena. Es una dote gratis.
+ */
+export const NIVEL_DESPERTAR = 4
 function procesarMarcaCampaña(ctx: Ctx) {
-  if (!ctx.p.reglasCampaña.marcaGratis || !ctx.p.aspecto) return
-  const origen = 'Campaña: El fallo de los portales'
+  if (ctx.r.nivel < NIVEL_DESPERTAR || !ctx.p.aspecto) return
+  const origen = 'Despertar de la marca'
   const yaTiene = ctx.r.dotes.some((f) => f._marca?.tipo === 'manifiesta')
   if (!yaTiene) {
     const m = marcaManifiesta(ctx.d, ctx.p.aspecto)
-    if (m) procesarDote(ctx, m, 'camp:marca', origen, 0)
+    if (m) procesarDote(ctx, m, 'camp:marca', origen, NIVEL_DESPERTAR)
   } else {
     const aspecto = ctx.r.dotes.find((f) => f._marca?.tipo === 'manifiesta')!._marca
     const plena = ctx.d.dotes.find((f) => f._marca?.tipo === 'plena' && f._marca.aspecto === aspecto.aspecto && f._marca.invertida === aspecto.invertida)
-    if (plena) procesarDote(ctx, plena, 'camp:plena', origen, 0)
+    if (plena) procesarDote(ctx, plena, 'camp:plena', origen, NIVEL_DESPERTAR)
   }
 }
 
@@ -321,10 +325,16 @@ function procesarDotesDe(ctx: Ctx, feats: Crudo[] | undefined, id: string, orige
       continue
     }
     for (const ref of Object.keys(f)) {
-      if (ref === 'marca manifiesta|setting') {
-        const m = ctx.p.aspecto ? marcaManifiesta(ctx.d, ctx.p.aspecto) : undefined
+      if (ref === 'marca manifiesta|setting' || ref === 'marca invertida|setting') {
+        // La marca del aspecto del alma (al derecho o invertida, según el aspecto elegido)
+        const necesitaInvertida = ref === 'marca invertida|setting'
+        const m = ctx.p.aspecto && (!necesitaInvertida || aspectoEsInvertido(ctx.p.aspecto)) ? marcaManifiesta(ctx.d, ctx.p.aspecto) : undefined
         if (m) procesarDote(ctx, m, `${id}:marca`, origen, nivel)
-        else ctx.elegir({ id: `${id}:aspecto`, tipo: 'texto', etiqueta: 'Elige primero el aspecto del alma', origen, nivel, n: 1, opciones: [] })
+        else
+          ctx.elegir({
+            id: `${id}:aspecto`, tipo: 'texto', origen, nivel, n: 1, opciones: [],
+            etiqueta: necesitaInvertida ? 'Este trasfondo necesita una marca invertida: marca «Marca invertida» al elegir el aspecto del alma.' : 'Elige primero el aspecto del alma.',
+          })
         continue
       }
       const dote = buscarDote(ctx.d, ref)
@@ -411,8 +421,7 @@ function procesarDote(ctx: Ctx, f: Entidad, id: string, origen: string, nivel: n
   for (const rc of (f._recursos as Crudo[]) ?? []) ctx.efecto({ tipo: 'recurso', nombre: rc.nombre, usos: rc.usos, recarga: rc.recarga }, o)
   if (f._usosMarcaPlena) {
     // La marca plena convierte el conjuro gratis de la marca en PB usos por descanso largo
-    for (const c of ctx.r.conjuros) if (c.origen === `Dote: ${f._usosMarcaPlena.de}` && c.usos === 1) c.usos = undefined
-    ctx.efecto({ tipo: 'recurso', nombre: `${f._usosMarcaPlena.de}: conjuro gratis`, usos: 'pb', recarga: 'largo' }, o)
+    for (const c of ctx.r.conjuros) if (c.origen === `Dote: ${f._usosMarcaPlena.de}` && c.usos === 1) c.usos = 'pb'
   }
   if (f.resist) procesarResistencias(ctx, f.resist, `${id}:resist`, o, nivel)
   for (const s of f.senses ?? []) for (const [k, v] of Object.entries(s as Crudo)) ctx.efecto({ tipo: 'sentido', nombre: titulo(k), valor: Number(v) }, o)

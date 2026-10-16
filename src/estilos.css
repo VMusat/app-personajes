@@ -12,7 +12,9 @@
   --exito: #2f8a4c;
   --peligro: #b8323a;
   --aviso: #b8741a;
-  --iris: linear-gradient(90deg, #ff6f91, #ffc75f, #6fe3a6, #5fb7ff, #b083ff);
+  /* Gradiente plateado: en el tema claro, plata oscura para que se lea sobre fondo claro */
+  --iris: linear-gradient(100deg, #5d626c, #9aa0aa, #4b5058, #b4b9c2, #6b7079);
+  --iris-texto: #ffffff;
   --sombra: 0 2px 10px rgb(30 20 50 / 0.12);
   --radio: 10px;
   --fuente-titulo: 'Cinzel', Georgia, serif;
@@ -34,6 +36,8 @@
     --peligro: #ff6b72;
     --aviso: #f0b45a;
     --sombra: 0 2px 14px rgb(0 0 0 / 0.45);
+    --iris: linear-gradient(100deg, #ffffff, #c9cdd4, #f4f5f7, #9ea3ad, #e8eaee);
+    --iris-texto: #1b1822;
     color-scheme: dark;
   }
 }
@@ -93,7 +97,7 @@ code { background: var(--fondo-3); padding: 0 0.3em; border-radius: 4px; }
 .insignia { display: inline-block; font-size: 0.75em; padding: 0.1em 0.55em; border-radius: 999px; background: var(--fondo-3); border: 1px solid var(--borde); margin-left: 6px; vertical-align: middle; }
 .insignia.aviso { color: var(--aviso); border-color: var(--aviso); }
 .insignia.dm { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); }
-.insignia.campaña { background: var(--iris); color: #1d1630; border: none; }
+.insignia.campaña { background: var(--iris); color: var(--iris-texto); border: none; }
 .enlace-insignia { cursor: pointer; }
 .interruptor { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; margin: 4px 0; }
 .interruptor.pequeño { font-size: 0.85em; }
@@ -210,7 +214,7 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .stats-grandes .activo { border-color: var(--acento); background: var(--acento-suave); }
 .salvaciones-muerte { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border: 1px solid var(--peligro); border-radius: var(--radio); padding: 8px; }
 .estado-fila { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; }
-.chip.disolucion { background: var(--iris); color: #1d1630; border: none; }
+.chip.disolucion { background: var(--iris); color: var(--iris-texto); border: none; }
 .chip.concentracion { border-color: var(--acento); }
 .rejilla-condiciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .pestañas { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--borde); margin-top: 8px; scrollbar-width: thin; }

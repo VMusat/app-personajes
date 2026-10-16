@@ -73,6 +73,7 @@ export interface Personaje {
   niveles: NivelPersonaje[]
   /** Valores de todas las elecciones, por id de elección. */
   elecciones: Record<string, string[]>
+  /** Obsoleto: la marca gratis se aplica sola al llegar a nivel 4. Se conserva para personajes antiguos. */
   reglasCampaña: { marcaGratis?: boolean }
   estado: EstadoJuego
   inventario: ItemInventario[]

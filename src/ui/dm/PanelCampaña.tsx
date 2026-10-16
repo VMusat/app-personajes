@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ir, useEstado } from '../../estado/store'
 import { derivar } from '../../motor/derivar'
 import { resumenPersonaje } from '../Inicio'
+import ajustes from '../../setting/campaña.json'
 
 export function PanelCampaña() {
   const { repo, campaña, set, personajes, datos, objetos, tiradasCompartidas } = useEstado()
@@ -17,7 +18,7 @@ export function PanelCampaña() {
     <div className="panel-campaña">
       <header className="cabecera-app">
         <button className="boton secundario" onClick={() => ir({ tipo: 'inicio' })}>← Inicio</button>
-        <h2>{campaña.nombre}</h2>
+        <h2>{ajustes.nombre}</h2>
       </header>
 
       <section>

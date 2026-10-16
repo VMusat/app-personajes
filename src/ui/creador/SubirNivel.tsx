@@ -87,6 +87,14 @@ export function SubirNivel({ id }: { id: string }) {
           <section>
             <h3>Rasgos nuevos de {claseNueva._nombre} {nivelClase}</h3>
             <RasgosNivel clase={claseNueva} nivel={nivelClase} p={p} datos={datos} />
+            {res.rasgos
+              .filter((r) => r.nivel === nivelNuevo && r.tipo === 'marca')
+              .map((r) => (
+                <details key={r.nombre} open className="rasgo-marca">
+                  <summary>{r.nombre} <small className="sutil">({r.origen})</small></summary>
+                  <Entradas entries={r.entries} />
+                </details>
+              ))}
           </section>
           <section>
             <h3>Elecciones</h3>

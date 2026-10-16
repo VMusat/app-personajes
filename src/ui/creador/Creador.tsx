@@ -6,7 +6,6 @@ import { resolver, resumenEquipo, type Eleccion } from '../../motor/resolver'
 import { derivar } from '../../motor/derivar'
 import { CONJUNTO_ESTANDAR, COSTE_COMPRA, PUNTOS_COMPRA, costeCompra, modificador, nuevoId, sumar4d6, type Personaje } from '../../motor/personaje'
 import { ASPECTOS } from '../../setting/marcas'
-import campaña from '../../setting/campaña.json'
 import { CARACTERISTICAS, type Caracteristica, type Crudo, type Datos } from '../../datos/tipos'
 import { claveDeRef } from '../../datos/refs'
 import { ABREV, NOMBRE_CAR, conSigno } from '../glosario'
@@ -87,8 +86,13 @@ const enPasoElecciones = (e: Eleccion) => e.id !== 'tra:aumento' && e.tipo !== '
 type Act = (f: (p: Personaje) => void) => void
 
 function PasoConcepto({ p, actualizar }: { p: Personaje; actualizar: Act }) {
-  const invertida = !!p.aspecto && ASPECTOS.some((a) => a.invertida === p.aspecto)
-  const regla = campaña.reglasCampaña.marcaGratisFalloPortales
+  // El interruptor muestra la cara invertida de todas las cartas, haya o no un aspecto elegido
+  const [invertida, setInvertida] = useState(() => !!p.aspecto && ASPECTOS.some((a) => a.invertida === p.aspecto))
+  const cambiarCara = (inv: boolean) => {
+    setInvertida(inv)
+    const a = ASPECTOS.find((x) => x.derecho === p.aspecto || x.invertida === p.aspecto)
+    if (a) actualizar((x) => void (x.aspecto = inv ? a.invertida : a.derecho))
+  }
   return (
     <div className="formulario">
       <label className="campo">Nombre del personaje<input value={p.nombre} onChange={(e) => actualizar((x) => void (x.nombre = e.target.value))} /></label>
@@ -96,17 +100,10 @@ function PasoConcepto({ p, actualizar }: { p: Personaje; actualizar: Act }) {
       <h3>Aspecto del alma</h3>
       <p className="sutil">
         Todo el mundo nace con la marca de uno de los 22 aspectos. Elige el de tu personaje (o pídele al DM que te lo asigne según su sinergia).
-        La marca invertida no hace malvado a nadie, pero los Oscuros la detectan.
+        Una marca invertida tiene el dibujo del revés y un tacto frío: no hace malvado a nadie, pero mucha gente desconfía de ella.
       </p>
       <label className="interruptor">
-        <input
-          type="checkbox"
-          checked={invertida}
-          onChange={(e) => {
-            const a = ASPECTOS.find((x) => x.derecho === p.aspecto || x.invertida === p.aspecto)
-            actualizar((x) => void (x.aspecto = a ? (e.target.checked ? a.invertida : a.derecho) : undefined))
-          }}
-        />
+        <input type="checkbox" checked={invertida} onChange={(e) => cambiarCara(e.target.checked)} />
         Marca invertida
       </label>
       <div className="rejilla-aspectos">
@@ -116,16 +113,11 @@ function PasoConcepto({ p, actualizar }: { p: Personaje; actualizar: Act }) {
             <button key={a.n} className={`aspecto ${p.aspecto === nombre ? 'elegido' : ''} ${invertida ? 'invertido' : ''}`} onClick={() => actualizar((x) => void (x.aspecto = nombre))}>
               <span className="arcano">{a.n}</span>
               <b>{nombre}</b>
-              <small>{a.carta} · {a.realidad}</small>
+              <small>{a.carta}{invertida ? ' (invertida)' : ''} · {a.realidad}</small>
             </button>
           )
         })}
       </div>
-      <label className="interruptor">
-        <input type="checkbox" checked={!!p.reglasCampaña.marcaGratis} onChange={(e) => actualizar((x) => void (x.reglasCampaña.marcaGratis = e.target.checked))} />
-        {regla.nombre}
-      </label>
-      <p className="sutil">{regla.descripcion} Actívala solo cuando el DM lo indique.</p>
     </div>
   )
 }
@@ -194,7 +186,7 @@ function PasoEspecie({ p, datos, actualizar }: { p: Personaje; datos: Datos; act
 function resumenTrasfondo(t: Crudo, datos: Datos): string {
   const habs = (t.skillProficiencies?.[0] ? Object.keys(t.skillProficiencies[0]).filter((k) => k !== 'choose' && k !== 'any') : []).join(', ')
   const dote = (t.feats ?? []).flatMap((f: Crudo) => Object.keys(f))[0]
-  const doteNombre = dote === 'marca manifiesta|setting' ? 'Marca manifiesta' : datos.dotes.find((x) => x._clave === claveDeRef(dote?.split(';')[0] ?? ''))?._nombre ?? dote?.split('|')[0]
+  const doteNombre = dote === 'marca manifiesta|setting' ? 'Marca manifiesta' : dote === 'marca invertida|setting' ? 'Marca invertida' : datos.dotes.find((x) => x._clave === claveDeRef(dote?.split(';')[0] ?? ''))?._nombre ?? dote?.split('|')[0]
   const car = t.ability?.[0]?.choose?.weighted?.from?.map((c: Caracteristica) => ABREV[c]).join(', ')
   return [car && `Características: ${car}`, habs && `Habilidades: ${habs}`, doteNombre && `Dote: ${doteNombre}`].filter(Boolean).join(' · ')
 }
