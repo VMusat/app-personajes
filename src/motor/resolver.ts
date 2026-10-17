@@ -293,6 +293,8 @@ function procesarEspecie(ctx: Ctx, e: Entidad) {
   if (nombres.length > 1) {
     const [v] = ctx.elegir({ id: 'esp:variante', tipo: 'variante', etiqueta: 'Linaje', origen, nivel: 0, n: 1, opciones: nombres.map((n: string) => ({ valor: n, etiqueta: n })) })
     bloques = bloques.filter((b) => b.name === v)
+    // Idioma propio de un linaje concreto (el umbrío de los drow)
+    for (const l of ((e._idiomasPorVariante as Record<string, string[]>) ?? {})[v] ?? []) ctx.efecto({ tipo: 'competencia', categoria: 'idioma', valor: l }, origen)
   }
   procesarProficiencias(ctx, e, 'esp', origen, 0)
   procesarAdicionales(ctx, bloques, 'esp', origen, ctx.r.nivel, 0)

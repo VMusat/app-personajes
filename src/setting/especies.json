@@ -3,7 +3,9 @@
     "nombre": "Aasimar",
     "origen": "Reino Sérafo y Cerinnar",
     "setting": "Llevan en la sangre la luz de un Resplandor. Los linajes más antiguos se remontan al primer Resplandor, y la nobleza sérafa presume de ellos; los nuevos linajes nacieron entre los supervivientes del segundo, y fueron ellos quienes bautizaron Cerinnar en lengua aasimar, la lengua de los Serafines, que conocen de forma innata.",
-    "idiomas": []
+    "idiomas": [
+      "Lengua aasimar"
+    ]
   },
   "Dragonborn|XPHB": {
     "nombre": "Dracónido",
@@ -25,7 +27,12 @@
     "setting": "Un pueblo antiguo que, según sus leyendas, salió del Bosque Hondo. Los elfos silvanos siguen viviendo en el Bosque; los altos elfos habitan las Tierras de Lar y comercian con medio mundo; los drow, pálidos y discretos, vienen de cuevas y hondonadas donde se cuela la Umbra, y son muy raros. Viven tanto que conservan el élfico entre ellos.",
     "idiomas": [
       "Élfico"
-    ]
+    ],
+    "idiomasPorVariante": {
+      "Drow": [
+        "Umbrío"
+      ]
+    }
   },
   "Gnome|XPHB": {
     "nombre": "Gnomo",
