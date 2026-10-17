@@ -300,7 +300,7 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .opciones-5e { border-left: 2px solid var(--borde); padding-left: 10px; }
 
 /* Ventanas */
-.modal-fondo { position: fixed; inset: 0; background: rgb(10 6 18 / 0.6); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
+.modal-fondo { position: fixed; inset: 0; background: rgb(10 6 18 / 0.6); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 12px; }
 .modal { background: var(--fondo-2); border: 1px solid var(--borde); border-radius: 14px; max-width: 640px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: var(--sombra); }
 .modal.modal-ancho { max-width: 900px; }
 .modal-cabecera { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--borde); }
@@ -308,22 +308,6 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .modal-cuerpo { padding: 12px 16px; overflow-y: auto; }
 
 /* Dados */
-#caja-dados { position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
-#caja-dados.visible { opacity: 1; pointer-events: auto; }
-#caja-dados canvas { width: 100%; height: 100%; }
-.resultado-tirada {
-  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 70; min-width: 260px; max-width: calc(100vw - 32px);
-  background: var(--fondo-2); border: 2px solid var(--acento); border-radius: 16px; padding: 12px 18px; text-align: center; box-shadow: var(--sombra);
-  animation: aparecer 0.25s ease-out;
-}
-.resultado-tirada.critico { border-color: transparent; background: linear-gradient(var(--fondo-2), var(--fondo-2)) padding-box, var(--iris) border-box; }
-.resultado-tirada.pifia { border-color: var(--peligro); }
-@keyframes aparecer { from { transform: translate(-50%, 20px); opacity: 0; } }
-.rt-etiqueta { font-weight: 600; color: var(--texto-suave); }
-.rt-total { font-family: var(--fuente-titulo); font-size: 3rem; line-height: 1.1; }
-.rt-detalle { font-size: 0.85em; color: var(--texto-suave); }
-.rt-aviso { font-weight: 700; color: var(--acento); }
-.dado-girando { font-size: 2.6rem; animation: girar 0.6s linear infinite; display: inline-block; }
 .boton-dados {
   position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 56px; height: 56px; border-radius: 50%; font-size: 1.7rem;
   background: var(--acento); border: none; box-shadow: var(--sombra); cursor: pointer;
@@ -365,3 +349,50 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .efectos-estado summary { cursor: pointer; font-weight: 600; }
 .detalle-condicion { border-top: 1px solid var(--borde); margin-top: 8px; }
 .usos-rasgo { margin: 4px 0 8px; background: var(--fondo-2); border-radius: 8px; padding: 0 8px; }
+
+/* Dados: tirada animada */
+.resultado-tirada {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 70; width: min(560px, calc(100vw - 32px));
+  background: var(--fondo-2); border: 2px solid var(--acento); border-radius: 16px; padding: 12px 16px; text-align: center; box-shadow: var(--sombra);
+  animation: aparecer 0.2s ease-out;
+}
+.resultado-tirada.critico { border-color: transparent; background: linear-gradient(var(--fondo-2), var(--fondo-2)) padding-box, var(--iris) border-box; }
+.resultado-tirada.pifia { border-color: var(--peligro); }
+@keyframes aparecer { from { transform: translate(-50%, 20px); opacity: 0; } }
+.rt-etiqueta { font-weight: 600; color: var(--texto-suave); }
+.rt-total { font-family: var(--fuente-titulo); font-size: 3rem; line-height: 1.1; }
+.rt-total.oculto { opacity: 0.4; }
+.rt-detalle { font-size: 0.85em; color: var(--texto-suave); }
+.rt-aviso { font-weight: 700; color: var(--acento); }
+.rt-aviso.pifia { color: var(--peligro); }
+.rt-mod { font-family: var(--fuente-titulo); font-size: 1.4rem; align-self: center; }
+.mesa-dados { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 8px 0 4px; min-height: 64px; }
+.dado { display: inline-flex; flex-direction: column; align-items: center; width: 56px; }
+.dado svg { width: 56px; height: 56px; overflow: visible; }
+.dado svg polygon, .dado svg rect, .dado svg circle { fill: var(--acento); stroke: var(--acento-texto); stroke-width: 3; stroke-linejoin: round; }
+.dado svg .arista { fill: none; stroke-opacity: 0.35; }
+.dado svg text { fill: var(--acento-texto); font-family: var(--fuente-titulo); font-weight: 700; }
+.dado small { font-size: 0.7em; color: var(--texto-suave); }
+.dado.rodando { animation: rodar 0.95s cubic-bezier(.2,.7,.3,1) both; }
+.dado.descartado { opacity: 0.4; }
+.dado.descartado svg text { text-decoration: line-through; }
+.dado.nat20 svg polygon:first-child { fill: #e3b341; }
+.dado.nat1 svg polygon:first-child { fill: var(--peligro); }
+@keyframes rodar {
+  0% { transform: translate(var(--dx), -90px) rotate(0deg) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  55% { transform: translate(calc(var(--dx) * -0.25), 6px) rotate(calc(var(--giro) * 0.8)) scale(1.05); }
+  78% { transform: translate(0, -10px) rotate(calc(var(--giro) * 0.95)) scale(1); }
+  100% { transform: translate(0, 0) rotate(var(--giro)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .dado.rodando { animation: none; } }
+.boton-dado-tipo { position: relative; display: inline-flex; flex-direction: column; align-items: center; background: var(--fondo-3); border: 1px solid var(--borde); border-radius: 10px; padding: 4px 6px; cursor: pointer; width: 52px; }
+.boton-dado-tipo:hover { border-color: var(--acento); }
+.boton-dado-tipo svg { width: 30px; height: 30px; }
+.boton-dado-tipo svg polygon, .boton-dado-tipo svg rect, .boton-dado-tipo svg circle { fill: var(--acento); }
+.boton-dado-tipo svg .arista { fill: none; stroke: var(--acento-texto); stroke-opacity: 0.4; stroke-width: 3; }
+.boton-dado-tipo span { font-size: 0.8em; }
+.contador-reserva { position: absolute; top: -6px; right: -6px; background: var(--peligro); color: #fff; border-radius: 999px; font-size: 0.75em; min-width: 18px; padding: 0 4px; }
+.reserva { justify-content: space-between; margin: 6px 0; }
+.formula-reserva { font-family: var(--fuente-titulo); font-weight: 700; }
+.historial li .boton-mini { margin-left: auto; }

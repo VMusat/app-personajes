@@ -1,5 +1,6 @@
 // Componentes básicos reutilizables.
 import { useEffect, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 export function Modal({ titulo, alCerrar, children, ancho }: { titulo: ReactNode; alCerrar: () => void; children: ReactNode; ancho?: 'normal' | 'ancho' }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -9,7 +10,8 @@ export function Modal({ titulo, alCerrar, children, ancho }: { titulo: ReactNode
     ref.current?.focus()
     return () => window.removeEventListener('keydown', tecla)
   }, [alCerrar])
-  return (
+  // Se pinta en <body> con un portal: así ninguna tarjeta ni contenedor con transform puede taparla
+  return createPortal(
     <div className="modal-fondo" onClick={alCerrar}>
       <div className={`modal ${ancho === 'ancho' ? 'modal-ancho' : ''}`} onClick={(e) => e.stopPropagation()} ref={ref} tabIndex={-1} role="dialog" aria-modal="true">
         <header className="modal-cabecera">
@@ -18,7 +20,8 @@ export function Modal({ titulo, alCerrar, children, ancho }: { titulo: ReactNode
         </header>
         <div className="modal-cuerpo">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

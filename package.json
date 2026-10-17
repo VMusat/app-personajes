@@ -9,12 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "datos": "node scripts/descargar-datos.mjs",
-    "test": "vitest run",
-    "predev": "node scripts/copiar-dados.mjs",
-    "prebuild": "node scripts/copiar-dados.mjs"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@3d-dice/dice-box": "^1.1.4",
     "firebase": "^12.4.0",
     "idb-keyval": "^6.2.2",
     "react": "^19.1.0",

@@ -26,7 +26,7 @@ export interface ResultadoTirada {
   formula: string
   total: number
   /** Valores de cada dado por término. */
-  dados: { caras: number; valores: number[]; descartados?: number[] }[]
+  dados: { caras: number; valores: number[]; descartados?: number[]; signo?: 1 | -1 }[]
   modificador: number
   natural?: number
   ventaja?: 'ventaja' | 'desventaja'
@@ -53,9 +53,30 @@ export function parsearFormula(f: string): Termino[] {
   return res
 }
 
+/** Un dado justo: usa el generador criptográfico del navegador (sin sesgo de módulo). */
+export function tirarDado(caras: number): number {
+  const c = globalThis.crypto
+  if (c?.getRandomValues) {
+    const a = new Uint32Array(1)
+    const limite = Math.floor(0x100000000 / caras) * caras
+    let x: number
+    do {
+      c.getRandomValues(a)
+      x = a[0]
+    } while (x >= limite)
+    return 1 + (x % caras)
+  }
+  return 1 + Math.floor(Math.random() * caras)
+}
+
+/** Nº total de dados que se tirarían (para limitar tiradas absurdas). */
+export function cuantosDados(f: string): number {
+  return parsearFormula(f).reduce((s, t) => s + (t.tipo === 'dados' ? t.n : 0), 0)
+}
+
 export function formulaValida(f: string): boolean {
   const t = parsearFormula(f)
-  return t.length > 0 && t.every((x) => x.tipo === 'fijo' || (x.n > 0 && x.n <= 100 && x.caras > 0 && x.caras <= 1000))
+  return t.length > 0 && t.every((x) => x.tipo === 'fijo' || (x.n > 0 && x.n <= 100 && x.caras > 0 && x.caras <= 1000)) && cuantosDados(f) <= 100
 }
 
 /** Dados físicos a lanzar (para la animación 3D): «2d20», «1d8» ... */
@@ -92,16 +113,16 @@ export function resolverTirada(p: PeticionTirada, valores?: number[][]): Resulta
     const esD20 = p.d20 && t.caras === 20 && n === 1 && !!p.ventaja
     if (esD20) n = 2
     if (p.critico) n *= 2
-    const vals = valores?.[i]?.length === n ? valores[i] : Array.from({ length: n }, () => 1 + Math.floor(Math.random() * t.caras))
+    const vals = valores?.[i]?.length === n ? valores[i] : Array.from({ length: n }, () => tirarDado(t.caras))
     i++
     if (esD20) {
       const elegido = p.ventaja === 'ventaja' ? Math.max(...vals) : Math.min(...vals)
       const descartado = vals[0] === elegido ? vals[1] : vals[0]
-      dados.push({ caras: 20, valores: [elegido], descartados: [descartado] })
+      dados.push({ caras: 20, valores: [elegido], descartados: [descartado], signo: t.signo })
       total += t.signo * elegido
       natural = elegido
     } else {
-      dados.push({ caras: t.caras, valores: vals })
+      dados.push({ caras: t.caras, valores: vals, signo: t.signo })
       total += t.signo * vals.reduce((a, b) => a + b, 0)
       if (p.d20 && t.caras === 20 && t.n === 1) natural = vals[0]
     }

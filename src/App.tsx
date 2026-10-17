@@ -56,10 +56,12 @@ export default function App() {
     const c1 = repo.personajes((ps) => set({ personajes: [...ps].sort((a, b) => a.nombre.localeCompare(b.nombre)) }))
     const c2 = repo.objetos((os) => set({ objetos: [...os].sort((a, b) => a.nombre.localeCompare(b.nombre)) }))
     const c3 = repo.tiradas((ts) => set({ tiradasCompartidas: ts }))
+    const c4 = repo.solicitudes((s) => set({ solicitudes: s }))
     return () => {
       c1()
       c2()
       c3()
+      c4()
     }
   }, [repo, usuario, campaña, set])
 

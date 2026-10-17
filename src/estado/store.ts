@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import type { Datos } from '../datos/tipos'
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
-import type { InfoCampaña, Repo, TiradaCompartida, Usuario } from '../almacen/repo'
+import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } from '../almacen/repo'
 import type { PeticionTirada, ResultadoTirada } from '../dados/tiradas'
 
 export type Vista =
@@ -24,6 +24,7 @@ interface Estado {
   personajes: Personaje[]
   objetos: ObjetoCampaña[]
   tiradasCompartidas: TiradaCompartida[]
+  solicitudes: SolicitudAcceso[]
   vista: Vista
   /** Historial local de tiradas. */
   tiradas: ResultadoTirada[]
@@ -38,12 +39,14 @@ export const useEstado = create<Estado>((set) => ({
   personajes: [],
   objetos: [],
   tiradasCompartidas: [],
+  solicitudes: [],
   vista: { tipo: 'inicio' },
   tiradas: [],
   colaTiradas: [],
   compartirTiradas: leerPreferencia('compartirTiradas', true),
   set: (p) => set(p),
-  tirar: (p) => set((s) => ({ colaTiradas: [...s.colaTiradas, p] })),
+  // Como mucho 6 tiradas en espera: pulsar muchas veces seguidas no satura la página
+  tirar: (p) => set((s) => (s.colaTiradas.length >= 6 ? {} : { colaTiradas: [...s.colaTiradas, p] })),
 }))
 
 export function leerPreferencia<T>(k: string, def: T): T {

@@ -6,8 +6,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: './',
   plugins: [react()],
-  // dice-box carga sus web workers con rutas relativas: no debe pre-empaquetarse
-  optimizeDeps: { exclude: ['@3d-dice/dice-box'] },
   server: { port: 5173, strictPort: true },
   test: {
     environment: 'node',

@@ -1,5 +1,5 @@
 // Pantalla principal: acceso, lista de personajes y accesos del DM.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ir, useEstado } from '../estado/store'
 import { personajeVacio, type Personaje } from '../motor/personaje'
 import { derivar } from '../motor/derivar'
@@ -15,7 +15,7 @@ export function resumenPersonaje(p: Personaje, d: Datos): string {
 }
 
 export function Inicio() {
-  const { repo, usuario, campaña, personajes, datos, objetos, set } = useEstado()
+  const { repo, usuario, campaña, personajes, datos, objetos, solicitudes, set } = useEstado()
   const [error, setError] = useState('')
   if (!repo || !datos) return null
 
@@ -34,8 +34,15 @@ export function Inicio() {
     return (
       <div className="pantalla-centro">
         <h2>Hola, {usuario.nombre}</h2>
-        <p>No tienes acceso a la campaña, o todavía no existe.</p>
-        <p className="sutil">Si eres jugador, pide al DM que añada tu email: <b>{usuario.email}</b></p>
+        <SolicitudPendiente />
+        <button
+          className="boton"
+          onClick={async () => {
+            set({ campaña: await repo.campaña() })
+          }}
+        >
+          Comprobar de nuevo
+        </button>
         <details>
           <summary>Soy el DM y quiero crear la campaña</summary>
           <p className="sutil">Solo funciona si la campaña aún no existe. Quedarás como DM.</p>
@@ -99,7 +106,11 @@ export function Inicio() {
           <h2>Herramientas del DM</h2>
           <div className="fila-botones">
             <button className="boton secundario" onClick={() => ir({ tipo: 'almacen' })}>Objetos de la campaña ({objetos.length})</button>
-            {repo.modo === 'firebase' && <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>Jugadores y campaña</button>}
+            {repo.modo === 'firebase' && (
+              <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>
+                Jugadores y campaña{solicitudes.length ? ` (${solicitudes.length} pendiente${solicitudes.length > 1 ? 's' : ''})` : ''}
+              </button>
+            )}
           </div>
           {ajenos.length > 0 && (
             <>
@@ -139,6 +150,30 @@ export function BorrarPersonaje({ p, alCerrar, alBorrar }: { p: Personaje; alCer
         <button className="boton secundario" onClick={alCerrar}>Cancelar</button>
       </div>
     </Modal>
+  )
+}
+
+/** Quien no tiene acceso deja su solicitud automáticamente para que el DM la valide con un clic. */
+function SolicitudPendiente() {
+  const { repo, usuario } = useEstado()
+  const [estado, setEstado] = useState<'enviando' | 'enviada' | 'error'>('enviando')
+  useEffect(() => {
+    repo?.solicitarAcceso().then(
+      () => setEstado('enviada'),
+      () => setEstado('error'),
+    )
+  }, [repo])
+  return (
+    <>
+      <p>Todavía no tienes acceso a la campaña.</p>
+      {estado === 'enviada' && (
+        <p className="ok">
+          El DM ya ve tu solicitud con tu email (<b>{usuario?.email}</b>) y puede darte acceso con un clic. Cuando lo haga, pulsa «Comprobar de nuevo».
+        </p>
+      )}
+      {estado === 'enviando' && <p className="sutil">Enviando tu solicitud de acceso…</p>}
+      {estado === 'error' && <p className="sutil">No se pudo enviar la solicitud. Pide al DM que añada tu email: <b>{usuario?.email}</b></p>}
+    </>
   )
 }
 

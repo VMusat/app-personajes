@@ -6,7 +6,7 @@ import { resumenPersonaje } from '../Inicio'
 import ajustes from '../../setting/campaña.json'
 
 export function PanelCampaña() {
-  const { repo, campaña, set, personajes, datos, objetos, tiradasCompartidas } = useEstado()
+  const { repo, campaña, set, personajes, datos, objetos, tiradasCompartidas, solicitudes } = useEstado()
   const [email, setEmail] = useState('')
   if (!repo?.esDM() || !campaña || !datos) return <p className="pantalla-centro">Solo para el DM.</p>
   const guardar = async (miembros: string[]) => {
@@ -20,6 +20,37 @@ export function PanelCampaña() {
         <button className="boton secundario" onClick={() => ir({ tipo: 'inicio' })}>← Inicio</button>
         <h2>{ajustes.nombre}</h2>
       </header>
+
+      {solicitudes.length > 0 && (
+        <section className="solicitudes">
+          <h3>Pendientes de validación</h3>
+          <p className="sutil">Han entrado con su cuenta de Google, pero aún no tienen acceso.</p>
+          <ul className="lista-miembros">
+            {solicitudes.map((s) => (
+              <li key={s.uid}>
+                <span>
+                  <b>{s.email}</b> {s.nombre && s.nombre !== s.email && <span className="sutil">({s.nombre})</span>}
+                  <small className="sutil"> · {new Date(s.fecha).toLocaleString()}</small>
+                </span>
+                <span className="fila">
+                  <button
+                    className="boton"
+                    onClick={async () => {
+                      await repo.resolverSolicitud(s, true)
+                      set({ campaña: await repo.campaña() })
+                    }}
+                  >
+                    Dar acceso
+                  </button>
+                  <button className="boton secundario" onClick={() => repo.resolverSolicitud(s, false)}>
+                    Rechazar
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h3>Jugadores con acceso</h3>

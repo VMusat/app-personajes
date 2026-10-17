@@ -19,6 +19,14 @@ export interface TiradaCompartida {
   fecha: number
 }
 
+/** Alguien que ha entrado con su cuenta pero aún no está en la lista de jugadores. */
+export interface SolicitudAcceso {
+  uid: string
+  email: string
+  nombre: string
+  fecha: number
+}
+
 export interface InfoCampaña {
   nombre: string
   dms: string[]
@@ -46,6 +54,12 @@ export interface Repo {
   borrarObjeto(id: string): Promise<void>
   tiradas(cb: (ts: TiradaCompartida[]) => void): Cancelar
   compartirTirada(t: Omit<TiradaCompartida, 'id' | 'uid' | 'fecha'>): Promise<void>
+  /** Quien no tiene acceso deja su solicitud para que el DM la valide. */
+  solicitarAcceso(): Promise<void>
+  /** Solicitudes pendientes (solo DM). */
+  solicitudes(cb: (s: SolicitudAcceso[]) => void): Cancelar
+  /** El DM acepta (añade el email a la lista) o rechaza una solicitud. */
+  resolverSolicitud(s: SolicitudAcceso, aceptar: boolean): Promise<void>
 }
 
 // ── Modo local
@@ -134,5 +148,12 @@ export function repoLocal(): Repo {
       escribir('tiradas', [{ ...t, id: String(Date.now()), uid: 'local', fecha: Date.now() }, ...ts].slice(0, 50))
       avisar()
     },
+    // En modo local no hay más usuarios que validar
+    async solicitarAcceso() {},
+    solicitudes(cb) {
+      cb([])
+      return () => {}
+    },
+    async resolverSolicitud() {},
   }
 }

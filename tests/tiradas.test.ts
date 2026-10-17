@@ -47,3 +47,27 @@ describe('fórmulas y características', () => {
     expect(sumar4d6([1, 6, 6, 5])).toBe(17)
   })
 })
+
+describe('dados justos y límites', () => {
+  it('tirarDado da todos los valores posibles y ninguno fuera de rango', async () => {
+    const { tirarDado } = await import('../src/dados/tiradas')
+    for (const c of [4, 6, 8, 10, 12, 20, 100]) {
+      const vistos = new Set<number>()
+      for (let i = 0; i < c * 60; i++) {
+        const v = tirarDado(c)
+        expect(v).toBeGreaterThanOrEqual(1)
+        expect(v).toBeLessThanOrEqual(c)
+        vistos.add(v)
+      }
+      expect(vistos.size).toBe(c)
+    }
+  })
+  it('combina varios dados y tipos y rechaza tiradas absurdas', () => {
+    const r = resolverTirada({ etiqueta: 'x', formula: '3d6+2d8-1d4+2' })
+    expect(r.dados.map((d) => `${d.valores.length}d${d.caras}${d.signo === -1 ? '-' : ''}`)).toEqual(['3d6', '2d8', '1d4-'])
+    const suma = r.dados.reduce((s, d) => s + (d.signo === -1 ? -1 : 1) * d.valores.reduce((a, b) => a + b, 0), 0)
+    expect(r.total).toBe(suma + 2)
+    expect(formulaValida('101d6')).toBe(false)
+    expect(formulaValida('60d6+50d4')).toBe(false)
+  })
+})

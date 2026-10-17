@@ -36,6 +36,14 @@ service cloud.firestore {
         allow write: if esDM(c);
       }
 
+      // Solicitudes de acceso: cada usuario crea la suya (con su propio email); el DM las ve y las resuelve
+      match /solicitudes/{u} {
+        allow create, update: if request.auth != null && request.auth.uid == u
+          && request.resource.data.uid == u
+          && request.resource.data.email == request.auth.token.email.lower();
+        allow read, delete: if esDM(c) || (request.auth != null && request.auth.uid == u);
+      }
+
       match /tiradas/{t} {
         allow read: if esMiembro(c);
         allow create: if esMiembro(c) && request.resource.data.uid == request.auth.uid;

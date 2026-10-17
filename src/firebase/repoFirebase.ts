@@ -8,7 +8,7 @@ import {
   persistentMultipleTabManager, query, setDoc, where,
 } from 'firebase/firestore'
 import { CAMPAÑA_ID, firebaseConfig } from './config'
-import type { InfoCampaña, Repo, TiradaCompartida, Usuario } from '../almacen/repo'
+import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } from '../almacen/repo'
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
 
@@ -103,6 +103,25 @@ export function repoFirebase(): Repo {
     async compartirTirada(t) {
       if (!usuario) return
       await addDoc(collection(campRef, 'tiradas'), { ...t, uid: usuario.uid, fecha: Date.now() })
+    },
+    async solicitarAcceso() {
+      if (!usuario) return
+      const s: SolicitudAcceso = { uid: usuario.uid, email: (usuario.email ?? '').toLowerCase(), nombre: usuario.displayName ?? usuario.email ?? '', fecha: Date.now() }
+      await setDoc(doc(campRef, 'solicitudes', usuario.uid), s)
+    },
+    solicitudes(cb) {
+      if (!usuario || !esDM()) {
+        cb([])
+        return () => {}
+      }
+      return onSnapshot(collection(campRef, 'solicitudes'), (snap) => cb(snap.docs.map((d) => d.data() as SolicitudAcceso).sort((a, b) => a.fecha - b.fecha)))
+    },
+    async resolverSolicitud(s, aceptar) {
+      if (aceptar && info && !info.miembros.includes(s.email)) {
+        info = { ...info, miembros: [...info.miembros, s.email] }
+        await setDoc(campRef, info)
+      }
+      await deleteDoc(doc(campRef, 'solicitudes', s.uid))
     },
   }
 }
