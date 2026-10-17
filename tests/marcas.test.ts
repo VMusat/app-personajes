@@ -40,6 +40,16 @@ describe('marcas de aspecto', () => {
     expect(marcas(pj('sage|xphb', 'Valor', 4).r)).toEqual(['Marca manifiesta (Valor)'])
   })
 
+  it('con multiclase cuenta el nivel total del personaje', () => {
+    const { p, d } = pj('sage|xphb', 'Valor', 2)
+    p.niveles.push({ clase: 'cleric|xphb' })
+    autocompletar(p, d)
+    expect(marcas(resolver(p, d))).toEqual([])
+    p.niveles.push({ clase: 'cleric|xphb' })
+    autocompletar(p, d)
+    expect(marcas(resolver(p, d))).toEqual(['Marca manifiesta (Valor)'])
+  })
+
   it('quien ya tenía la marca obtiene la marca plena a nivel 4', () => {
     expect(marcas(pj('superviviente de la miasma|setting', 'Fortuna', 3).r)).toEqual(['Marca manifiesta (Fortuna)'])
     expect(marcas(pj('superviviente de la miasma|setting', 'Fortuna', 4).r)).toEqual(['Marca manifiesta (Fortuna)', 'Marca plena (Fortuna)'])
