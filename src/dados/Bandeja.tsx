@@ -4,6 +4,7 @@
 // y varias tiradas seguidas se encolan sin bloquear la página.
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useEstado, guardarPreferencia } from '../estado/store'
+import { ColorDados } from '../ui/Apariencia'
 import { formulaValida, resolverTirada, tirarDado, type PeticionTirada, type ResultadoTirada } from './tiradas'
 
 const DURACION = 950
@@ -256,6 +257,8 @@ function PanelDados({ alCerrar }: { alCerrar: () => void }) {
         <input value={formula} onChange={(e) => setFormula(e.target.value)} placeholder="o escribe: 2d6+1d4+3" aria-label="Fórmula" />
         <button className="boton secundario" disabled={!formulaValida(formula.replace(/\s/g, ''))}>Tirar</button>
       </form>
+      <h4>Color de los dados</h4>
+      <ColorDados />
       <label className="interruptor">
         <input
           type="checkbox"

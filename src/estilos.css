@@ -309,8 +309,9 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Dados */
 .boton-dados {
+  --fondo-boton: var(--dado, var(--acento));
   position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 56px; height: 56px; border-radius: 50%; font-size: 1.7rem;
-  background: var(--acento); border: none; box-shadow: var(--sombra); cursor: pointer;
+  background: var(--fondo-boton); border: none; box-shadow: var(--sombra); cursor: pointer;
 }
 .panel-dados {
   position: fixed; right: 16px; bottom: 82px; z-index: 45; width: min(360px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto;
@@ -369,9 +370,9 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .mesa-dados { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 8px 0 4px; min-height: 64px; }
 .dado { display: inline-flex; flex-direction: column; align-items: center; width: 56px; }
 .dado svg { width: 56px; height: 56px; overflow: visible; }
-.dado svg polygon, .dado svg rect, .dado svg circle { fill: var(--acento); stroke: var(--acento-texto); stroke-width: 3; stroke-linejoin: round; }
+.dado svg polygon, .dado svg rect, .dado svg circle { fill: var(--dado, var(--acento)); stroke: var(--dado-texto, var(--acento-texto)); stroke-width: 3; stroke-linejoin: round; }
 .dado svg .arista { fill: none; stroke-opacity: 0.35; }
-.dado svg text { fill: var(--acento-texto); font-family: var(--fuente-titulo); font-weight: 700; }
+.dado svg text { fill: var(--dado-texto, var(--acento-texto)); font-family: var(--fuente-titulo); font-weight: 700; }
 .dado small { font-size: 0.7em; color: var(--texto-suave); }
 .dado.rodando { animation: rodar 0.95s cubic-bezier(.2,.7,.3,1) both; }
 .dado.descartado { opacity: 0.4; }
@@ -389,10 +390,16 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .boton-dado-tipo { position: relative; display: inline-flex; flex-direction: column; align-items: center; background: var(--fondo-3); border: 1px solid var(--borde); border-radius: 10px; padding: 4px 6px; cursor: pointer; width: 52px; }
 .boton-dado-tipo:hover { border-color: var(--acento); }
 .boton-dado-tipo svg { width: 30px; height: 30px; }
-.boton-dado-tipo svg polygon, .boton-dado-tipo svg rect, .boton-dado-tipo svg circle { fill: var(--acento); }
-.boton-dado-tipo svg .arista { fill: none; stroke: var(--acento-texto); stroke-opacity: 0.4; stroke-width: 3; }
+.boton-dado-tipo svg polygon, .boton-dado-tipo svg rect, .boton-dado-tipo svg circle { fill: var(--dado, var(--acento)); }
+.boton-dado-tipo svg .arista { fill: none; stroke: var(--dado-texto, var(--acento-texto)); stroke-opacity: 0.4; stroke-width: 3; }
 .boton-dado-tipo span { font-size: 0.8em; }
 .contador-reserva { position: absolute; top: -6px; right: -6px; background: var(--peligro); color: #fff; border-radius: 999px; font-size: 0.75em; min-width: 18px; padding: 0 4px; }
 .reserva { justify-content: space-between; margin: 6px 0; }
 .formula-reserva { font-family: var(--fuente-titulo); font-weight: 700; }
 .historial li .boton-mini { margin-left: auto; }
+
+/* Apariencia */
+.grupo-apariencia { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 14px; }
+.opcion-apariencia { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--borde); background: var(--fondo-2); cursor: pointer; }
+.opcion-apariencia.activa { border: 2px solid var(--acento); font-weight: 600; }
+.opcion-apariencia .punto { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--borde); flex: none; }

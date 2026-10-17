@@ -17,6 +17,7 @@ import { PestañaElecciones } from './PestañaElecciones'
 import { exportarJSON, exportarObsidian } from './exportar'
 import { aspectoEsInvertido } from '../../motor/resolver'
 import { Entradas } from '../Entradas'
+import { VentanaApariencia } from '../Apariencia'
 import DISOLUCION from '../../setting/disolucion.json'
 import { aplicarEquipo, equipoPendiente } from '../equipo'
 
@@ -32,6 +33,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
   const [descanso, setDescanso] = useState<'corto' | 'largo'>()
   const [menu, setMenu] = useState(false)
   const [borrar, setBorrar] = useState(false)
+  const [apariencia, setApariencia] = useState(false)
   const h = useMemo(() => {
     if (!p || !datos) return undefined
     try {
@@ -81,6 +83,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
           <button className="boton-icono" onClick={() => setMenu(!menu)} aria-label="Más opciones">⋮</button>
           {menu && (
             <div className="menu" onClick={() => setMenu(false)}>
+              <button onClick={() => setApariencia(true)}>Apariencia (tema y colores)</button>
               <button onClick={() => exportarObsidian(p, h, datos)}>Exportar nota para Obsidian</button>
               <button onClick={() => exportarJSON(p)}>Copia de seguridad (JSON)</button>
               <button onClick={() => ir({ tipo: 'crear', id })}>Volver al asistente de creación</button>
@@ -119,6 +122,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
         {pestaña === 'elecciones' && <PestañaElecciones {...props} />}
       </div>
 
+      {apariencia && <VentanaApariencia alCerrar={() => setApariencia(false)} />}
       {borrar && <BorrarPersonaje p={p} alCerrar={() => setBorrar(false)} alBorrar={() => ir({ tipo: 'inicio' })} />}
       {descanso && <ModalDescanso tipo={descanso} {...props} alCerrar={() => setDescanso(undefined)} />}
     </div>

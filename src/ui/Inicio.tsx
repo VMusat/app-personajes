@@ -5,6 +5,7 @@ import { personajeVacio, type Personaje } from '../motor/personaje'
 import { derivar } from '../motor/derivar'
 import type { Datos } from '../datos/tipos'
 import { Modal } from './comun'
+import { VentanaApariencia } from './Apariencia'
 
 export function resumenPersonaje(p: Personaje, d: Datos): string {
   const especie = d.especies.find((e) => e._clave === p.especie)?._nombre
@@ -17,6 +18,7 @@ export function resumenPersonaje(p: Personaje, d: Datos): string {
 export function Inicio() {
   const { repo, usuario, campaña, personajes, datos, objetos, solicitudes, set } = useEstado()
   const [error, setError] = useState('')
+  const [apariencia, setApariencia] = useState(false)
   if (!repo || !datos) return null
 
   if (!usuario) {
@@ -86,6 +88,8 @@ export function Inicio() {
           {repo.modo === 'local' && <span className="insignia" title="Firebase no está configurado: los datos se guardan solo en este navegador">Modo local</span>}
           {esDM && <span className="insignia dm">DM</span>}
           <span className="sutil">{usuario.nombre}</span>
+          <button className="boton secundario" onClick={() => setApariencia(true)} aria-label="Apariencia">🎨 Apariencia</button>
+          {apariencia && <VentanaApariencia alCerrar={() => setApariencia(false)} />}
           {repo.modo === 'firebase' && <button className="boton secundario" onClick={() => repo.salir()}>Salir</button>}
         </div>
       </header>
