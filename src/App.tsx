@@ -12,6 +12,7 @@ import { HojaPersonaje } from './ui/hoja/HojaPersonaje'
 import { SubirNivel } from './ui/creador/SubirNivel'
 import { Almacen } from './ui/dm/Almacen'
 import { PanelCampaña } from './ui/dm/PanelCampaña'
+import { Guia } from './ui/Guia'
 
 // Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
 let promesaRepo: Promise<Repo> | undefined
@@ -74,7 +75,9 @@ export default function App() {
   }, [set])
 
   let contenido
-  if (errorDatos) {
+  // La guía es pública: se lee sin iniciar sesión y sin esperar a las reglas
+  if (vista.tipo === 'guia') contenido = <Guia />
+  else if (errorDatos) {
     contenido = (
       <div className="pantalla-centro">
         <h2>No se pudieron cargar las reglas</h2>
@@ -97,7 +100,7 @@ export default function App() {
   return (
     <>
       <main className="app">{contenido}</main>
-      <Bandeja />
+      {vista.tipo !== 'guia' && <Bandeja />}
       <Detalle />
     </>
   )

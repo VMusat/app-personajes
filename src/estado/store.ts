@@ -13,6 +13,7 @@ export type Vista =
   | { tipo: 'nivel'; id: string }
   | { tipo: 'almacen' }
   | { tipo: 'campaña' }
+  | { tipo: 'guia' }
 
 interface Estado {
   datos?: Datos
@@ -66,7 +67,7 @@ export function guardarPreferencia(k: string, v: unknown) {
   }
 }
 
-// ── Enrutado por hash: #/hoja/<id>, #/crear/<id>, #/nivel/<id>, #/almacen, #/campaña
+// ── Enrutado por hash: #/hoja/<id>, #/crear/<id>, #/nivel/<id>, #/almacen, #/campaña, #/guia
 
 export function vistaDeHash(h: string): Vista {
   const [, tipo, id, pestaña] = h.replace(/^#/, '').split('/')
@@ -75,6 +76,7 @@ export function vistaDeHash(h: string): Vista {
   if (tipo === 'nivel' && id) return { tipo: 'nivel', id }
   if (tipo === 'almacen') return { tipo: 'almacen' }
   if (tipo === 'campana') return { tipo: 'campaña' }
+  if (tipo === 'guia') return { tipo: 'guia' }
   return { tipo: 'inicio' }
 }
 
@@ -83,6 +85,7 @@ export function ir(v: Vista) {
     v.tipo === 'inicio' ? '#/' :
     v.tipo === 'almacen' ? '#/almacen' :
     v.tipo === 'campaña' ? '#/campana' :
+    v.tipo === 'guia' ? '#/guia' :
     v.tipo === 'hoja' ? `#/hoja/${v.id}${v.pestaña ? `/${v.pestaña}` : ''}` :
     `#/${v.tipo}/${v.id}`
   if (location.hash !== h) location.hash = h

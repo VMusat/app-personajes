@@ -27,6 +27,7 @@ export function Inicio() {
         <h1 className="titulo-app">Herederos de la Miasma</h1>
         <p className="subtitulo">Personajes de D&amp;D 2024 para la campaña</p>
         <button className="boton grande" onClick={() => repo.entrar().catch((e: Error) => setError(e.message))}>Entrar con Google</button>
+        <button className="boton secundario" onClick={() => ir({ tipo: 'guia' })}>📖 Leer la Guía para aventureros</button>
         {error && <p className="error">{error}</p>}
       </div>
     )
@@ -37,6 +38,8 @@ export function Inicio() {
       <div className="pantalla-centro">
         <h2>Hola, {usuario.nombre}</h2>
         <SolicitudPendiente />
+        <p className="sutil">Mientras esperas, puedes leer la Guía para aventureros de los Reinos de la Miasma.</p>
+        <button className="boton secundario" onClick={() => ir({ tipo: 'guia' })}>📖 Leer la Guía</button>
         <button
           className="boton"
           onClick={async () => {
@@ -88,6 +91,7 @@ export function Inicio() {
           {repo.modo === 'local' && <span className="insignia" title="Firebase no está configurado: los datos se guardan solo en este navegador">Modo local</span>}
           {esDM && <span className="insignia dm">DM</span>}
           <span className="sutil">{usuario.nombre}</span>
+          <button className="boton secundario" onClick={() => ir({ tipo: 'guia' })}>📖 Guía</button>
           <button className="boton secundario" onClick={() => setApariencia(true)} aria-label="Apariencia">🎨 Apariencia</button>
           {apariencia && <VentanaApariencia alCerrar={() => setApariencia(false)} />}
           {repo.modo === 'firebase' && <button className="boton secundario" onClick={() => repo.salir()}>Salir</button>}

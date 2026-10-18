@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "datos": "node scripts/descargar-datos.mjs",
+    "guia": "node scripts/copiar-guia.mjs",
+    "predev": "node scripts/copiar-guia.mjs",
+    "prebuild": "node scripts/copiar-guia.mjs",
     "test": "vitest run"
   },
   "dependencies": {
