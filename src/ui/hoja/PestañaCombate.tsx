@@ -28,8 +28,33 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
   const pen = h.penalizacionD20
   const maestrias = useEstado((s) => s.datos?.maestrias ?? [])
 
+  const alternarActivo = (nombre: string) =>
+    actualizar((x) => {
+      const a = x.estado.activos ?? []
+      x.estado.activos = a.includes(nombre) ? a.filter((n) => n !== nombre) : [...a, nombre]
+    })
+
   return (
     <div className="pestaña-combate">
+      {h.activables.length > 0 && (
+        <section>
+          <h3>Efectos activos</h3>
+          <p className="sutil">Actívalos mientras duren: la AC, la Speed y los ataques se recalculan solos. El descanso largo los desactiva.</p>
+          <div className="lista-activables">
+            {h.activables.map((a) => (
+              <label key={a.nombre} className={`activable ${a.activo ? 'activo' : ''} ${a.bloqueado && a.activo ? 'bloqueado' : ''}`}>
+                <input type="checkbox" checked={a.activo} onChange={() => alternarActivo(a.nombre)} />
+                <span>
+                  <b>{a.nombre}</b> <small className="sutil">{a.origen && a.origen !== a.nombre ? `· ${a.origen}` : ''}</small>
+                  {a.texto && <small className="activable-texto">{a.texto}</small>}
+                  {a.bloqueado && <small className="aviso-texto">{a.bloqueado}{a.activo ? ': no se aplica ahora' : ''}</small>}
+                </span>
+              </label>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section>
         <div className="fila-titulo">
           <h3>Ataques</h3>
@@ -48,6 +73,7 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
                     <button className="insignia enlace-insignia" onClick={() => abrirDetalleMaestria(a.maestria!, maestrias)}>Mastery: {a.maestria}</button>
                   )}
                   {a.propiedades.length > 0 && <small className="sutil"> {a.propiedades.join(', ')}</small>}
+                  {a.notas && a.notas.length > 0 && <small className="nota-ataque">{a.notas.join(' · ')}</small>}
                 </td>
                 <td>
                   <button

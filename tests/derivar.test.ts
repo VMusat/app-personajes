@@ -80,6 +80,87 @@ describe('hoja derivada', () => {
     expect(h.lanzamiento.map((l) => l.clase).sort()).toEqual(['Cleric', 'Paladin'])
   })
 
+  it('Bladesong: +INT a la AC, +10 ft y ataques con INT; no funciona con armadura', () => {
+    const { p, d } = crear('wizard|xphb', 3, { str: 8, dex: 14, con: 13, int: 16, wis: 12, cha: 10 }, { 'cls:Wizard:sub': ['bladesinger|frhof'], 'tra:aumento': ['str:2', 'con:1'] })
+    p.inventario.push({ id: 'r', origen: '5etools', ref: 'rapier|xphb', nombre: 'Rapier', cantidad: 1, equipado: true })
+    const sin = derivar(p, d)
+    expect(sin.activables.map((a) => a.nombre)).toContain('Bladesong')
+    expect(sin.ca.valor).toBe(12)
+    expect(sin.ataques.find((a) => a.nombre === 'Rapier')!.bonoAtaque).toBe(2 + 2)
+    p.estado.activos = ['Bladesong']
+    const con = derivar(p, d)
+    expect(con.ca.valor).toBe(12 + 3)
+    expect(con.velocidad.andar).toBe(40)
+    const rapier = con.ataques.find((a) => a.nombre === 'Rapier')!
+    expect(rapier.bonoAtaque).toBe(3 + 2)
+    expect(rapier.dano).toBe('1d8+3')
+    p.inventario.push({ id: 'a', origen: '5etools', ref: 'leather armor|xphb', nombre: 'Leather Armor', cantidad: 1, equipado: true })
+    const armado = derivar(p, d)
+    expect(armado.activables.find((a) => a.nombre === 'Bladesong')!.bloqueado).toBeTruthy()
+    expect(armado.velocidad.andar).toBe(30)
+  })
+
+  it('Mage Armor preparado: AC 13 + DEX al activarlo, con los demás bonos', () => {
+    const { p, d } = crear('wizard|xphb', 1, { str: 8, dex: 14, con: 13, int: 15, wis: 12, cha: 10 }, { 'tra:aumento': ['str:2', 'con:1'] })
+    p.elecciones['cls:Wizard:libro'] = [...p.elecciones['cls:Wizard:libro'].slice(0, 5), 'mage armor|xphb']
+    p.elecciones['cls:Wizard:preparados'] = ['mage armor|xphb', ...p.elecciones['cls:Wizard:libro'].slice(0, 3)]
+    p.estado.activos = ['Mage Armor']
+    const h = derivar(p, d)
+    expect(h.ca.valor).toBe(13 + 2)
+    p.estado.activos = ['Mage Armor', 'Shield']
+    p.elecciones['cls:Wizard:preparados'] = ['mage armor|xphb', 'shield|xphb']
+    p.elecciones['cls:Wizard:libro'] = [...p.elecciones['cls:Wizard:libro'].slice(0, 4), 'mage armor|xphb', 'shield|xphb']
+    expect(derivar(p, d).ca.valor).toBe(13 + 2 + 5)
+  })
+
+  it('el mago copia conjuros al libro además de los de nivel y puede prepararlos', () => {
+    const { p, d } = crear('wizard|xphb', 3, { str: 8, dex: 14, con: 13, int: 15, wis: 12, cha: 10 }, { 'tra:aumento': ['str:2', 'con:1'] })
+    const libro = p.elecciones['cls:Wizard:libro']
+    const nuevo = d.conjuros.find((c) => c.level === 2 && c._clases.includes('Wizard') && !libro.includes(c._clave))!
+    p.elecciones['cls:Wizard:libroCopiados'] = [nuevo._clave]
+    const r = derivar(p, d).resolucion
+    expect(r.elecciones.find((e) => e.id === 'cls:Wizard:libro')!.valor).toEqual(libro) // los de nivel no cambian
+    expect(r.elecciones.find((e) => e.id === 'cls:Wizard:libro')!.opciones.find((o) => o.valor === nuevo._clave)?.bloqueada).toBeTruthy()
+    const prep = r.elecciones.find((e) => e.id === 'cls:Wizard:preparados')!
+    expect(prep.opciones.some((o) => o.valor === nuevo._clave)).toBe(true)
+    expect(prep.cambia).toBe('largo')
+    expect(derivar(p, d).conjuros.some((c) => c.conjuro._clave === nuevo._clave)).toBe(true)
+  })
+
+  it('Rage suma Rage Damage a los ataques con STR', () => {
+    const { p, d } = crear('barbarian|xphb', 3, { str: 16, dex: 14, con: 15, int: 8, wis: 10, cha: 8 })
+    p.inventario.push({ id: 'g', origen: '5etools', ref: 'greataxe|xphb', nombre: 'Greataxe', cantidad: 1, equipado: true })
+    const fuerza = derivar(p, d).car.str.mod
+    expect(derivar(p, d).ataques.find((a) => a.nombre === 'Greataxe')!.dano).toBe(`1d12+${fuerza}`)
+    p.estado.activos = ['Rage']
+    const h = derivar(p, d)
+    expect(h.ataques.find((a) => a.nombre === 'Greataxe')!.dano).toBe(`1d12+${fuerza + 2}`)
+    expect(h.resistencias).toEqual(expect.arrayContaining(['bludgeoning', 'piercing', 'slashing']))
+  })
+
+  it('Speed de monje, explorador y especies', () => {
+    expect(derivar(...Object.values(crear('monk|xphb', 2, { str: 10, dex: 15, con: 13, int: 8, wis: 14, cha: 10 })) as [never, never]).velocidad.andar).toBe(40)
+    const exp = derivar(...Object.values(crear('ranger|xphb', 6, { str: 10, dex: 15, con: 13, int: 8, wis: 14, cha: 10 })) as [never, never])
+    expect(exp.velocidad).toMatchObject({ andar: 40, trepar: 40, nado: 40 })
+  })
+
+  it('Martial Arts: el monje ataca con DEX y su dado con armas de monje', () => {
+    const { p, d } = crear('monk|xphb', 5, { str: 10, dex: 16, con: 13, int: 8, wis: 14, cha: 10 })
+    p.inventario.push({ id: 'q', origen: '5etools', ref: 'quarterstaff|xphb', nombre: 'Quarterstaff', cantidad: 1, equipado: true })
+    const q = derivar(p, d).ataques.find((a) => a.nombre === 'Quarterstaff')!
+    const dex = derivar(p, d).car.dex.mod
+    expect(q.dano).toBe(`1d8+${dex}`)
+    expect(q.bonoAtaque).toBe(dex + 3)
+  })
+
+  it('Warforged: +1 AC', () => {
+    const { p, d } = crear('fighter|xphb', 1, { str: 15, dex: 14, con: 13, int: 8, wis: 12, cha: 10 })
+    const humano = derivar(p, d).ca.valor
+    p.especie = 'warforged|efa'
+    autocompletar(p, d)
+    expect(derivar(p, d).ca.valor).toBe(humano + 1)
+  })
+
   it('el objeto mágico de campaña aplica sus efectos al sintonizarlo', () => {
     const { p, d } = crear('rogue|xphb', 3, { str: 8, dex: 15, con: 14, int: 12, wis: 10, cha: 13 })
     const catalogo = [{

@@ -47,3 +47,12 @@ export const NIVEL_CONJURO = (n: number) => (n === 0 ? 'Cantrips' : `Level ${n}`
 export const conSigno = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
 export const titulo = (s: string) => s.replace(/(^|\s|-)\S/g, (m) => m.toUpperCase())
+
+/** Explicación de las etiquetas de los conjuros (se muestran al pasar el ratón o al tocarlas). */
+export const TERMINOS_CONJURO: Record<'V' | 'S' | 'M' | 'R' | 'C', { nombre: string; texto: string }> = {
+  V: { nombre: 'Verbal', texto: 'Verbal: hay que pronunciar palabras místicas en voz alta. No puedes lanzarlo si no puedes hablar (amordazado, en una zona de Silence...).' },
+  S: { nombre: 'Somatic', texto: 'Somatic: requiere gestos con al menos una mano libre. Puede ser la mano que sostiene el foco o los componentes materiales.' },
+  M: { nombre: 'Material', texto: 'Material: requiere los objetos indicados. Una bolsa de componentes o un foco sustituye a los que no tienen precio; los que tienen coste, o que el conjuro consume, hay que tenerlos de verdad.' },
+  R: { nombre: 'Ritual', texto: 'Ritual: puedes lanzarlo como ritual, tardando 10 minutos más, sin gastar espacio de conjuro. Tienes que tenerlo preparado (el mago lo lanza desde su libro aunque no lo tenga preparado).' },
+  C: { nombre: 'Concentration', texto: 'Concentration: el efecto dura mientras mantengas la concentración, hasta la duración máxima. Termina si lanzas otro conjuro de concentración, quedas Incapacitated o mueres. Al recibir daño, haz una salvación de CON (DC 10 o la mitad del daño, máximo DC 30).' },
+}

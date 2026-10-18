@@ -3,10 +3,11 @@ import { useEstado } from '../../estado/store'
 import type { ConjuroHoja } from '../../motor/derivar'
 import { Contador, Modal } from '../comun'
 import { ABREV, ESCUELAS, NIVEL_CONJURO, RECARGA, conSigno } from '../glosario'
-import { abrirDetalle, alcanceConjuro, duracionConjuro, tiempoConjuro } from '../Detalle'
+import { Termino, abrirDetalle, alcanceConjuro, duracionConjuro, tiempoConjuro } from '../Detalle'
 import type { PropsPestaña } from './HojaPersonaje'
 import { EditorEleccion } from '../creador/EditorEleccion'
 import type { Crudo } from '../../datos/tipos'
+import type { Eleccion } from '../../motor/resolver'
 
 /** Primer dado de daño o curación del texto del conjuro (para el botón de tirar). */
 function danoConjuro(c: Crudo, nivelLanzado: number, nivelPj: number): string | undefined {
@@ -30,6 +31,7 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
   const tirar = useEstado((s) => s.tirar)
   const [lanzando, setLanzando] = useState<ConjuroHoja>()
   const [preparar, setPreparar] = useState(false)
+  const [copiar, setCopiar] = useState(false)
   const [filtro, setFiltro] = useState<'preparados' | 'todos'>('preparados')
   const gastados = p.estado.gastados
   // Elecciones de conjuros preparados de cada clase (para preparar y quitar desde la lista)
@@ -68,7 +70,9 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
       x.elecciones[e.id] = v.includes(clave) ? v.filter((k) => k !== clave) : v.length < e.n ? [...v, clave] : v
     })
   }
-  const eleccionesPreparar = h.resolucion.elecciones.filter((e) => ['preparados', 'trucos', 'libro'].includes(e.tipo))
+  // Solo lo que se puede cambiar tras un descanso; el libro y los trucos se eligen al subir de nivel
+  const eleccionesPreparar = h.resolucion.elecciones.filter((e) => ['preparados', 'trucos', 'libro'].includes(e.tipo) && e.cambia && e.cambia !== 'nivel')
+  const libro = h.resolucion.elecciones.find((e) => e.tipo === 'libro')
   const nPreparados = (clase: string) => (p.elecciones[`cls:${clase}:preparados`] ?? []).length
 
   const gastarEspacio = (nivel: number | 'pacto') =>
@@ -90,7 +94,10 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
             {p.elecciones[`cls:${l.clase}:preparados`] !== undefined && <span className="sutil">Preparados: {nPreparados(l.clase)}</span>}
           </div>
         ))}
-        {eleccionesPreparar.length > 0 && <button className="boton secundario" onClick={() => setPreparar(true)}>Cambiar conjuros preparados</button>}
+        <div className="fila">
+          {eleccionesPreparar.length > 0 && <button className="boton secundario" onClick={() => setPreparar(true)}>Cambiar conjuros preparados</button>}
+          {libro && <button className="boton secundario" onClick={() => setCopiar(true)}>Copiar conjuro al libro</button>}
+        </div>
       </section>
 
       {(h.espacios.length > 0 || h.pacto) && (
@@ -130,9 +137,9 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
                   {c.conjuro.name}
                 </button>
                 <small className="sutil">
-                  {ESCUELAS[c.conjuro.school]} · {tiempoConjuro(c.conjuro)} · {alcanceConjuro(c.conjuro)}
-                  {duracionConjuro(c.conjuro).startsWith('Concentration') ? ' · C' : ''}
-                  {c.ritual || c.conjuro.meta?.ritual ? ' · R' : ''}
+                  {ESCUELAS[c.conjuro.school]} · {tiempoConjuro(c.conjuro)} · {alcanceConjuro(c.conjuro)} · <ComponentesCortos c={c.conjuro} />
+                  {duracionConjuro(c.conjuro).startsWith('Concentration') && <> · <Termino t="C" /></>}
+                  {(c.ritual || c.conjuro.meta?.ritual) && <> · <Termino t="R" /></>}
                   {c.siempre && nivel > 0 ? ' · siempre preparado' : ''}
                   {' · '}{c.origen}
                 </small>
@@ -174,14 +181,96 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
       )}
 
       {preparar && (
-        <Modal titulo="Conjuros preparados y conocidos" alCerrar={() => setPreparar(false)} ancho="ancho">
+        <Modal titulo="Conjuros preparados" alCerrar={() => setPreparar(false)} ancho="ancho">
+          <p className="sutil">Los conjuros que aprendes (trucos, libro de hechizos) se eligen al subir de nivel. Aquí cambias los preparados, como tras un descanso largo.</p>
           {eleccionesPreparar.map((e) => (
             <EditorEleccion key={e.id} e={e} alCambiar={(v) => actualizar((x) => void (x.elecciones[e.id] = v))} />
           ))}
         </Modal>
       )}
+
+      {copiar && libro && <ModalCopiarLibro libro={libro} {...{ p, h, actualizar }} alCerrar={() => setCopiar(false)} />}
     </div>
   )
+}
+
+/** Copiar al libro un conjuro de mago encontrado en la campaña (pergamino, otro libro...): 2 horas y 50 gp por nivel. */
+function ModalCopiarLibro({ libro, p, actualizar, alCerrar }: PropsPestaña & { libro: Eleccion; alCerrar: () => void }) {
+  const datos = useEstado((s) => s.datos)
+  const [buscar, setBuscar] = useState('')
+  const [pagar, setPagar] = useState(true)
+  const copiados = p.elecciones['cls:Wizard:libroCopiados'] ?? []
+  const enLibro = new Set([...libro.valor, ...copiados])
+  const oro = p.monedas.gp + p.monedas.pp * 10
+  const candidatos = libro.opciones
+    .filter((o) => !enLibro.has(o.valor) && o.etiqueta.toLowerCase().includes(buscar.toLowerCase()))
+    .map((o) => ({ o, nivel: datos?.conjuros.find((c) => c._clave === o.valor)?.level ?? 1 }))
+    .sort((a, b) => a.nivel - b.nivel || a.o.etiqueta.localeCompare(b.o.etiqueta))
+  const copiar = (clave: string, nivel: number) =>
+    actualizar((x) => {
+      x.elecciones['cls:Wizard:libroCopiados'] = [...(x.elecciones['cls:Wizard:libroCopiados'] ?? []), clave]
+      if (!pagar) return
+      // Paga en gp y, si no llega, cambia pp
+      let coste = 50 * nivel
+      const deOro = Math.min(coste, x.monedas.gp)
+      x.monedas.gp -= deOro
+      coste -= deOro
+      if (coste > 0) {
+        const pp = Math.ceil(coste / 10)
+        x.monedas.pp -= pp
+        x.monedas.gp += pp * 10 - coste
+      }
+    })
+  const quitar = (clave: string) => actualizar((x) => void (x.elecciones['cls:Wizard:libroCopiados'] = (x.elecciones['cls:Wizard:libroCopiados'] ?? []).filter((k) => k !== clave)))
+  const nombre = (clave: string) => datos?.conjuros.find((c) => c._clave === clave)?.name ?? clave
+
+  return (
+    <Modal titulo="Copiar conjuro al libro" alCerrar={alCerrar} ancho="ancho">
+      <p className="sutil">
+        Puedes copiar al libro cualquier conjuro de mago de un nivel que puedas lanzar, si lo encuentras (pergamino, otro libro...).
+        Copiar cuesta 2 horas y 50 gp por nivel del conjuro. Estos conjuros se suman a los dos que aprendes en cada nivel.
+      </p>
+      <label className="fila">
+        <input type="checkbox" checked={pagar} onChange={(e) => setPagar(e.target.checked)} /> Descontar el coste de mi dinero (tienes {oro} gp contando los pp)
+      </label>
+      {copiados.length > 0 && (
+        <>
+          <h4>Copiados durante la campaña</h4>
+          <ul className="lista-conjuros">
+            {copiados.map((k) => (
+              <li key={k}>
+                <button className="enlace nombre-conjuro" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: k })}>{nombre(k)}</button>
+                <button className="boton-mini" onClick={() => quitar(k)}>Quitar del libro</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <h4>Conjuros de mago</h4>
+      <input className="buscador" type="search" placeholder="Buscar conjuro..." value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+      <ul className="lista-conjuros">
+        {candidatos.map(({ o, nivel }) => {
+          const coste = 50 * nivel
+          const sinOro = pagar && oro < coste
+          return (
+            <li key={o.valor}>
+              <button className="enlace nombre-conjuro" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: o.valor })}>{o.etiqueta}</button>
+              <small className="sutil">Level {nivel} · {2 * nivel} h · {coste} gp</small>
+              <button className="boton-mini" disabled={sinOro} title={sinOro ? 'No tienes oro suficiente' : ''} onClick={() => copiar(o.valor, nivel)}>Copiar</button>
+            </li>
+          )
+        })}
+        {!candidatos.length && <li className="sutil">No hay conjuros que coincidan.</li>}
+      </ul>
+    </Modal>
+  )
+}
+
+/** V, S, M sin el texto del material (el detalle lo muestra completo). */
+function ComponentesCortos({ c }: { c: Crudo }) {
+  const k = c.components ?? {}
+  const t = (['V', 'S', 'M'] as const).filter((x) => k[x.toLowerCase()])
+  return <>{t.flatMap((x, i) => [i ? ' ' : '', <Termino key={x} t={x} />])}</>
 }
 
 function ModalLanzar({ c, p, h, actualizar, alCerrar, gastar, tirarDano }: PropsPestaña & { c: ConjuroHoja; alCerrar: () => void; gastar: (n: number | 'pacto') => void; tirarDano: (nivel: number) => void }) {
@@ -217,7 +306,7 @@ function ModalLanzar({ c, p, h, actualizar, alCerrar, gastar, tirarDano }: Props
       <p className="sutil">
         {salvacion && <>Salvación de {salvacion} contra DC <b>{c.cd}</b>. </>}
         {ataque && <>Ataque de conjuro {conSigno(c.ataque)}. </>}
-        {concentracion && 'Requiere concentración.'}
+        {concentracion && <>Requiere <Termino t="C">concentración</Termino>.</>}
       </p>
       {nivel === 0 || c.usos === 'voluntad' ? (
         <button className="boton" onClick={() => lanzar()}>Lanzar{dano ? ` y tirar ${ataque ? 'ataque' : dano}` : ''}</button>

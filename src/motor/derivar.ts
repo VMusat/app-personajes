@@ -1,12 +1,15 @@
 // Calcula la hoja de personaje a partir de la resolución (decisiones), el inventario y el estado de juego.
 import type { Caracteristica, Conjuro, Crudo, Datos, Entidad } from '../datos/tipos'
 import { CARACTERISTICAS } from '../datos/tipos'
+
+const ABREV_CAR: Record<Caracteristica, string> = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' }
 import { claveDeRef } from '../datos/refs'
-import type { Efecto, Recarga } from './efectos'
+import type { Efecto, Recarga, RequisitoArmadura } from './efectos'
+import { ACTIVABLES_CONJURO } from './activables'
 import { evaluar } from './formula'
 import type { ItemInventario, Personaje } from './personaje'
 import { bonoCompetencia, modificador } from './personaje'
-import { resolver, columnaClase, type ConjuroObtenido, type InfoClase, type Resolucion, type RasgoObtenido } from './resolver'
+import { resolver, columnaClase, libroMago, type ConjuroObtenido, type InfoClase, type Resolucion, type RasgoObtenido } from './resolver'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
 
 export interface HabilidadHoja {
@@ -30,6 +33,17 @@ export interface AtaqueHoja {
   maestria?: string
   origen: string
   versatil?: string
+  /** De dónde salen la característica o los dados extra (Bladesong, Hunter's Mark...). */
+  notas?: string[]
+}
+
+export interface ActivableHoja {
+  nombre: string
+  origen: string
+  texto?: string
+  activo: boolean
+  /** Motivo por el que no se aplica ahora (lleva armadura...). */
+  bloqueado?: string
 }
 
 export interface ConjuroHoja {
@@ -77,6 +91,7 @@ export interface Hoja {
   inmunidades: string[]
   inmunidadesCondicion: string[]
   ataques: AtaqueHoja[]
+  activables: ActivableHoja[]
   lanzamiento: { clase: string; nombre: string; car: Caracteristica; cd: number; ataque: number; nivelMax: number }[]
   espacios: number[]
   pacto?: { n: number; nivel: number }
@@ -183,6 +198,38 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
     for (const e of it.efectos ?? []) efectos.push({ ...e, origen: nombre })
   }
 
+  // ── Armadura puesta y efectos activables (Rage, Bladesong, Mage Armor...)
+  const tipoArm = (a?: { o: Crudo }) => String(a?.o.type ?? '').split('|')[0]
+  const armaduraPuesta = armaduras.find((a) => ['LA', 'MA', 'HA'].includes(tipoArm(a)))
+  const escudo = armaduras.find((a) => tipoArm(a) === 'S')
+  const cumpleArmadura = (c?: string) =>
+    !c ||
+    (c === 'sin armadura pesada' ? tipoArm(armaduraPuesta) !== 'HA'
+      : c === 'sin armadura ni escudo' ? !armaduraPuesta && !escudo
+      : c === 'sin armadura' ? !armaduraPuesta
+      : true)
+  const motivoArmadura: Record<RequisitoArmadura, string> = {
+    'sin armadura': 'No funciona con armadura',
+    'sin armadura ni escudo': 'No funciona con armadura ni escudo',
+    'sin armadura pesada': 'No funciona con armadura pesada',
+  }
+  const preparadosLibro = new Set(Object.entries(p.elecciones).filter(([k]) => k.endsWith(':preparados')).flatMap(([, v]) => v))
+  const conjurosDisponibles = new Set([...r.conjuros.filter((c) => !c.enLibro || preparadosLibro.has(c.clave)), ...conjurosExtra].map((c) => c.clave))
+  const definiciones: (Extract<Efecto, { tipo: 'activable' }> & { origen?: string })[] = efectos.filter((e) => e.tipo === 'activable') as never
+  for (const [clave, a] of Object.entries(ACTIVABLES_CONJURO)) {
+    const cj = conjurosDisponibles.has(clave) ? d.conjuros.find((x) => x._clave === clave) : undefined
+    if (cj) definiciones.push({ tipo: 'activable', nombre: cj.name, origen: 'Conjuro', ...a })
+  }
+  const activos = new Set(p.estado.activos ?? [])
+  const activables: ActivableHoja[] = []
+  for (const a of definiciones) {
+    if (activables.some((x) => x.nombre === a.nombre)) continue
+    const bloqueado = cumpleArmadura(a.requisito) ? undefined : motivoArmadura[a.requisito!]
+    const activo = activos.has(a.nombre)
+    activables.push({ nombre: a.nombre, origen: a.origen ?? '', texto: a.texto, activo, bloqueado })
+    if (activo && !bloqueado) efectos.push(...a.efectos.map((e) => ({ ...e, origen: a.nombre })))
+  }
+
   // ── Características
   const base = { ...p.caracteristicas.base }
   const valores = {} as Record<Caracteristica, number>
@@ -241,21 +288,21 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   })
 
   // ── Velocidad y sentidos
-  const velEf = efectos.filter((e) => e.tipo === 'velocidad') as Extract<Efecto, { tipo: 'velocidad' }>[]
+  const velEf = (efectos.filter((e) => e.tipo === 'velocidad') as Extract<Efecto, { tipo: 'velocidad' }>[]).filter((v) => cumpleArmadura(v.condicion))
   for (const v of velEf.filter((v) => (v.modo ?? 'andar') === 'andar' && v.fijar)) velocidadBase = Number(ev(v.valor))
-  const armaduraPuesta = armaduras.find((a) => ['LA', 'MA', 'HA'].includes(String(a.o.type).split('|')[0]))
-  const escudo = armaduras.find((a) => String(a.o.type).split('|')[0] === 'S')
-  const condicionVel = (c?: string) =>
-    !c || (c === 'sin armadura pesada' ? String(armaduraPuesta?.o.type ?? '').split('|')[0] !== 'HA' : c === 'sin armadura ni escudo' ? !armaduraPuesta && !escudo : true)
-  const velocidad: Record<string, number> = { andar: velocidadBase }
+  // Primero la Speed a pie con sus bonos; después los otros modos («igual a tu Speed» usa ya la Speed final)
+  let andar = velocidadBase
+  for (const v of velEf) if ((v.modo ?? 'andar') === 'andar' && !v.fijar) andar += Number(ev(v.valor))
+  if (armaduraPuesta?.o.strength && valores.str < Number(armaduraPuesta.o.strength)) andar -= 10
+  const velocidad: Record<string, number> = { andar }
   for (const v of velEf) {
     const m = v.modo ?? 'andar'
-    if (!condicionVel(v.condicion)) continue
-    if (v.fijar && m !== 'andar') velocidad[m] = Math.max(velocidad[m] ?? 0, Number(ev(v.valor)))
-    else if (!v.fijar) velocidad[m] = (velocidad[m] ?? (m === 'andar' ? velocidadBase : 0)) + Number(ev(v.valor))
+    if (m === 'andar') continue
+    const valor = v.valor === 'velocidad' ? andar : Number(ev(v.valor))
+    velocidad[m] = v.fijar ? Math.max(velocidad[m] ?? 0, valor) : (velocidad[m] ?? 0) + valor
   }
-  if (armaduraPuesta?.o.strength && valores.str < Number(armaduraPuesta.o.strength)) velocidad.andar -= 10
-  if (agot) for (const k of Object.keys(velocidad)) velocidad[k] = Math.max(0, velocidad[k] - 5 * agot)
+  const multiplicador = velEf.reduce((x, v) => x * (v.multiplicar ?? 1), 1)
+  for (const k of Object.keys(velocidad)) velocidad[k] = Math.max(0, velocidad[k] * multiplicador - 5 * agot)
   const sentidosMap: Record<string, number> = {}
   for (const e of efectos) if (e.tipo === 'sentido') sentidosMap[e.nombre] = Math.max(sentidosMap[e.nombre] ?? 0, Number(ev(e.valor)))
   // Drow: visión en la oscuridad 120
@@ -267,7 +314,8 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   const tieneArmaduraComp = (tipo: string) => comp('armadura').includes(({ LA: 'light', MA: 'medium', HA: 'heavy' } as Record<string, string>)[tipo])
   if (armaduraPuesta) {
     const t = String(armaduraPuesta.o.type).split('|')[0]
-    const dex = t === 'LA' ? mod('dex') : t === 'MA' ? Math.min(2, mod('dex')) : 0
+    const maxMedia = 2 + (valores.dex >= 16 ? bonos('destrezaMediaMax') : 0)
+    const dex = t === 'LA' ? mod('dex') : t === 'MA' ? Math.min(maxMedia, mod('dex')) : 0
     const magia = parseInt(String(armaduraPuesta.o.bonusAc ?? 0), 10) || 0
     opcionesCA.push({ valor: Number(armaduraPuesta.o.ac) + dex + magia + bonoEscudo, detalle: `${armaduraPuesta.it.nombre}${escudo ? ' + shield' : ''}` })
   } else {
@@ -281,6 +329,10 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   const mejorCA = opcionesCA.sort((a, b) => b.valor - a.valor)[0]
   const caDefensa = armaduraPuesta ? efectos.filter((e) => e.tipo === 'bono' && e.objetivo === 'ca' && e.condicion === 'armadura').reduce((s, e) => s + ev((e as { valor: number }).valor), 0) : 0
   const ca = { valor: mejorCA.valor + bonos('ca') + caDefensa, detalle: mejorCA.detalle }
+  const caMin = efectos.filter((e) => e.tipo === 'caMinima').reduce((x, e) => Math.max(x, ev((e as { valor: number }).valor)), 0)
+  if (ca.valor < caMin) Object.assign(ca, { valor: caMin, detalle: `${ca.detalle} (mínimo ${caMin})` })
+  const otrosCA = efectos.filter((e) => e.tipo === 'bono' && e.objetivo === 'ca' && !e.condicion && e.origen).map((e) => e.origen)
+  if (otrosCA.length) ca.detalle += ` + ${[...new Set(otrosCA)].join(', ')}`
   if (armaduraPuesta && !tieneArmaduraComp(String(armaduraPuesta.o.type).split('|')[0])) ca.detalle += ' (sin competencia: desventaja en STR/DEX y sin conjuros)'
 
   // ── PG
@@ -294,41 +346,78 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   const ataques: AtaqueHoja[] = []
   const bonoCuerpo = bonos('ataque') + bonos('ataqueCuerpo')
   const bonoDist = bonos('ataque') + bonos('ataqueDistancia')
-  for (const { it, o, extra } of armas) {
-    if (!it.equipado) continue
+  const mejorMental = (['int', 'wis', 'cha'] as Caracteristica[]).sort((a, b) => mod(b) - mod(a))[0]
+  const carLanz: Caracteristica = r.clases.find((c) => c.lanzador)?.lanzador?.caracteristica ?? mejorMental
+  const carAtaques = (efectos.filter((e) => e.tipo === 'carAtaque') as (Extract<Efecto, { tipo: 'carAtaque' }> & { origen?: string })[]).filter((e) => cumpleArmadura(e.condicion))
+  const extras = efectos.filter((e) => e.tipo === 'danoExtra') as (Extract<Efecto, { tipo: 'danoExtra' }> & { origen?: string })[]
+  const conExtras = (dano: string) => dano + extras.map((e) => `+${e.dado}`).join('')
+  const notasExtras = extras.map((e) => `+${e.dado}${e.tipoDano ? ` ${e.tipoDano}` : ''} (${e.origen})`)
+  const conSignoM = (m: number) => (m ? (m > 0 ? `+${m}` : `${m}`) : '')
+  const media = (dado: string) => [...dado.matchAll(/(\d*)d(\d+)/g)].reduce((x, m) => x + (Number(m[1] || 1) * (Number(m[2]) + 1)) / 2, 0)
+  const plantilla = (f: string) => f.replace(/{([^}]+)}/g, (_, x) => String(ev(x)))
+  const armasEquipadas = armas.filter((a) => a.it.equipado)
+  for (const { it, o, extra } of armasEquipadas) {
     const props = ((o.property as string[]) ?? []).map((x) => (typeof x === 'string' ? x.split('|')[0] : (x as Crudo).uid?.split('|')[0]))
     const distancia = String(o.type).split('|')[0] === 'R'
     const fin = props.includes('F')
-    const carAt: Caracteristica = fin ? (mod('dex') >= mod('str') ? 'dex' : 'str') : distancia ? 'dex' : 'str'
     const baseNombre = (o.baseItem ? String(o.baseItem).split('|')[0] : o.name).toLowerCase()
     const competente = armasComp.some((a) => a === o.weaponCategory || a === baseNombre || (a === 'martial ranged' && o.weaponCategory === 'martial' && distancia) || a.startsWith('martial melee') && o.weaponCategory === 'martial' && !distancia && !props.includes('2H') && !props.includes('H'))
     const magia = parseInt(String(o.bonusWeapon ?? 0), 10) || 0
+    const magica = magia > 0 || !!extra || (!!o.rarity && !['none', 'unknown'].includes(o.rarity))
+    // Característica: la normal del arma o la mejor de las que permiten los rasgos (Bladesong, Pact of the Blade...)
+    const notas: string[] = []
+    let carAt: Caracteristica = fin ? (mod('dex') > mod('str') ? 'dex' : 'str') : distancia ? 'dex' : 'str'
+    let dado = String(o.dmg1 ?? '1')
+    for (const x of carAtaques) {
+      const aplica =
+        x.armas === 'competentes' ? competente
+        : x.armas === 'cuerpo' ? !distancia
+        : x.armas === 'magicas' ? magica
+        : x.armas === 'monje' ? !distancia && (o.weaponCategory === 'simple' || (o.weaponCategory === 'martial' && props.includes('L')))
+        : x.armas.includes(baseNombre)
+      if (!aplica) continue
+      const c = x.car === 'conjuro' ? carLanz : x.car
+      if (mod(c) > mod(carAt)) {
+        carAt = c
+        notas.push(`${ABREV_CAR[c]} (${x.origen})`)
+      }
+      if (x.dado) {
+        const d2 = plantilla(x.dado)
+        if (media(d2) > media(dado)) dado = d2
+      }
+    }
     const magiaAt = magia + (parseInt(String(o.bonusWeaponAttack ?? 0), 10) || 0) + (extra ? extra.efectos.filter((e) => e.tipo === 'bono' && e.objetivo === 'ataque').reduce((s, e) => s + ev((e as { valor: number }).valor), 0) : 0)
     const magiaDa = magia + (parseInt(String(o.bonusWeaponDamage ?? 0), 10) || 0) + (extra ? extra.efectos.filter((e) => e.tipo === 'bono' && e.objetivo === 'dano').reduce((s, e) => s + ev((e as { valor: number }).valor), 0) : 0)
-    const m = mod(carAt) + magiaDa + bonos('dano')
+    const mBase = mod(carAt) + magiaDa + bonos('dano') + bonos('danoArma') + (carAt === 'str' ? bonos('danoFuerza') : 0) + (props.includes('H') ? bonos('danoPesada') : 0)
+    // Dueling: a una mano y sin otra arma
+    const duelo = !distancia && !props.includes('2H') && armasEquipadas.length === 1 ? bonos('danoDuelo') : 0
     const claveBase = o.baseItem ? claveDeRef(o.baseItem) : o._clave
     const tieneMaestria = maestrias.includes(claveBase) || maestrias.includes(o._clave)
     ataques.push({
       id: it.id,
       nombre: it.nombre,
-      bonoAtaque: mod(carAt) + (competente ? pb : 0) + magiaAt + (distancia ? bonoDist : bonoCuerpo),
-      dano: `${o.dmg1 ?? '1'}${m ? (m > 0 ? `+${m}` : m) : ''}`,
-      versatil: o.dmg2 ? `${o.dmg2}${m ? (m > 0 ? `+${m}` : m) : ''}` : undefined,
+      bonoAtaque: mod(carAt) + (competente ? pb : 0) + magiaAt + bonos('ataqueArma') + (distancia ? bonoDist : bonoCuerpo),
+      dano: conExtras(`${dado}${conSignoM(mBase + duelo)}`),
+      versatil: o.dmg2 ? conExtras(`${media(String(o.dmg2)) > media(dado) ? o.dmg2 : dado}${conSignoM(mBase)}`) : undefined,
       tipoDano: ({ S: 'slashing', P: 'piercing', B: 'bludgeoning' } as Record<string, string>)[o.dmgType] ?? o.dmgType ?? '',
       alcance: o.range ? `${o.range} ft` : props.includes('R') ? '10 ft' : '5 ft',
       propiedades: props,
       maestria: tieneMaestria && o.mastery ? String(o.mastery[0]).split('|')[0] : undefined,
       origen: extra ? 'Objeto de la campaña' : 'Inventario',
+      notas: [...notas, ...notasExtras],
     })
   }
-  ataques.push({ id: 'unarmed', nombre: 'Unarmed Strike', bonoAtaque: mod('str') + pb + bonoCuerpo, dano: `${Math.max(1, 1 + mod('str'))}`, tipoDano: 'bludgeoning', propiedades: [], origen: 'Reglas', alcance: '5 ft' })
+  ataques.push({
+    id: 'unarmed', nombre: 'Unarmed Strike', bonoAtaque: mod('str') + pb + bonoCuerpo,
+    dano: conExtras(`${Math.max(1, 1 + mod('str') + bonos('dano') + bonos('danoFuerza'))}`), tipoDano: 'bludgeoning', propiedades: [], origen: 'Reglas', alcance: '5 ft', notas: notasExtras,
+  })
   for (const e of efectos) {
     if (e.tipo !== 'ataque') continue
-    const c: Caracteristica = e.car === 'mejorFuerzaDestreza' ? (mod('dex') >= mod('str') ? 'dex' : 'str') : e.car === 'conjuro' || !e.car ? 'str' : e.car
-    const m = mod(c)
+    const c: Caracteristica = e.car === 'mejorFuerzaDestreza' ? (mod('dex') > mod('str') ? 'dex' : 'str') : e.car === 'conjuro' ? carLanz : e.car ?? 'str'
+    const m = mod(c) + bonos('dano') + (c === 'str' ? bonos('danoFuerza') : 0)
     ataques.push({
-      id: `ef:${e.nombre}`, nombre: e.nombre, bonoAtaque: m + (e.competente !== false ? pb : 0) + ev(e.bonoAtaque ?? 0) + bonoCuerpo,
-      dano: `${e.dano}${m ? (m > 0 ? `+${m}` : m) : ''}`, tipoDano: e.tipoDano, alcance: e.alcance ?? '5 ft', propiedades: [], origen: e.origen ?? '',
+      id: `ef:${e.nombre}`, nombre: e.nombre, bonoAtaque: mod(c) + (e.competente !== false ? pb : 0) + ev(e.bonoAtaque ?? 0) + (e.distancia ? bonoDist : bonoCuerpo),
+      dano: conExtras(`${e.dano}${conSignoM(m)}`), tipoDano: e.tipoDano, alcance: e.alcance ?? '5 ft', propiedades: [], origen: e.origen ?? '', notas: notasExtras,
     })
   }
   // Unarmed Strike (Martial Arts) sustituye al ataque desarmado básico
@@ -347,7 +436,6 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   const pacto = brujo ? { n: Number(columnaClase(brujo.clase, brujo.subclase, 'Spell Slots', brujo.nivel)) || 1, nivel: Number(columnaClase(brujo.clase, brujo.subclase, 'Slot Level', brujo.nivel)) || 1 } : undefined
   for (const l of lanzamiento) l.nivelMax = l.clase === 'Warlock' ? pacto?.nivel ?? 1 : espacios.length
 
-  const mejorMental = (['int', 'wis', 'cha'] as Caracteristica[]).sort((a, b) => mod(b) - mod(a))[0]
   const conjuros: ConjuroHoja[] = []
   const vistos = new Map<string, ConjuroHoja>()
   for (const c of [...r.conjuros, ...conjurosExtra]) {
@@ -372,7 +460,7 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
     if (h.idRecurso) recursos.push({ id: h.idRecurso, nombre: `${cj.name} (${c.origen})`, max: usos as number, recarga: c.recarga ?? 'largo', origen: c.origen })
   }
   // Libro de hechizos del mago: los no preparados también aparecen
-  for (const v of p.elecciones['cls:Wizard:libro'] ?? []) {
+  for (const v of libroMago(p)) {
     if (conjuros.some((c) => c.conjuro._clave === v)) continue
     const cj = d.conjuros.find((x) => x._clave === v)
     const l = lanzamiento.find((x) => x.clase === 'Wizard')
@@ -430,6 +518,7 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
     inmunidades: [...new Set(efectos.filter((e) => e.tipo === 'inmunidad').map((e) => (e as { valor: string }).valor))],
     inmunidadesCondicion: [...new Set(efectos.filter((e) => e.tipo === 'inmunidadCondicion').map((e) => (e as { valor: string }).valor))],
     ataques,
+    activables,
     lanzamiento,
     espacios,
     pacto,

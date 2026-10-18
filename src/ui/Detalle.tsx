@@ -1,9 +1,10 @@
 // Ventana de detalle de conjuros, objetos, dotes y condiciones (al pulsar un enlace del texto).
+import type { ReactNode } from 'react'
 import { create } from 'zustand'
 import { useEstado } from '../estado/store'
 import type { Conjuro, Crudo } from '../datos/tipos'
 import { Entradas } from './Entradas'
-import { ESCUELAS, NIVEL_CONJURO, titulo } from './glosario'
+import { ESCUELAS, NIVEL_CONJURO, TERMINOS_CONJURO, titulo } from './glosario'
 import { Modal } from './comun'
 
 type Peticion = { tipo: 'conjuro' | 'objeto' | 'dote' | 'condicion' | 'maestria'; clave: string }
@@ -36,6 +37,26 @@ export function componentesConjuro(c: Crudo): string {
   return partes.join(', ')
 }
 
+/** Etiqueta con explicación al pasar el ratón o al tocarla (V, S, M, Ritual, Concentration). */
+export function Termino({ t, children }: { t: keyof typeof TERMINOS_CONJURO; children?: ReactNode }) {
+  const x = TERMINOS_CONJURO[t]
+  return (
+    <span className="termino" tabIndex={0} data-tip={x.texto} aria-label={x.texto}>
+      {children ?? t}
+    </span>
+  )
+}
+
+/** Componentes con explicación: «V, S, M (una pluma)». */
+export function Componentes({ c }: { c: Crudo }) {
+  const k = c.components ?? {}
+  const partes: ReactNode[] = []
+  if (k.v) partes.push(<Termino key="v" t="V" />)
+  if (k.s) partes.push(<Termino key="s" t="S" />)
+  if (k.m) partes.push(<span key="m"><Termino t="M" /> ({typeof k.m === 'string' ? k.m : k.m.text})</span>)
+  return <>{partes.flatMap((x, i) => (i ? [', ', x] : [x]))}</>
+}
+
 export function duracionConjuro(c: Crudo): string {
   return (c.duration as Crudo[])
     ?.map((d) => {
@@ -53,13 +74,13 @@ export function FichaConjuro({ c }: { c: Conjuro }) {
     <div className="ficha-conjuro">
       <p className="sutil">
         {NIVEL_CONJURO(c.level).replace('Cantrips', 'Cantrip')} · {ESCUELAS[c.school] ?? c.school}
-        {c.meta?.ritual ? ' · Ritual' : ''}
+        {c.meta?.ritual && <> · <Termino t="R">Ritual</Termino></>}
       </p>
       <dl className="datos-conjuro">
         <dt>Casting Time</dt><dd>{tiempoConjuro(c)}</dd>
         <dt>Range</dt><dd>{alcanceConjuro(c)}</dd>
-        <dt>Components</dt><dd>{componentesConjuro(c)}</dd>
-        <dt>Duration</dt><dd>{duracionConjuro(c)}</dd>
+        <dt>Components</dt><dd><Componentes c={c} /></dd>
+        <dt>Duration</dt><dd>{duracionConjuro(c).startsWith('Concentration') ? <><Termino t="C">Concentration</Termino>{duracionConjuro(c).slice('Concentration'.length)}</> : duracionConjuro(c)}</dd>
       </dl>
       <Entradas entries={c.entries} />
       {c.entriesHigherLevel && <Entradas entries={c.entriesHigherLevel} />}

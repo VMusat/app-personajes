@@ -357,6 +357,11 @@ function procesarMarcaCampaña(ctx: Ctx) {
   }
 }
 
+/** Libro de hechizos del mago: los aprendidos al subir de nivel más los copiados durante la campaña. */
+export function libroMago(p: Personaje): string[] {
+  return [...new Set([...(p.elecciones['cls:Wizard:libro'] ?? []), ...(p.elecciones['cls:Wizard:libroCopiados'] ?? [])])]
+}
+
 export function aspectoEsInvertido(aspecto: string): boolean {
   return ASPECTOS.some((a) => a.invertida === aspecto)
 }
@@ -646,7 +651,7 @@ function procesarAdicionales(ctx: Ctx, bloques: Crudo[], id: string, origen: str
     }
     for (const f of r.fijos) añadir(f.clave, f)
     for (const { nivel: nv, i, e } of r.aElegir) {
-      const libro = ctx.p.elecciones[`cls:Wizard:libro`] ?? []
+      const libro = libroMago(ctx.p)
       const opciones = filtrarConjuros(ctx.d, e.filtro, libro).map((c) => ({ valor: c._clave, etiqueta: c.name, grupo: c.level ? `Nivel ${c.level}` : 'Trucos' }))
       for (const v of ctx.elegir({ id: `${id}:as${bi}:${e.modo}:${nv}:${i}`, tipo: 'conjuro', etiqueta: etiquetaFiltro(e.filtro), origen, nivel: nv !== '_' && aPj && /^d+$/.test(nv) ? aPj(Number(nv)) : nivelOrigen, n: e.n, opciones, meta: { filtro: e.filtro } }))
         añadir(v, e)
@@ -883,19 +888,20 @@ function procesarRasgo(ctx: Ctx, r: Rasgo, nivelPj: number, info: InfoClase, niv
 
 /** Evalúa ya las fórmulas que dependen de la tabla o del nivel de clase (no las de características). */
 function concretar(e: Efecto, vars: (n: string) => number, c: Clase, info: InfoClase, nivelFinal: number): Efecto {
-  const dependeDeClase = (f: unknown) => typeof f === 'string' && /col:|nivel:|escala/.test(f) && !/(str|dex|con|int|wis|cha)/.test(f)
+  const dependeDeClase = (f: unknown) => typeof f === 'string' && /col:|nivel:|escala/.test(f) && !/\b(str|dex|con|int|wis|cha)\b/.test(f)
   const columna = (f: string) => String(columnaClase(c, info.subclase, f.slice(4).replace(/_/g, ' '), nivelFinal) ?? '')
   const o = { ...e } as Crudo
   for (const k of ['usos', 'valor', 'recargaCorta']) {
     if (dependeDeClase(o[k])) {
-      if (String(o[k]).startsWith('col:') && k === 'valor') o[k] = parseInt(columna(o[k]).replace(/[^d-]/g, ''), 10) || 0
+      if (String(o[k]).startsWith('col:') && k === 'valor') o[k] = parseInt(columna(o[k]).replace(/[^\d-]/g, ''), 10) || 0
       else o[k] = evaluar(o[k], vars)
     }
   }
   for (const k of ['dado', 'dano']) {
-    if (typeof o[k] === 'string' && o[k].startsWith('col:')) o[k] = columna(o[k]).toLowerCase()
+    if (typeof o[k] === 'string' && o[k].includes('col:')) o[k] = o[k].replace(/col:\w+/g, (x: string) => columna(x).toLowerCase())
     else if (typeof o[k] === 'string' && o[k].startsWith('escala')) o[k] = `d${evaluar(o[k], vars)}`
   }
+  if (e.tipo === 'activable') o.efectos = e.efectos.map((x) => concretar(x, vars, c, info, nivelFinal))
   return o as Efecto
 }
 
@@ -950,7 +956,7 @@ function procesarEleccionManual(ctx: Ctx, em: EleccionManual, id: string, origen
       break
     case 'conjuro': {
       const f: FiltroConjuros = parsearFiltro(em.filtro ?? '')
-      const libro = ctx.p.elecciones['cls:Wizard:libro'] ?? []
+      const libro = libroMago(ctx.p)
       opciones = filtrarConjuros(ctx.d, f, libro).map((c) => ({ valor: c._clave, etiqueta: c.name, grupo: `Nivel ${c.level}` }))
       break
     }
@@ -1073,15 +1079,19 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
     }).forEach((v) => ctx.r.conjuros.push({ clave: v, origen, siempre: true, clase: c.name }))
   }
 
-  // Libro de hechizos (mago): 6 al nivel 1 y 2 más por nivel
+  // Libro de hechizos (mago): 6 al nivel 1 y 2 más por nivel, más los que copie durante la campaña
   let libro: string[] | undefined
   if (fuente.spellsKnownProgressionFixed) {
     const n = (fuente.spellsKnownProgressionFixed as number[]).slice(0, L).reduce((a, b) => a + b, 0)
+    const copiados = ctx.p.elecciones[`${id}:libroCopiados`] ?? []
     libro = ctx.elegir({
       id: `${id}:libro`, tipo: 'libro', etiqueta: 'Spellbook', origen, nivel: nivelPj, n, cambia: 'nivel',
-      opciones: d.conjuros.filter((cj) => cj.level >= 1 && cj.level <= maxNivel && deLista(cj)).map((cj) => opcion(cj, `Nivel ${cj.level}`)),
+      opciones: d.conjuros
+        .filter((cj) => cj.level >= 1 && cj.level <= maxNivel && deLista(cj))
+        .map((cj) => ({ ...opcion(cj, `Nivel ${cj.level}`), ...(copiados.includes(cj._clave) ? { bloqueada: 'Ya está en tu libro (copiado)' } : {}) })),
       meta: { fijos: fijos.filter((x) => x.nivel > 0) },
     })
+    libro = [...libro, ...copiados.filter((k) => !libro!.includes(k))]
   }
 
   // Conjuros preparados

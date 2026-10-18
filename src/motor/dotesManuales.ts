@@ -24,7 +24,7 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   // Estilos de combate
   'archery|xphb': [{ tipo: 'bono', objetivo: 'ataqueDistancia', valor: 2 }],
   'defense|xphb': [{ tipo: 'bono', objetivo: 'ca', valor: 1, condicion: 'armadura' }],
-  'dueling|xphb': [{ tipo: 'nota', texto: '+2 al daño con un arma cuerpo a cuerpo a una mano y sin otra arma.' }],
+  'dueling|xphb': [{ tipo: 'bono', objetivo: 'danoDuelo', valor: 2 }],
   'great weapon fighting|xphb': [{ tipo: 'nota', texto: 'Trata 1 y 2 como 3 en los dados de daño con armas a dos manos o versátiles.' }],
   'two-weapon fighting|xphb': [{ tipo: 'nota', texto: 'Añade el modificador al daño del ataque extra con dos armas.' }],
   'thrown weapon fighting|xphb': [{ tipo: 'nota', texto: '+2 al daño con armas arrojadizas.' }],
@@ -44,6 +44,10 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   ],
   'martial weapon training|xphb': [{ tipo: 'competencia', categoria: 'arma', valor: 'martial' }],
   'weapon master|xphb': [{ tipo: 'nota', texto: 'Maestría de un arma adicional (cambia tras un descanso largo).' }],
+  'great weapon master|xphb': [{ tipo: 'bono', objetivo: 'danoPesada', valor: 'pb' }],
+  'medium armor master|xphb': [{ tipo: 'bono', objetivo: 'destrezaMediaMax', valor: 1 }],
+  'heavy armor master|xphb': [{ tipo: 'nota', texto: 'Con armadura pesada, reduce en PB el daño contundente, perforante y cortante de cada ataque.' }],
+  'athlete|xphb': [{ tipo: 'velocidad', modo: 'trepar', valor: 'velocidad', fijar: true }],
   'durable|xphb': [{ tipo: 'nota', texto: 'Ventaja en salvaciones de muerte; acción adicional para gastar un dado de golpe.' }],
   'observant|xphb': [{ tipo: 'nota', texto: 'Búsqueda rápida como acción adicional.' }],
   // Dotes con usos limitados
@@ -62,5 +66,7 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   'spellfire spark|frhof': [{ tipo: 'recurso', nombre: 'Spellfire Spark (Bonus Action)', usos: 'pb', recarga: 'largo' }],
   'ritual caster|xphb': [{ tipo: 'recurso', nombre: 'Ritual Caster: Quick Ritual', usos: 1, recarga: 'largo' }],
   // Invocaciones y otros rasgos opcionales con usos
+  'pact of the blade|xphb': [{ tipo: 'carAtaque', car: 'cha', armas: 'cuerpo' }],
+  'gift of the depths|xphb': [{ tipo: 'velocidad', modo: 'nado', valor: 'velocidad', fijar: true }],
   'gift of the protectors|xphb': [{ tipo: 'recurso', nombre: 'Gift of the Protectors', usos: 1, recarga: 'largo' }],
 }

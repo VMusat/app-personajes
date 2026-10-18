@@ -328,6 +328,7 @@ function ModalDescanso({ tipo, p, h, actualizar, alCerrar }: PropsPestaña & { t
         x.estado.agotamiento = Math.max(0, x.estado.agotamiento - 1)
         if (fueraMiasma) x.estado.disolucion = Math.max(0, x.estado.disolucion - 1)
         x.estado.concentracion = undefined
+        x.estado.activos = []
       }
     })
     alCerrar()

@@ -90,7 +90,18 @@ export const RASGOS_MANUALES: Record<string, RasgoManual> = {
   },
   'Artificer|Armorer|3|Armorer Spells': conjuroSub,
   'Artificer|Armorer|3|Armor Model': {
-    elecciones: [{ id: 'modelo', tipo: 'opcion', etiqueta: 'Armor Model', n: 1, de: ['Dreadnaught', 'Guardian', 'Infiltrator'], cambia: 'corto' }],
+    elecciones: [{
+      id: 'modelo', tipo: 'opcion', etiqueta: 'Armor Model', n: 1, de: ['Dreadnaught', 'Guardian', 'Infiltrator'], cambia: 'corto',
+      // El arma de cada modelo ataca con INT
+      opciones: {
+        Dreadnaught: [{ tipo: 'ataque', nombre: 'Force Demolisher', dano: '1d10', tipoDano: 'force', car: 'int', competente: true, alcance: '10 ft' }],
+        Guardian: [{ tipo: 'ataque', nombre: 'Thunder Pulse', dano: '1d8', tipoDano: 'thunder', car: 'int', competente: true }],
+        Infiltrator: [
+          { tipo: 'ataque', nombre: 'Lightning Launcher', dano: '1d6', tipoDano: 'lightning', car: 'int', competente: true, alcance: '90/300 ft', distancia: true },
+          { tipo: 'velocidad', valor: 5 },
+        ],
+      },
+    }],
   },
   'Artificer|Armorer|9|Improved Armorer': { sinEleccion: 'El plano extra de armadura entra en «Plans Known»' },
   'Artificer|Artillerist|3|Tools of the Trade': {

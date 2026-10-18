@@ -9,7 +9,19 @@ const r = (nombre: string, usos: string | number, recarga: 'largo' | 'corto' | '
 
 export const MECANICAS: Record<string, Efecto[]> = {
   'Artificer||7|Flash of Genius': [r('Flash of Genius', 'max(1,int)', 'largo')],
-  'Barbarian||1|Rage': [r('Rage', 'col:Rages', 'largo', { recargaCorta: 1 })],
+  'Barbarian||1|Rage': [
+    r('Rage', 'col:Rages', 'largo', { recargaCorta: 1 }),
+    {
+      tipo: 'activable', nombre: 'Rage', requisito: 'sin armadura pesada',
+      texto: 'Resistance a bludgeoning, piercing y slashing; Rage Damage en los ataques con STR; ventaja en pruebas y salvaciones de STR.',
+      efectos: [
+        { tipo: 'bono', objetivo: 'danoFuerza', valor: 'col:Rage_Damage' },
+        { tipo: 'resistencia', valor: 'bludgeoning' },
+        { tipo: 'resistencia', valor: 'piercing' },
+        { tipo: 'resistencia', valor: 'slashing' },
+      ],
+    },
+  ],
   'Barbarian||1|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+con', sinArmadura: true, escudo: true }],
   'Barbarian||5|Fast Movement': [{ tipo: 'velocidad', valor: 10, condicion: 'sin armadura pesada' }],
   'Bard|Dance|3|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+cha', sinArmadura: true }],
@@ -28,7 +40,11 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Fighter|Battle Master|3|Combat Superiority': [r('Superiority Dice', 'escala(nivel:Fighter,3,4,7,5,15,6)', 'corto', { dado: 'escala(nivel:Fighter,3,8,10,10,18,12)' })],
   'Fighter|Psi Warrior|3|Psionic Power': [r('Psionic Energy Dice', 'col:Number', 'largo', { recargaCorta: 1, dado: 'col:Die_Size' })],
   'Rogue|Soulknife|3|Psionic Power': [r('Psionic Energy Dice', 'col:Number', 'largo', { recargaCorta: 1, dado: 'col:Die_Size' })],
-  'Monk||1|Martial Arts': [{ tipo: 'ataque', nombre: 'Unarmed Strike (Martial Arts)', dano: 'col:Martial_Arts', tipoDano: 'bludgeoning', car: 'mejorFuerzaDestreza', competente: true }],
+  'Monk||1|Martial Arts': [
+    { tipo: 'ataque', nombre: 'Unarmed Strike (Martial Arts)', dano: 'col:Martial_Arts', tipoDano: 'bludgeoning', car: 'mejorFuerzaDestreza', competente: true },
+    // Dexterous Attacks y Martial Arts Die con armas de monje, sin armadura ni escudo
+    { tipo: 'carAtaque', car: 'dex', armas: 'monje', dado: 'col:Martial_Arts', condicion: 'sin armadura ni escudo' },
+  ],
   'Monk||1|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+wis', sinArmadura: true }],
   'Monk||2|Unarmored Movement': [{ tipo: 'velocidad', valor: 'col:Unarmored_Movement', condicion: 'sin armadura ni escudo' }],
   "Monk||2|Monk's Focus": [r('Focus Points', 'col:Focus_Points', 'corto')],
@@ -110,7 +126,6 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Sorcerer|Clockwork|3|Restore Balance': [r('Restore Balance', 'max(1,cha)', 'largo')],
   'Sorcerer|Clockwork|14|Trance of Order': [r('Trance of Order', 1, 'largo')],
   'Sorcerer|Clockwork|18|Clockwork Cavalcade': [r('Clockwork Cavalcade', 1, 'largo')],
-  'Sorcerer|Draconic|14|Dragon Wings': [r('Dragon Wings', 1, 'largo')],
   'Sorcerer|Wild Magic|3|Tides of Chaos': [r('Tides of Chaos', 1, 'largo')],
   'Sorcerer|Wild Magic|18|Tamed Surge': [r('Tamed Surge', 1, 'largo')],
   'Warlock||9|Contact Patron': [{ tipo: 'conjuro', conjuro: 'contact other plane|xphb', siempre: true, usos: 1, recarga: 'largo' }],
@@ -125,7 +140,38 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Wizard|Diviner|14|Greater Portent': [r('Portent', 3, 'largo', { dado: '1d20' })],
   'Wizard|Diviner|10|The Third Eye': [r('The Third Eye', 1, 'corto')],
   'Wizard|Illusionist|10|Illusory Self': [r('Illusory Self', 1, 'corto')],
-  'Wizard|Bladesinger|3|Bladesong': [r('Bladesong', 'max(1,int)', 'largo')],
+  'Wizard|Bladesinger|3|Bladesong': [
+    r('Bladesong', 'max(1,int)', 'largo'),
+    {
+      tipo: 'activable', nombre: 'Bladesong', requisito: 'sin armadura ni escudo',
+      texto: '+INT a la AC (mínimo +1), +10 ft de Speed, INT para atacar con armas en las que eres competente, ventaja en Acrobatics y +INT a las salvaciones de concentración.',
+      efectos: [
+        { tipo: 'bono', objetivo: 'ca', valor: 'max(1,int)' },
+        { tipo: 'velocidad', valor: 10 },
+        { tipo: 'carAtaque', car: 'int', armas: 'competentes' },
+      ],
+    },
+  ],
+  'Bard|Dance|3|Bardic Damage': [{ tipo: 'ataque', nombre: 'Unarmed Strike (Dazzling Footwork)', dano: '1col:Bardic_Die', tipoDano: 'bludgeoning', car: 'dex', competente: true }],
+  'Artificer|Battle Smith|3|Battle Ready': [{ tipo: 'carAtaque', car: 'int', armas: 'magicas' }],
+  'Paladin|Devotion|3|Sacred Weapon': [
+    {
+      tipo: 'activable', nombre: 'Sacred Weapon', texto: '+CHA (mínimo +1) a los ataques con el arma cuerpo a cuerpo imbuida; puede hacer daño radiant.',
+      efectos: [{ tipo: 'bono', objetivo: 'ataqueArma', valor: 'max(1,cha)' }],
+    },
+  ],
+  'Paladin|Glory|7|Aura of Alacrity': [{ tipo: 'velocidad', valor: 10 }],
+  'Ranger||6|Roving': [
+    { tipo: 'velocidad', valor: 10, condicion: 'sin armadura pesada' },
+    { tipo: 'velocidad', modo: 'trepar', valor: 'velocidad', fijar: true },
+    { tipo: 'velocidad', modo: 'nado', valor: 'velocidad', fijar: true },
+  ],
+  'Rogue|Thief|3|Second-Story Work': [{ tipo: 'velocidad', modo: 'trepar', valor: 'velocidad', fijar: true }],
+  'Druid|Sea|6|Aquatic Affinity': [{ tipo: 'velocidad', modo: 'nado', valor: 'velocidad', fijar: true }],
+  'Sorcerer|Draconic|14|Dragon Wings': [
+    r('Dragon Wings', 1, 'largo'),
+    { tipo: 'activable', nombre: 'Dragon Wings', texto: 'Fly Speed de 60 ft durante 1 hora.', efectos: [{ tipo: 'velocidad', modo: 'vuelo', valor: 60, fijar: true }] },
+  ],
 }
 
 // ── Especies: usos limitados, opciones y rasgos que solo llegan a cierto nivel de personaje.
@@ -140,9 +186,21 @@ export interface MecanicaEspecie {
 
 export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
   'Aasimar|Healing Hands': { efectos: [r('Healing Hands', 1, 'largo', { dado: '{pb}d4' })] },
-  'Aasimar|Celestial Revelation': { nivelMin: 3, efectos: [r('Celestial Revelation', 1, 'largo')] },
+  'Aasimar|Celestial Revelation': {
+    nivelMin: 3,
+    efectos: [
+      r('Celestial Revelation', 1, 'largo'),
+      { tipo: 'activable', nombre: 'Heavenly Wings', texto: 'Celestial Revelation: Fly Speed igual a tu Speed durante 1 minuto.', efectos: [{ tipo: 'velocidad', modo: 'vuelo', valor: 'velocidad', fijar: true }] },
+    ],
+  },
   'Dragonborn|Breath Weapon': { efectos: [r('Breath Weapon', 'pb', 'largo', { dado: '{escala(nivel,1,1,5,2,11,3,17,4)}d10' })] },
-  'Dragonborn|Draconic Flight': { nivelMin: 5, efectos: [r('Draconic Flight', 1, 'largo')] },
+  'Dragonborn|Draconic Flight': {
+    nivelMin: 5,
+    efectos: [
+      r('Draconic Flight', 1, 'largo'),
+      { tipo: 'activable', nombre: 'Draconic Flight', texto: 'Fly Speed igual a tu Speed durante 10 minutos.', efectos: [{ tipo: 'velocidad', modo: 'vuelo', valor: 'velocidad', fijar: true }] },
+    ],
+  },
   'Dwarf|Stonecunning': { efectos: [r('Stonecunning', 'pb', 'largo')] },
   'Goliath|Giant Ancestry': {
     eleccion: {
@@ -157,7 +215,14 @@ export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
       },
     },
   },
-  'Goliath|Large Form': { nivelMin: 5, efectos: [r('Large Form', 1, 'largo')] },
+  'Goliath|Large Form': {
+    nivelMin: 5,
+    efectos: [
+      r('Large Form', 1, 'largo'),
+      { tipo: 'activable', nombre: 'Large Form', texto: 'Tamaño Large durante 10 minutos: ventaja en pruebas de STR y +10 ft de Speed.', efectos: [{ tipo: 'velocidad', valor: 10 }] },
+    ],
+  },
+  'Warforged|Integrated Protection': { efectos: [{ tipo: 'bono', objetivo: 'ca', valor: 1 }] },
   'Khoravar|Lethargy Resilience': { efectos: [r('Lethargy Resilience (1d4 Long Rests)', 1, 'nunca')] },
   'Orc|Adrenaline Rush': { efectos: [r('Adrenaline Rush', 'pb', 'corto')] },
   'Orc|Relentless Endurance': { efectos: [r('Relentless Endurance', 1, 'largo')] },
@@ -166,9 +231,9 @@ export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
     eleccion: {
       etiqueta: 'Shifting',
       opciones: {
-        Beasthide: [{ tipo: 'nota', texto: 'Beasthide: al cambiar, +1d6 HP temporales extra y +1 AC mientras dure.' }],
+        Beasthide: [{ tipo: 'activable', nombre: 'Shifting (Beasthide)', texto: '+1 AC mientras dure; al cambiar, 1d6 HP temporales extra.', efectos: [{ tipo: 'bono', objetivo: 'ca', valor: 1 }] }],
         Longtooth: [{ tipo: 'ataque', nombre: 'Longtooth (shifted)', dano: '1d6', tipoDano: 'piercing', car: 'str', competente: true }],
-        Swiftstride: [{ tipo: 'nota', texto: 'Swiftstride: al cambiar, +10 ft de Speed y movimiento de 10 ft como Reaction.' }],
+        Swiftstride: [{ tipo: 'activable', nombre: 'Shifting (Swiftstride)', texto: '+10 ft de Speed mientras dure; movimiento de 10 ft como Reaction.', efectos: [{ tipo: 'velocidad', valor: 10 }] }],
         Wildhunt: [{ tipo: 'nota', texto: 'Wildhunt: al cambiar, ventaja en las pruebas de WIS y nadie tiene ventaja contra ti salvo que estés Incapacitated.' }],
       },
     },

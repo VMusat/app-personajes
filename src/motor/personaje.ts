@@ -45,6 +45,8 @@ export interface EstadoJuego {
   disolucion: number
   inspiracion: boolean
   concentracion?: string
+  /** Efectos temporales activos (Rage, Bladesong, Mage Armor...), por nombre. */
+  activos?: string[]
 }
 
 export interface Nota {

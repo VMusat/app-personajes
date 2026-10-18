@@ -458,3 +458,50 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
   .guia-ficha { grid-template-columns: 1fr; gap: 0 0; }
   .guia-ficha dd { margin-bottom: 6px; }
 }
+
+/* Términos con explicación (V, S, M, Ritual, Concentration): al pasar el ratón o al tocarlos */
+.termino {
+  position: relative;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+  outline: none;
+}
+.termino:hover::after,
+.termino:focus::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: var(--fondo-2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+  font-size: 0.8rem;
+  font-weight: normal;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  z-index: 50;
+  pointer-events: none;
+}
+.termino:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; border-radius: 3px; }
+
+/* Efectos activables (Rage, Bladesong, Mage Armor...) */
+.lista-activables { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.5rem; }
+.activable {
+  display: flex; gap: 0.6rem; align-items: flex-start;
+  padding: 0.55rem 0.7rem; border: 1px solid var(--borde); border-radius: 10px; background: var(--fondo-2); cursor: pointer;
+}
+.activable input { flex: none; width: 1.05rem; height: 1.05rem; margin: 0.15rem 0 0; accent-color: var(--acento); }
+.activable > span { display: flex; flex-direction: column; gap: 0.15rem; }
+.activable.activo { border-color: var(--acento); background: var(--acento-suave); }
+.activable.bloqueado { border-style: dashed; }
+.activable-texto { color: var(--texto-suave); font-size: 0.8rem; }
+.aviso-texto { color: var(--aviso); font-size: 0.8rem; }
+.nota-ataque { display: block; color: var(--acento); font-size: 0.75rem; }
