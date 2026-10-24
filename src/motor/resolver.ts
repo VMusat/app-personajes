@@ -257,7 +257,8 @@ export function resolver(p: Personaje, d: Datos): Resolucion {
  * elegidas, la elección queda pendiente para cambiarlas por otras.
  */
 function revisarCompetenciasRepetidas(r: Resolucion) {
-  const k = (v: string) => v.toLowerCase()
+  // Skilled guarda «habilidad:deception» / «herramienta:forgery kit»
+  const k = (v: string) => v.toLowerCase().replace(/^(habilidad|herramienta):/, '')
   const total = new Map<string, number>()
   for (const x of r.efectos) {
     if (x.tipo !== 'competencia' || (x.categoria !== 'habilidad' && x.categoria !== 'herramienta')) continue

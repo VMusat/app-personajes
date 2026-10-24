@@ -139,6 +139,18 @@ describe('hoja derivada', () => {
     expect(e.opciones.find((o) => o.valor === 'sleight of hand')?.bloqueada).toBeTruthy()
   })
 
+  it('Skilled avisa si repite una habilidad del trasfondo', () => {
+    const { p, d } = crear('fighter|xphb', 1, { str: 15, dex: 14, con: 13, int: 8, wis: 12, cha: 10 })
+    p.trasfondo = 'charlatan|xphb' // Deception, Sleight of Hand y la dote Skilled
+    p.elecciones['tra:dote'] = ['original']
+    autocompletar(p, d)
+    const id = derivar(p, d).resolucion.elecciones.find((e) => e.etiqueta === 'Habilidades o herramientas')!.id
+    p.elecciones[id] = ['habilidad:deception', 'habilidad:history', 'herramienta:forgery kit']
+    const e = derivar(p, d).resolucion.elecciones.find((x) => x.id === id)!
+    expect(e.meta?.repetidas).toEqual(['habilidad:deception', 'herramienta:forgery kit'])
+    expect(e.completa).toBe(false)
+  })
+
   it('los planos del artificiero respetan el nivel de las tablas', async () => {
     const { nivelesPlanos } = await import('../src/motor/resolver')
     const d = datosDePrueba()
