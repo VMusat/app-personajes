@@ -113,9 +113,11 @@ function ListaUnica({ e, alCambiar, competentes, repetidos }: Props) {
             <label>
               <input type="radio" name={e.id} checked={e.valor[0] === o.valor} disabled={!!o.bloqueada && e.valor[0] !== o.valor} onChange={() => alCambiar([o.valor])} />
               <span className="opcion-texto">
-                <b>{o.etiqueta}</b>
-                {esAU(o.valor) && <span className="insignia au" title="Arcana Unleashed">AU</span>}
-                {aviso && <span className="insignia aviso">{aviso}</span>}
+                <span className="opcion-titulo">
+                  <b>{o.etiqueta}</b>
+                  {esAU(o.valor) && <span className="insignia au" title="Arcana Unleashed">AU</span>}
+                  {aviso && <span className="insignia aviso">{aviso}</span>}
+                </span>
                 {o.detalle && <small>{o.detalle}</small>}
               </span>
               <BotonInfo e={e} o={o} />
@@ -196,9 +198,11 @@ function ListaMultiple({ e, alCambiar, competentes, repetidos, buscador }: Props
                 <label key={o.valor} className={`opcion compacta ${marcado ? 'elegida' : ''} ${off ? 'deshabilitada' : ''}`}>
                   <input type={e.n === 1 ? 'radio' : 'checkbox'} name={e.id} checked={marcado} disabled={off} onChange={() => alternar(o.valor)} />
                   <span className="opcion-texto">
-                    {o.etiqueta}
-                    {esAU(o.valor) && <span className="insignia au" title="Arcana Unleashed">AU</span>}
-                    {aviso && <span className="insignia aviso">{aviso}</span>}
+                    <span className="opcion-titulo">
+                      {o.etiqueta}
+                      {esAU(o.valor) && <span className="insignia au" title="Arcana Unleashed">AU</span>}
+                      {aviso && <span className="insignia aviso">{aviso}</span>}
+                    </span>
                     {o.detalle && <small>{o.detalle}</small>}
                   </span>
                   <BotonInfo e={e} o={o} />

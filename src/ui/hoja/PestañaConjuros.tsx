@@ -135,6 +135,7 @@ export function PestañaConjuros({ p, h, actualizar }: PropsPestaña) {
               <li key={`${c.conjuro._clave}${c.origen}`} className={c.preparado || c.siempre || nivel === 0 ? '' : 'no-preparado'}>
                 <button className="enlace nombre-conjuro" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: c.conjuro._clave })}>
                   {c.conjuro.name}
+                  {c.conjuro._nombre !== c.conjuro.name && <small className="sutil"> ({c.conjuro._nombre})</small>}
                   {c.conjuro.source === 'AU' && <span className="insignia au" title="Arcana Unleashed">AU</span>}
                 </button>
                 <small className="sutil">

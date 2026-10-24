@@ -420,6 +420,11 @@ export function nivelesPlanos(d: Datos): Map<string, number> {
   return m
 }
 
+/** Nombre del conjuro con el del setting si lo tiene: «Festering Blast (Ráfaga pútrida)». */
+export function nombreConjuro(c: Conjuro): string {
+  return c._nombre && c._nombre !== c.name ? `${c.name} (${c._nombre})` : c.name
+}
+
 /** Libro de hechizos del mago: los aprendidos al subir de nivel más los copiados durante la campaña. */
 export function libroMago(p: Personaje): string[] {
   return [...new Set([...(p.elecciones['cls:Wizard:libro'] ?? []), ...(p.elecciones['cls:Wizard:libroCopiados'] ?? [])])]
@@ -717,7 +722,7 @@ function procesarAdicionales(ctx: Ctx, bloques: Crudo[], id: string, origen: str
     for (const f of r.fijos) añadir(f.clave, f)
     for (const { nivel: nv, i, e } of r.aElegir) {
       const libro = libroMago(ctx.p)
-      const opciones = filtrarConjuros(ctx.d, e.filtro, libro).map((c) => ({ valor: c._clave, etiqueta: c.name, grupo: c.level ? `Nivel ${c.level}` : 'Trucos' }))
+      const opciones = filtrarConjuros(ctx.d, e.filtro, libro).map((c) => ({ valor: c._clave, etiqueta: nombreConjuro(c), grupo: c.level ? `Nivel ${c.level}` : 'Trucos' }))
       for (const v of ctx.elegir({ id: `${id}:as${bi}:${e.modo}:${nv}:${i}`, tipo: 'conjuro', etiqueta: etiquetaFiltro(e.filtro), origen, nivel: nv !== '_' && aPj && /^d+$/.test(nv) ? aPj(Number(nv)) : nivelOrigen, n: e.n, opciones, meta: { filtro: e.filtro } }))
         añadir(v, e)
     }
@@ -1022,7 +1027,7 @@ function procesarEleccionManual(ctx: Ctx, em: EleccionManual, id: string, origen
     case 'conjuro': {
       const f: FiltroConjuros = parsearFiltro(em.filtro ?? '')
       const libro = libroMago(ctx.p)
-      opciones = filtrarConjuros(ctx.d, f, libro).map((c) => ({ valor: c._clave, etiqueta: c.name, grupo: `Nivel ${c.level}` }))
+      opciones = filtrarConjuros(ctx.d, f, libro).map((c) => ({ valor: c._clave, etiqueta: nombreConjuro(c), grupo: `Nivel ${c.level}` }))
       break
     }
     case 'plano': {
@@ -1136,7 +1141,7 @@ function procesarAcumulativas(ctx: Ctx, info: InfoClase, nivelesClase: Record<st
     const fx = fijos.find((y) => y.clave === cj._clave)
     return fx ? `Ya lo tienes (${fx.origen})` : undefined
   }
-  const opcion = (cj: Conjuro, grupo?: string): Opcion => ({ valor: cj._clave, etiqueta: cj.name, grupo, bloqueada: yaTiene(cj) })
+  const opcion = (cj: Conjuro, grupo?: string): Opcion => ({ valor: cj._clave, etiqueta: nombreConjuro(cj), grupo, bloqueada: yaTiene(cj) })
 
   if (nTrucos) {
     ctx.elegir({
