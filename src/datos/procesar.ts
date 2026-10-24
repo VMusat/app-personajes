@@ -123,7 +123,10 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
       .filter((b: Crudo) => !excluidoTrasfondo(b))
       .map((b: Crudo) => {
         const s = ren[`${b.name}|${b.source}`]
-        const b2 = { ...b, startingEquipment: corregirOro(b.startingEquipment, b.entries) }
+        const b2: Crudo = { ...b, startingEquipment: corregirOro(b.startingEquipment, b.entries) }
+        // Semi-AU: dotes de origen de Arcana Unleashed como alternativa a la del trasfondo
+        const au = (trasfondosSetting.semiAU as Record<string, string[]>)[`${b.name}|${b.source}`]
+        if (au) b2._dotesAU = au
         return s ? entidad(b2, s.nombre, s.setting) : entidad(b2)
       }),
     ...trasfondosSetting.nuevos.map((b) => entidad(b as Crudo, b.name, b._setting)),

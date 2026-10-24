@@ -17,6 +17,8 @@ export interface Entidad extends Crudo {
   _nombre: string
   /** Texto del setting que explica qué es en el mundo de la campaña. */
   _setting?: string
+  /** Trasfondos Semi-AU: dotes de origen de Arcana Unleashed que se pueden tomar en lugar de la suya. */
+  _dotesAU?: string[]
 }
 
 export interface Clase extends Entidad {

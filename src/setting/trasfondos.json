@@ -1,5 +1,17 @@
 {
   "_nota": "Trasfondos del mundo (Reglas/Trasfondos del mundo). Las descripciones son públicas: sin secretos ni metajuego.",
+  "_semiAU": "Dotes de origen de Arcana Unleashed que se ofrecen como alternativa en trasfondos existentes (tarjeta marcada Semi-AU).",
+  "semiAU": {
+    "Entertainer|XPHB": ["arcane artist|au"],
+    "Charlatan|XPHB": ["arcane eloquence|au"],
+    "Harper|FRHoF": ["arcane infiltrator|au"],
+    "Hermit|XPHB": ["arcane omens|au"],
+    "Sage|XPHB": ["arcane overload|au"],
+    "Acolyte|XPHB": ["arcane safeguard|au", "arcane undertaker|au"],
+    "Guide|XPHB": ["familiar friend|au"],
+    "Wayfarer|XPHB": ["portal jumper|au"],
+    "Artisan|XPHB": ["transmuted anatomy|au"]
+  },
   "excluir": ["House Agent|EFA", "Aberrant Heir|EFA", "/^House .* Heir$/"],
   "renombrar": {
     "Acolyte|XPHB": { "nombre": "Acólito", "setting": "Te criaste al servicio de la fe. Puede que fueras novicio de la Iglesia Seráfica, entre incienso y liturgia en lengua aasimar, o que cuidaras uno de los santuarios callejeros de los Divinos que hay en cada esquina del Tajo." },

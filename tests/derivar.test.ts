@@ -151,6 +151,19 @@ describe('hoja derivada', () => {
     expect(e.completa).toBe(false)
   })
 
+  it('Semi-AU: el acólito puede tomar una dote de origen de Arcana Unleashed', () => {
+    const { p, d } = crear('cleric|xphb', 1, { str: 10, dex: 12, con: 14, int: 8, wis: 15, cha: 13 })
+    p.trasfondo = 'acolyte|xphb'
+    autocompletar(p, d)
+    const e = derivar(p, d).resolucion.elecciones.find((x) => x.id === 'tra:dote')!
+    expect(e.opciones.map((o) => o.valor)).toEqual(['original', 'arcane safeguard|au', 'arcane undertaker|au', 'marca'])
+    p.elecciones['tra:dote'] = ['arcane undertaker|au']
+    autocompletar(p, d)
+    const r = derivar(p, d).resolucion
+    expect(r.dotes.map((f) => f._clave)).toContain('arcane undertaker|au')
+    expect(r.dotes.map((f) => f._clave)).not.toContain('magic initiate|xphb')
+  })
+
   it('los planos del artificiero respetan el nivel de las tablas', async () => {
     const { nivelesPlanos } = await import('../src/motor/resolver')
     const d = datosDePrueba()

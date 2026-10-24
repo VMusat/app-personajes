@@ -99,6 +99,7 @@ code { background: var(--fondo-3); padding: 0 0.3em; border-radius: 4px; }
 .insignia.dm { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); }
 .insignia.campaña { background: var(--iris); color: var(--iris-texto); border: none; }
 .insignia.au { background: #3a6ea5; color: #fff; border-color: #3a6ea5; font-weight: 700; letter-spacing: 0.04em; }
+.insignia.au.semi { background: transparent; color: #6fa3dc; }
 .setting-conjuro { border-left: 3px solid var(--acento); padding-left: 8px; font-style: italic; }
 .enlace-insignia { cursor: pointer; }
 .interruptor { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; margin: 4px 0; }

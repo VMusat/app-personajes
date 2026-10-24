@@ -355,16 +355,21 @@ function procesarTrasfondo(ctx: Ctx, t: Entidad) {
   const dotes = (t.feats ?? []) as Crudo[]
   const original = dotes.flatMap((f) => Object.keys(f))[0]
   const marca = ctx.p.aspecto ? marcaManifiesta(ctx.d, ctx.p.aspecto) : undefined
-  if (original && marca && !original.endsWith('|setting')) {
+  // Semi-AU: dotes de origen de Arcana Unleashed que sustituyen a la del trasfondo
+  const dotesAU = (t._dotesAU ?? []).map((ref) => buscarDote(ctx.d, ref)).filter((f): f is Entidad => !!f)
+  if (original && !original.endsWith('|setting') && (marca || dotesAU.length)) {
     const dOrig = buscarDote(ctx.d, original)
     const [v] = ctx.elegir({
       id: 'tra:dote', tipo: 'alternativa', etiqueta: 'Dote de origen', origen, nivel: 0, n: 1,
       opciones: [
         { valor: 'original', etiqueta: dOrig?._nombre ?? original },
-        { valor: 'marca', etiqueta: marca._nombre, detalle: 'Marca manifiesta de tu aspecto en lugar de la dote del trasfondo' },
+        ...dotesAU.map((f) => ({ valor: f._clave, etiqueta: f._nombre, detalle: 'Dote de origen de Arcana Unleashed en lugar de la del trasfondo' })),
+        ...(marca ? [{ valor: 'marca', etiqueta: marca._nombre, detalle: 'Marca manifiesta de tu aspecto en lugar de la dote del trasfondo' }] : []),
       ],
     })
-    if (v === 'marca') procesarDote(ctx, marca, 'tra:marca', origen, 0)
+    const dAU = dotesAU.find((f) => f._clave === v)
+    if (v === 'marca' && marca) procesarDote(ctx, marca, 'tra:marca', origen, 0)
+    else if (dAU) procesarDote(ctx, dAU, `tra:au/${dAU._clave}`, origen, 0)
     else if (v === 'original') procesarDotesDe(ctx, dotes, 'tra', origen, 0)
   } else {
     procesarDotesDe(ctx, dotes, 'tra', origen, 0)

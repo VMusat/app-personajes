@@ -214,7 +214,7 @@ function PasoTrasfondo({ p, datos, actualizar }: { p: Personaje; datos: Datos; a
         {grupo.map((t) => (
           <article key={t._clave} className={`tarjeta-eleccion ${p.trasfondo === t._clave ? 'elegida' : ''}`}>
             <button className="tarjeta-boton" onClick={() => actualizar((x) => void (x.trasfondo = t._clave))}>
-              <h3>{t._nombre} {t._nombre !== t.name && <small className="sutil">({t.name})</small>}{esAU(t.source) && <span className="insignia au">AU</span>}</h3>
+              <h3>{t._nombre} {t._nombre !== t.name && <small className="sutil">({t.name})</small>}{esAU(t.source) && <span className="insignia au">AU</span>}{t._dotesAU && <span className="insignia au semi" title="Puede tomar una dote de origen de Arcana Unleashed">Semi-AU</span>}</h3>
               {t._setting && <p>{t._setting}</p>}
               <p className="sutil">{resumenTrasfondo(t, datos)}</p>
             </button>
