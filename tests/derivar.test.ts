@@ -127,6 +127,31 @@ describe('hoja derivada', () => {
     expect(derivar(p, d).conjuros.some((c) => c.conjuro._clave === nuevo._clave)).toBe(true)
   })
 
+  it('una habilidad elegida que ya da el trasfondo queda pendiente y bloqueada', () => {
+    const { p, d } = crear('rogue|xphb', 1, { str: 8, dex: 15, con: 14, int: 12, wis: 10, cha: 13 })
+    p.trasfondo = 'criminal|xphb' // Sleight of Hand y Stealth
+    p.elecciones['cls:Rogue:skillProficiencies'] = ['stealth', 'acrobatics', 'perception', 'insight']
+    const r = derivar(p, d).resolucion
+    const e = r.elecciones.find((x) => x.id === 'cls:Rogue:skillProficiencies')!
+    expect(e.meta?.repetidas).toContain('stealth')
+    expect(e.meta?.repetidas).not.toContain('perception')
+    expect(e.completa).toBe(false)
+    expect(e.opciones.find((o) => o.valor === 'sleight of hand')?.bloqueada).toBeTruthy()
+  })
+
+  it('los planos del artificiero respetan el nivel de las tablas', async () => {
+    const { nivelesPlanos } = await import('../src/motor/resolver')
+    const d = datosDePrueba()
+    const n = nivelesPlanos(d)
+    expect(n.get('bag of holding|xdmg')).toBe(2)
+    expect(n.get('sentinel shield|xdmg')).toBe(6)
+    expect(n.get('ring of protection|xdmg')).toBe(14)
+    const { p } = crear('artificer|efa', 3, { str: 8, dex: 12, con: 13, int: 15, wis: 10, cha: 10 })
+    const planos = derivar(p, d).resolucion.elecciones.find((e) => e.tipo === 'plano')!
+    expect(planos.opciones.some((o) => o.valor === 'ring of protection|xdmg')).toBe(false)
+    expect(planos.opciones.some((o) => o.valor === 'bag of holding|xdmg')).toBe(true)
+  })
+
   it('Rage suma Rage Damage a los ataques con STR', () => {
     const { p, d } = crear('barbarian|xphb', 3, { str: 16, dex: 14, con: 15, int: 8, wis: 10, cha: 8 })
     p.inventario.push({ id: 'g', origen: '5etools', ref: 'greataxe|xphb', nombre: 'Greataxe', cantidad: 1, equipado: true })

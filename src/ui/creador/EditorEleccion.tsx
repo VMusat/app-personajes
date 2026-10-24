@@ -26,6 +26,11 @@ export function EditorEleccion({ e, alCambiar, competentes, repetidos }: Props) 
         {e.n > 1 && e.tipo !== 'aumento' && <span className="contador-eleccion"> {e.valor.length}/{e.n}</span>}
         {!e.completa && <span className="insignia aviso">Pendiente</span>}
       </legend>
+      {(e.meta?.repetidas as string[] | undefined)?.length ? (
+        <p className="aviso-texto">
+          Ya tenías {(e.meta!.repetidas as string[]).map((v) => e.opciones.find((o) => o.valor === v)?.etiqueta ?? v).join(', ')} por otra vía: quítala y elige otra para no desperdiciarla.
+        </p>
+      ) : null}
       {e.cambia && <p className="sutil">Se puede cambiar {e.cambia === 'largo' ? 'tras cada descanso largo' : e.cambia === 'corto' ? 'tras cada descanso' : 'al subir de nivel'}.</p>}
       <ConjurosFijos fijos={e.meta?.fijos as ConjuroFijo[] | undefined} />
       {e.tipo === 'idioma' && (e.meta?.conocidos as { nombre: string; origen: string }[] | undefined)?.length ? (

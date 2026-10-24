@@ -247,7 +247,39 @@ export function resolver(p: Personaje, d: Datos): Resolucion {
   if (trasfondo) procesarTrasfondo(ctx, trasfondo)
   procesarMarcaCampaña(ctx)
   procesarClases(ctx)
+  revisarCompetenciasRepetidas(ctx.r)
   return ctx.r
+}
+
+/**
+ * Habilidades y herramientas elegidas que ya se tenían por otra vía (el trasfondo da Deception y Skilled
+ * también la elige; la clase y el trasfondo eligen la misma...). Se bloquean como opción y, si ya estaban
+ * elegidas, la elección queda pendiente para cambiarlas por otras.
+ */
+function revisarCompetenciasRepetidas(r: Resolucion) {
+  const k = (v: string) => v.toLowerCase()
+  const total = new Map<string, number>()
+  for (const x of r.efectos) {
+    if (x.tipo !== 'competencia' || (x.categoria !== 'habilidad' && x.categoria !== 'herramienta')) continue
+    total.set(k(x.valor), (total.get(k(x.valor)) ?? 0) + 1)
+  }
+  const els = r.elecciones.filter((e) => e.tipo === 'habilidad' || e.tipo === 'herramienta')
+  const porElecciones = new Map<string, number>()
+  for (const e of els) for (const v of e.valor) porElecciones.set(k(v), (porElecciones.get(k(v)) ?? 0) + 1)
+  // Competencias que no salen de ninguna elección (trasfondo, clase, especie fijas)
+  const fija = (v: string) => (total.get(k(v)) ?? 0) - (porElecciones.get(k(v)) ?? 0) > 0
+  const vistos = new Set<string>()
+  for (const e of els) {
+    const repetidas = e.valor.filter((v) => fija(v) || vistos.has(k(v)))
+    for (const v of e.valor) vistos.add(k(v))
+    const enOtra = (v: string) => els.some((o) => o !== e && o.valor.some((x) => k(x) === k(v)))
+    e.opciones = e.opciones.map((o) => (e.valor.includes(o.valor) || o.bloqueada || !(fija(o.valor) || enOtra(o.valor)) ? o : { ...o, bloqueada: 'Ya competente' }))
+    if (!repetidas.length) continue
+    // Solo se pide cambiarla si hay otras opciones libres
+    const libres = e.opciones.filter((o) => !o.bloqueada && !e.valor.includes(o.valor)).length
+    e.meta = { ...e.meta, repetidas }
+    if (libres >= repetidas.length) e.completa = false
+  }
 }
 
 /** Marca un recurso con el rasgo, dote o especie del que sale (para mostrarlo junto al rasgo). */
@@ -355,6 +387,30 @@ function procesarMarcaCampaña(ctx: Ctx) {
     const plena = ctx.d.dotes.find((f) => f._marca?.tipo === 'plena' && f._marca.aspecto === aspecto.aspecto && f._marca.invertida === aspecto.invertida)
     if (plena) procesarDote(ctx, plena, 'camp:plena', origen, NIVEL_DESPERTAR)
   }
+}
+
+const cacheNivelesPlanos = new WeakMap<Datos, Map<string, number>>()
+/** Nivel de artificiero de cada plano de Replicate Magic Item, según las tablas del rasgo. */
+export function nivelesPlanos(d: Datos): Map<string, number> {
+  let m = cacheNivelesPlanos.get(d)
+  if (m) return m
+  m = new Map()
+  const rasgo = Object.values(d.rasgos).find((x) => x.name === 'Replicate Magic Item' && x.className === 'Artificer')
+  const visitar = (x: unknown): void => {
+    if (Array.isArray(x)) return x.forEach(visitar)
+    if (!x || typeof x !== 'object') return
+    const o = x as Crudo
+    const nivel = o.type === 'table' && Number(String(o.caption ?? '').match(/Level (\d+)\+/)?.[1])
+    if (nivel) {
+      for (const fila of (o.rows as unknown[][]) ?? []) {
+        const ref = String(fila[0]).match(/\{@item ([^|}]+)\|([^|}]+)/)
+        if (ref) m!.set(claveDeRef(`${ref[1]}|${ref[2]}`), nivel)
+      }
+    } else Object.values(o).forEach(visitar)
+  }
+  visitar(rasgo?.entries)
+  cacheNivelesPlanos.set(d, m)
+  return m
 }
 
 /** Libro de hechizos del mago: los aprendidos al subir de nivel más los copiados durante la campaña. */
@@ -961,10 +1017,12 @@ function procesarEleccionManual(ctx: Ctx, em: EleccionManual, id: string, origen
       break
     }
     case 'plano': {
+      // 5etools marca todos los planos como de nivel 2; el nivel real sale de las tablas del rasgo (2+, 6+, 10+, 14+)
+      const niveles = nivelesPlanos(ctx.d)
       opciones = ctx.d.objetos
         .filter((o) => (o.classFeatures as string[] | undefined)?.some((cf) => cf.toLowerCase().startsWith('replicate magic item|artificer')))
         .filter((o) => {
-          const nv = Number(String((o.classFeatures as string[]).find((cf) => cf.toLowerCase().startsWith('replicate magic item'))).split('|')[3])
+          const nv = niveles.get(o._clave) ?? Number(String((o.classFeatures as string[]).find((cf) => cf.toLowerCase().startsWith('replicate magic item'))).split('|')[3])
           return !nv || nv <= info.nivel
         })
         .map((o) => ({ valor: o._clave, etiqueta: o.name, grupo: titulo(o.rarity ?? '') }))

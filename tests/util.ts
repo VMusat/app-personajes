@@ -9,9 +9,11 @@ export function rellenar(e: Eleccion): string[] {
     return alt.pesos.map((p: number, i: number) => `${alt.de[i]}:${p}`)
   }
   if (e.tipo === 'pg') return [String(e.meta!.media)]
+  const repetidas = new Set<string>(e.meta?.repetidas ?? [])
+  const actuales = e.valor.filter((v) => !repetidas.has(v))
   const ya = new Set(e.valor)
-  const nuevos = e.opciones.map((o) => o.valor).filter((v) => !ya.has(v))
-  return [...e.valor, ...nuevos].slice(0, e.n)
+  const nuevos = e.opciones.filter((o) => !o.bloqueada).map((o) => o.valor).filter((v) => !ya.has(v))
+  return [...actuales, ...nuevos].slice(0, e.n)
 }
 
 /** Rellena elecciones pendientes hasta que no queden (o no se pueda avanzar). */
