@@ -13,6 +13,7 @@ export const ARCHIVOS_5ETOOLS = [
   'spells/spells-xphb.json',
   'spells/spells-efa.json',
   'spells/spells-frhof.json',
+  'spells/spells-au.json',
   'generated/gendata-spell-source-lookup.json',
   'races.json',
   'backgrounds.json',
@@ -26,11 +27,14 @@ export const ARCHIVOS_5ETOOLS = [
 ]
 
 /** Fuentes permitidas por la adaptación (ver Reglas/Adaptación a D&D 2024 en la bóveda). */
-export const FUENTES_PERMITIDAS = ['XPHB', 'XDMG', 'XMM', 'FRHoF', 'FRAiF', 'EFA', 'SETTING']
+export const FUENTES_PERMITIDAS = ['XPHB', 'XDMG', 'XMM', 'FRHoF', 'FRAiF', 'EFA', 'AU', 'SETTING']
 /** Fuentes de las que salen clases y subclases jugables. */
 export const FUENTES_CLASE = ['XPHB', 'EFA']
-export const FUENTES_SUBCLASE = ['XPHB', 'FRHoF', 'EFA']
+export const FUENTES_SUBCLASE = ['XPHB', 'FRHoF', 'EFA', 'AU']
 /** Fuentes de especies, trasfondos, dotes, conjuros y rasgos opcionales. */
-export const FUENTES_PERSONAJE = ['XPHB', 'FRHoF', 'EFA', 'SETTING']
+export const FUENTES_PERSONAJE = ['XPHB', 'FRHoF', 'EFA', 'AU', 'SETTING']
+/** Arcana Unleashed: todo lo suyo lleva la etiqueta AU en la app. */
+export const FUENTE_AU = 'AU'
+export const esAU = (fuenteOClave: string | undefined) => !!fuenteOClave && /(^|\|)au($|[|;#])/i.test(fuenteOClave)
 /** Fuentes de objetos. */
 export const FUENTES_OBJETOS = ['XPHB', 'XDMG', 'FRHoF', 'FRAiF', 'EFA']

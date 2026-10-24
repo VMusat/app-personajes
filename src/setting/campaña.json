@@ -1,6 +1,6 @@
 {
   "nombre": "Herederos de la Miasma",
-  "version": 7,
+  "version": 8,
   "fuentes": ["XPHB", "XDMG", "XMM", "FRHoF", "FRAiF", "EFA", "SETTING"],
   "fuentesNombres": {
     "XPHB": "Player's Handbook (2024)",
@@ -9,6 +9,7 @@
     "FRHoF": "Heroes of Faerûn",
     "FRAiF": "Adventures in Faerûn",
     "EFA": "Eberron: Forge of the Artificer",
+    "AU": "Arcana Unleashed",
     "SETTING": "Herederos de la Miasma",
     "CAMPAÑA": "Objeto de la campaña"
   },
@@ -58,6 +59,19 @@
   },
   "excluir": {
     "objetos": [],
-    "dotes": []
+    "dotes": [],
+    "conjuros": ["Hindsight|AU"]
+  },
+  "conjuros": {
+    "Festering Blast|AU": { "nombre": "Ráfaga pútrida", "setting": "Bruma necrótica: maná que imita la miasma. No provoca Disolución ni deja cicatriz." },
+    "Summon Dinosaur|AU": { "nombre": "Invocar bestia primigenia", "setting": "No hay dinosaurios: son bestias de antes del primer Resplandor, cuando la miasma lo cubría todo." },
+    "Mordenkainen's Lucubration|AU": { "nombre": "Vigilia de la Fundadora", "setting": "Viene de los libros «amables» de la Universidad, que muchos atribuyen a Rhea." },
+    "Fractured Awareness|AU": { "setting": "Visiones de varios futuros posibles a la vez: el daño psíquico es el de una mente que ve demasiados hilos." },
+    "Reweave Fate|AU": { "setting": "Deshace un hilo del destino: una rama diminuta que la realidad rellena al instante." },
+    "Vision of Elapsing Eons|AU": { "setting": "El objetivo ve su mundo desmoronarse durante eones, como un futuro lejano sin esperanza." },
+    "Spirit Lantern|AU": { "setting": "Atrapa fragmentos de almas que aún no han dejado el Margen. Nigromancia vigilada por la Consejería de Magia y Miasma." },
+    "Battle Familiar|AU": { "setting": "Celestial: un eco de luz. Feérico: un espíritu del Bosque Hondo. Infernal: un acechador menor." },
+    "Illusory Dragon|AU": { "setting": "Hilos de sombra de la Umbra. En Lar, la ilusión toma la forma de sus dragones." },
+    "Dueling Ground|AU": { "setting": "El círculo de los duelos mágicos del Puente de los Duelos de Partido." }
   }
 }

@@ -82,9 +82,10 @@ export function FichaConjuro({ c }: { c: Conjuro }) {
         <dt>Components</dt><dd><Componentes c={c} /></dd>
         <dt>Duration</dt><dd>{duracionConjuro(c).startsWith('Concentration') ? <><Termino t="C">Concentration</Termino>{duracionConjuro(c).slice('Concentration'.length)}</> : duracionConjuro(c)}</dd>
       </dl>
+      {c._setting && <p className="setting-conjuro">{c._nombre !== c.name && <b>{c._nombre}. </b>}{c._setting}</p>}
       <Entradas entries={c.entries} />
       {c.entriesHigherLevel && <Entradas entries={c.entriesHigherLevel} />}
-      <p className="sutil">Clases: {c._clases.join(', ') || '—'} · {c.source}</p>
+      <p className="sutil">Clases: {c._clases.join(', ') || '—'} · {c.source}{c.source === 'AU' && <span className="insignia au">AU</span>}</p>
     </div>
   )
 }

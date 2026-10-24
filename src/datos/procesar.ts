@@ -113,7 +113,7 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
     })
 
   // Trasfondos: los de 5etools renombrados al setting, salvo los de las casas de Eberron (los sustituyen
-  // los trasfondos propios Marcado manifiesto y Marcado invertido)
+  // los trasfondos propios Marcado manifiesto y Marcado invertido). Los de Arcana Unleashed van al final.
   const ren = trasfondosSetting.renombrar as Record<string, { nombre: string; setting: string }>
   const excluidoTrasfondo = (b: Crudo) =>
     trasfondosSetting.excluir.some((x) => (x.startsWith('/') ? new RegExp(x.slice(1, -1)).test(b.name) : x === `${b.name}|${b.source}`))
@@ -127,7 +127,7 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
         return s ? entidad(b2, s.nombre, s.setting) : entidad(b2)
       }),
     ...trasfondosSetting.nuevos.map((b) => entidad(b as Crudo, b.name, b._setting)),
-  ].sort((x, y) => x._nombre.localeCompare(y._nombre, 'es'))
+  ].sort((x, y) => Number(x.source === 'AU') - Number(y.source === 'AU') || x._nombre.localeCompare(y._nombre, 'es'))
 
   // Dotes: se quitan las prerrequisitos de campaña (Eberron, Faerûn) y se añaden las marcas del setting.
   const dotesCrudas: Crudo[] = crudos['feats.json']?.feat ?? []
@@ -150,12 +150,16 @@ export function construirDatos(crudos: Record<string, Crudo>): Datos {
   // Conjuros, con las clases a cuya lista pertenecen
   const lookup = crudos['generated/gendata-spell-source-lookup.json'] ?? {}
   const conjuros: Conjuro[] = []
-  for (const arch of ['spells/spells-xphb.json', 'spells/spells-efa.json', 'spells/spells-frhof.json']) {
+  const excluirConj = new Set(((campaña.excluir as Record<string, string[]>).conjuros ?? []).map((d) => d.toLowerCase()))
+  const settingConj = (campaña as unknown as { conjuros?: Record<string, { nombre?: string; setting: string }> }).conjuros ?? {}
+  for (const arch of ['spells/spells-xphb.json', 'spells/spells-efa.json', 'spells/spells-frhof.json', 'spells/spells-au.json']) {
     for (const sp of crudos[arch]?.spell ?? []) {
+      if (excluirConj.has(`${sp.name}|${sp.source}`.toLowerCase())) continue
       const l = lookup[sp.source.toLowerCase()]?.[sp.name.toLowerCase()]
       const cls = new Set<string>()
       for (const fc of FUENTES_CLASE) for (const n of Object.keys(l?.class?.[fc] ?? {})) cls.add(n)
-      conjuros.push({ ...entidad<Conjuro>(sp), _clases: [...cls] })
+      const s = settingConj[`${sp.name}|${sp.source}`]
+      conjuros.push({ ...entidad<Conjuro>(sp, s?.nombre, s?.setting), _clases: [...cls] })
     }
   }
 

@@ -37,7 +37,17 @@
     "Ice Fisher|FRHoF": { "nombre": "Pescador del hielo", "setting": "Vienes de las cumbres heladas del norte de Brennan o de Lar, donde se vive de la pesca bajo el hielo y del frío se aprende la paciencia." },
     "Rashemi Wanderer|FRHoF": { "nombre": "Errante de las cumbres", "setting": "Recorriste las montañas del noreste de Brennan, junto a los goliats y los últimos gigantes, aprendiendo sus costumbres." },
     "Mulhorandi Tomb Raider|FRHoF": { "nombre": "Saqueador de tumbas", "setting": "Saqueaste criptas y ruinas antiguas del Reino Sérafo y de las tierras que la miasma tuvo cubiertas durante siglos." },
-    "Lords' Alliance Vassal|FRHoF": { "nombre": "Vasallo", "setting": "Serviste a un señor de Brennan, de Lar o del Reino Sérafo, como mensajero, agente o mano derecha." }
+    "Lords' Alliance Vassal|FRHoF": { "nombre": "Vasallo", "setting": "Serviste a un señor de Brennan, de Lar o del Reino Sérafo, como mensajero, agente o mano derecha." },
+    "Agent of the Ninth Quill|AU": { "nombre": "Agente de la Novena Pluma", "setting": "Trabajas para la Novena Pluma, ladrones y espías que roban artefactos y saber peligroso porque se creen sus mejores guardianes." },
+    "Bejeweled Conclave Spy|AU": { "nombre": "Espía del Cónclave de las Gemas", "setting": "Perteneces al Cónclave de las Gemas, anfitriones y mediadores de los salones de Tarovictor que mueven los hilos detrás del poder." },
+    "Cosmic Dawn Experiment|AU": { "nombre": "Experimento del Alba Lejana", "setting": "Unos transmutadores que decían obedecer a voces venidas de muy lejos te cambiaron el cuerpo. Escapaste, pero el cambio sigue ahí." },
+    "Covenant of the Grave Recruit|AU": { "nombre": "Recluta del Pacto de la Tumba", "setting": "Estudias la muerte con método, al margen de la ley: en Cerinnar la nigromancia está prohibida, y el Pacto de la Tumba trabaja en silencio." },
+    "Crucible Storm Chaser|AU": { "nombre": "Cazatormentas del Crisol", "setting": "Acudes a los desastres mágicos para estudiarlos: zonas de maná, conjuros que cobran vida, bancos de niebla. El Crisol paga bien a quien no se asusta." },
+    "Familiar Trainer|AU": { "nombre": "Adiestrador de familiares", "setting": "Cuidas y adiestras familiares, los espíritus del Margen que toman forma de animal. En Cerinnar hay quien paga mucho por uno bien educado." },
+    "Horizon Weaver Initiate|AU": { "nombre": "Iniciado de los Tejedores del Horizonte", "setting": "Te formaron unos exploradores que viajan a lugares que no están en ningún mapa. Te fascinan los portales y te cuesta quedarte quieto." },
+    "Phantasmic Circus Trouper|AU": { "nombre": "Artista del Circo Fantasmagórico", "setting": "Actuabas en el Circo Fantasmagórico, un circo itinerante de ilusionistas que recorre los reinos y este año llega a Cerinnar para el Tricentenario." },
+    "Seer Apprentice|AU": { "nombre": "Aprendiz de vidente", "setting": "Aprendiste a leer las olas, las nubes y las constelaciones con los Videntes del Mar y el Cielo, en una de sus bibliotecas de la costa." },
+    "Ward of the Sheltering Hands|AU": { "nombre": "Protegido de las Manos del Refugio", "setting": "Te criaste en los refugios de las Manos del Refugio, abjuradores que dan techo y comida a quien lo necesita en el Tajo." }
   },
   "nuevos": [
     {

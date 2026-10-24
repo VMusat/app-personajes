@@ -1,5 +1,6 @@
 // Asistente de creación de personaje a nivel 1.
 import { useMemo, useState } from 'react'
+import { esAU } from '../../datos/fuentes'
 import { ir, useEstado } from '../../estado/store'
 import { usePersonaje } from '../usePersonaje'
 import { resolver, resumenEquipo, tamañosEspecie, type Eleccion } from '../../motor/resolver'
@@ -206,11 +207,14 @@ function PasoTrasfondo({ p, datos, actualizar }: { p: Personaje; datos: Datos; a
     <div>
       <p className="sutil">Los trasfondos de D&amp;D 2024 con su versión en el setting. Cualquiera puede cambiar su dote de origen por la marca manifiesta de su aspecto.</p>
       <Buscador valor={q} alCambiar={setQ} />
+      {[lista.filter((t) => !esAU(t.source)), lista.filter((t) => esAU(t.source))].map((grupo, gi) => grupo.length > 0 && (
+      <div key={gi}>
+      {gi === 1 && <h3 className="grupo-opciones">Arcana Unleashed <span className="insignia au">AU</span></h3>}
       <div className="rejilla-tarjetas">
-        {lista.map((t) => (
+        {grupo.map((t) => (
           <article key={t._clave} className={`tarjeta-eleccion ${p.trasfondo === t._clave ? 'elegida' : ''}`}>
             <button className="tarjeta-boton" onClick={() => actualizar((x) => void (x.trasfondo = t._clave))}>
-              <h3>{t._nombre} {t._nombre !== t.name && <small className="sutil">({t.name})</small>}</h3>
+              <h3>{t._nombre} {t._nombre !== t.name && <small className="sutil">({t.name})</small>}{esAU(t.source) && <span className="insignia au">AU</span>}</h3>
               {t._setting && <p>{t._setting}</p>}
               <p className="sutil">{resumenTrasfondo(t, datos)}</p>
             </button>
@@ -219,6 +223,8 @@ function PasoTrasfondo({ p, datos, actualizar }: { p: Personaje; datos: Datos; a
           </article>
         ))}
       </div>
+      </div>
+      ))}
     </div>
   )
 }

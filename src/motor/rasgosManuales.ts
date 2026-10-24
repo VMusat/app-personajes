@@ -524,6 +524,42 @@ export const RASGOS_MANUALES: Record<string, RasgoManual> = {
     efectos: [{ tipo: 'competencia', categoria: 'arma', valor: 'martial melee (no 2H/H)' }],
     elecciones: [{ id: 'habilidad', tipo: 'habilidad', etiqueta: 'Training in War and Song', n: 1, de: ['acrobatics', 'athletics', 'performance', 'persuasion'] }],
   },
+  // ── Arcana Unleashed
+  'Cleric|Arcana|3|Student of Arcana': {
+    elecciones: [{ id: 'habilidad', tipo: 'habilidad', etiqueta: 'Magical Knowledge', n: 1, de: ['arcana', 'history', 'insight', 'medicine', 'persuasion', 'religion'] }],
+  },
+  'Cleric|Arcana|17|Magical Mastery': conjuroSub,
+  'Fighter|Arcane Archer|3|Arcane Archer Lore': {
+    efectos: [
+      { tipo: 'competencia', categoria: 'habilidad', valor: 'arcana' },
+      { tipo: 'competencia', categoria: 'habilidad', valor: 'nature' },
+    ],
+    sinEleccion: 'Truco: additionalSpells estructurado; solo hay elección de habilidad si ya tenía Arcana o Naturaleza',
+  },
+  'Fighter|Arcane Archer|3|Arcane Shot': { sinEleccion: 'optionalfeatureProgression (disparos arcanos)' },
+  'Fighter|Arcane Archer|7|Curving Shot': enJuego(),
+  'Fighter|Arcane Archer|7|Magical Ammunition': enJuego(),
+  'Monk|Mystic Arts|3|Spellcasting': { sinEleccion: 'Progresión de conjuros de la subclase' },
+  'Warlock|Vestige|3|Vestige Companion': {
+    elecciones: [{ id: 'tipo', tipo: 'opcion', etiqueta: 'Vestige Companion', n: 1, de: ['Celestial', 'Fiend', 'Undead'] }],
+  },
+  'Wizard|Conjurer|3|Conjuration Savant': conjuroSub,
+  'Wizard|Conjurer|3|Benign Transposition': enJuego(),
+  'Wizard|Conjurer|14|Splintered Summons': enJuego(),
+  'Wizard|Enchanter|3|Enchantment Savant': conjuroSub,
+  'Wizard|Enchanter|3|Enchanting Conversationalist': {
+    elecciones: [{ id: 'habilidad', tipo: 'habilidad', etiqueta: 'Enchanting Conversationalist', n: 1, de: ['deception', 'intimidation', 'persuasion'] }],
+  },
+  'Wizard|Enchanter|3|Hypnotic Presence': enJuego(),
+  'Wizard|Enchanter|10|Instinctive Charm': enJuego(),
+  'Wizard|Enchanter|14|Alter Memories': enJuego(),
+  'Wizard|Necromancer|3|Necromancer': { sinEleccion: 'Rasgo introductorio de la subclase' },
+  'Wizard|Necromancer|3|Necromancy Savant': conjuroSub,
+  'Wizard|Necromancer|3|Necromancy Spellbook': { efectos: [{ tipo: 'resistencia', valor: 'necrotic' }], sinEleccion: 'Forma del familiar: se elige al lanzar Find Familiar' },
+  'Wizard|Transmuter|3|Transmutation Savant': conjuroSub,
+  "Wizard|Transmuter|3|Transmuter's Stone": enJuego('Beneficio de la piedra: se elige al crearla tras un descanso largo'),
+  'Wizard|Transmuter|10|Potent Stone': enJuego('Beneficios de la piedra: se eligen al crearla'),
+  'Wizard|Transmuter|14|Master Transmuter': enJuego(),
 }
 
 /** Clave de un rasgo en la tabla manual. */

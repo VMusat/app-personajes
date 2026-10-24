@@ -4,6 +4,7 @@
 //  - los efectos mecánicos, rasgos, conjuros y dotes resultantes.
 // Las elecciones pendientes de un nivel son las que el asistente de subida de nivel pide rellenar.
 import type { Caracteristica, Clase, Conjuro, Crudo, Datos, Entidad, Rasgo, Subclase } from '../datos/tipos'
+import { esAU } from '../datos/fuentes'
 import { CARACTERISTICAS } from '../datos/tipos'
 import { claveDeRef, claveRasgoClase, claveRasgoSubclase } from '../datos/refs'
 import type { Efecto, Formula, Recarga } from './efectos'
@@ -515,7 +516,9 @@ function elegirDote(ctx: Ctx, id: string, categorias: string[], origen: string, 
     .filter((f) => f.repeatable || !ctx.r.dotes.some((x) => x._clave === f._clave) || (ctx.p.elecciones[id] ?? []).includes(f._clave))
     // Solo una marca manifiesta por personaje
     .filter((f) => !(f._marca?.tipo === 'manifiesta' && ctx.r.dotes.some((x) => x._marca?.tipo === 'manifiesta' && x._clave !== f._clave)))
-    .map((f) => ({ valor: f._clave, etiqueta: f._nombre, grupo: catNombre(f.category) }))
+    .map((f) => ({ valor: f._clave, etiqueta: f._nombre, grupo: f.source === 'AU' ? `${catNombre(f.category)} · Arcana Unleashed (AU)` : catNombre(f.category) }))
+    // Las de Arcana Unleashed, separadas de las demás y al final
+    .sort((a, b) => Number(esAU(a.valor)) - Number(esAU(b.valor)))
   const [v] = ctx.elegir({ id, tipo: 'dote', etiqueta, origen, nivel, n: 1, opciones })
   const dote = ctx.d.dotes.find((f) => f._clave === v)
   if (dote) procesarDote(ctx, dote, `${id}/${dote._clave}`, origen, nivel)

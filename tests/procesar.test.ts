@@ -5,7 +5,7 @@ describe('datos procesados', () => {
   const d = datosDePrueba()
   it('tiene las 13 clases y sus subclases del setting', () => {
     expect(d.clases.map((c) => c.name).sort()).toHaveLength(13)
-    expect(d.subclases.length).toBe(61)
+    expect(d.subclases.length).toBe(69)
     for (const s of d.subclases) for (const ref of s.subclassFeatures) expect(Object.keys(d.rasgos).length).toBeGreaterThan(0) && ref
   })
   it('tiene las 15 especies y el trasfondo propio', () => {

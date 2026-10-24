@@ -59,5 +59,13 @@
   "Wizard|Diviner|XPHB": { "nombre": "Adivino", "setting": "Facultad de Adivinación de la Universidad de Arcanistas de Cerinnar." },
   "Wizard|Evoker|XPHB": { "nombre": "Evocador", "setting": "Facultad de Evocación de la Universidad de Arcanistas de Cerinnar." },
   "Wizard|Illusionist|XPHB": { "nombre": "Ilusionista", "setting": "Facultad de Ilusión de la Universidad de Arcanistas de Cerinnar." },
-  "Wizard|Bladesinger|FRHoF": { "nombre": "Danzante del filo", "setting": "Tradición de los altos elfos de Lar." }
+  "Wizard|Bladesinger|FRHoF": { "nombre": "Danzante del filo", "setting": "Tradición de los altos elfos de Lar." },
+  "Cleric|Arcana|AU": { "nombre": "Dominio Arcano", "setting": "Los clérigos de Raziel de la Universidad de San Judeburgo: con el maná agotado, sus arcanistas se han ido haciendo clérigos de su patrón, y ven el saber arcano como un don que hay que compartir. Aspectos: Ingenio, Plenitud." },
+  "Fighter|Arcane Archer|AU": { "nombre": "Arquero arcano", "setting": "Una técnica de los altos elfos de Lar, como la danza de la espada. Fuera de Lar la enseñan los pocos que la aprendieron." },
+  "Monk|Mystic Arts|AU": { "nombre": "Guerrero de las artes místicas", "setting": "La Disciplina del Puente: una escuela de Partido que mezcla la magia de los Humos con la técnica de los Tuercas, nacida de los duelos del Puente." },
+  "Warlock|Vestige|AU": { "nombre": "Patrón Vestigio", "setting": "Un Serafín olvidado, al que ya nadie reza: Raguel o Baraquiel en Brennan, o Gabriel, que pierde fieles desde que no acudió a Udegard. El brujo es su último fiel." },
+  "Wizard|Conjurer|AU": { "nombre": "Conjurador", "setting": "La Escuela de Portales de Calvin Oddvane, dentro de la Universidad pero sin ser una facultad: conjuración y miasma controlada." },
+  "Wizard|Enchanter|AU": { "nombre": "Encantador", "setting": "Sin facultad: se aprende con maestros con licencia de Tarovictor. Cambiar la voluntad de alguien sin licencia es un delito." },
+  "Wizard|Necromancer|AU": { "nombre": "Nigromante", "setting": "Prohibida en la Universidad desde que cerró el Pabellón del Borde. Se practica en secreto, cerca de la nigromancia de la miasma." },
+  "Wizard|Transmuter|AU": { "nombre": "Transmutador", "setting": "La Cátedra de Transmutación Aplicada, la única magia legal en la montaña de las Facultades: ajusta metales y encanta las herramientas de los Tuercas." }
 }
