@@ -84,7 +84,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
           {menu && (
             <div className="menu" onClick={() => setMenu(false)}>
               <button onClick={() => setApariencia(true)}>Apariencia (tema y colores)</button>
-              <button onClick={() => exportarObsidian(p, h, datos)}>Exportar nota para Obsidian</button>
+              <button onClick={() => exportarObsidian(p, h, datos, objetos)}>Exportar nota para Obsidian</button>
               <button onClick={() => exportarJSON(p)}>Copia de seguridad (JSON)</button>
               <button onClick={() => ir({ tipo: 'crear', id })}>Volver al asistente de creación</button>
               {puedeEditar && (

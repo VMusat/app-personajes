@@ -28,8 +28,11 @@ export const T = {
   salvacionesMuerte: 'Death saves',
 }
 
-export const MONEDAS = ['pp', 'gp', 'ep', 'sp', 'cp'] as const
-export const NOMBRE_MONEDA: Record<(typeof MONEDAS)[number], string> = { pp: 'PP', gp: 'GP', ep: 'EP', sp: 'SP', cp: 'CP' }
+// Monedas de Cerinnar: sello (oro), estrella (plata) y punta (cobre). Sin electrum.
+export const MONEDAS = ['pp', 'gp', 'sp', 'cp'] as const
+export const NOMBRE_MONEDA: Record<(typeof MONEDAS)[number], string> = { pp: 'PP', gp: 'Sellos (GP)', sp: 'Estrellas (SP)', cp: 'Puntas (CP)' }
+/** Nombre del setting en singular y plural. */
+export const MONEDA_SETTING: Partial<Record<(typeof MONEDAS)[number], [string, string]>> = { gp: ['sello', 'sellos'], sp: ['estrella', 'estrellas'], cp: ['punta', 'puntas'] }
 
 export const ESCUELAS: Record<string, string> = {
   A: 'Abjuration', C: 'Conjuration', D: 'Divination', E: 'Enchantment', V: 'Evocation', I: 'Illusion', N: 'Necromancy', T: 'Transmutation',

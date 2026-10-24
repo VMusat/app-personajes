@@ -35,6 +35,12 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
             <input type="number" min={0} value={p.monedas[m]} onChange={(e) => actualizar((x) => void (x.monedas[m] = Math.max(0, Number(e.target.value) || 0)))} />
           </label>
         ))}
+        {(p.monedas.ep ?? 0) > 0 && (
+          <p className="aviso-texto">
+            Tienes {p.monedas.ep} EP, que ya no se usan.{' '}
+            <button className="boton-mini" onClick={() => actualizar((x) => void ((x.monedas.sp += 5 * (x.monedas.ep ?? 0)), delete x.monedas.ep))}>Cambiar por {5 * p.monedas.ep!} estrellas</button>
+          </p>
+        )}
       </section>
 
       <div className="fila-titulo">

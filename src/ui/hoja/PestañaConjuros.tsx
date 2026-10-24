@@ -228,10 +228,10 @@ function ModalCopiarLibro({ libro, p, actualizar, alCerrar }: PropsPestaña & { 
     <Modal titulo="Copiar conjuro al libro" alCerrar={alCerrar} ancho="ancho">
       <p className="sutil">
         Puedes copiar al libro cualquier conjuro de mago de un nivel que puedas lanzar, si lo encuentras (pergamino, otro libro...).
-        Copiar cuesta 2 horas y 50 gp por nivel del conjuro. Estos conjuros se suman a los dos que aprendes en cada nivel.
+        Copiar cuesta 2 horas y 50 sellos (GP) por nivel del conjuro. Estos conjuros se suman a los dos que aprendes en cada nivel.
       </p>
       <label className="fila">
-        <input type="checkbox" checked={pagar} onChange={(e) => setPagar(e.target.checked)} /> Descontar el coste de mi dinero (tienes {oro} gp contando los pp)
+        <input type="checkbox" checked={pagar} onChange={(e) => setPagar(e.target.checked)} /> Descontar el coste de mi dinero (tienes {oro} sellos (GP) contando los PP)
       </label>
       {copiados.length > 0 && (
         <>
@@ -255,7 +255,7 @@ function ModalCopiarLibro({ libro, p, actualizar, alCerrar }: PropsPestaña & { 
           return (
             <li key={o.valor}>
               <button className="enlace nombre-conjuro" onClick={() => abrirDetalle({ tipo: 'conjuro', clave: o.valor })}>{o.etiqueta}</button>
-              <small className="sutil">Level {nivel} · {2 * nivel} h · {coste} gp</small>
+              <small className="sutil">Level {nivel} · {2 * nivel} h · {coste} GP</small>
               <button className="boton-mini" disabled={sinOro} title={sinOro ? 'No tienes oro suficiente' : ''} onClick={() => copiar(o.valor, nivel)}>Copiar</button>
             </li>
           )

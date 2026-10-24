@@ -79,7 +79,8 @@ export interface Personaje {
   reglasCampaña: { marcaGratis?: boolean }
   estado: EstadoJuego
   inventario: ItemInventario[]
-  monedas: { cp: number; sp: number; ep: number; gp: number; pp: number }
+  /** «ep» (electrum) ya no se usa en el setting; se conserva para convertir lo que tuvieran los personajes antiguos. */
+  monedas: { cp: number; sp: number; ep?: number; gp: number; pp: number }
   detalles: Record<string, string>
   notas: Nota[]
   recursosManuales: RecursoManual[]
@@ -114,7 +115,7 @@ export function personajeVacio(): Personaje {
       inspiracion: false,
     },
     inventario: [],
-    monedas: { cp: 0, sp: 0, ep: 0, gp: 0, pp: 0 },
+    monedas: { cp: 0, sp: 0, gp: 0, pp: 0 },
     detalles: {},
     notas: [],
     recursosManuales: [],
