@@ -5,6 +5,7 @@ import { RECARGA, conSigno, titulo } from '../glosario'
 import { nuevoId } from '../../motor/personaje'
 import type { PropsPestaña } from './HojaPersonaje'
 import { abrirDetalle } from '../Detalle'
+import { Acciones } from './Acciones'
 
 export type ModoD20 = 'normal' | 'ventaja' | 'desventaja'
 
@@ -190,6 +191,8 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
         {h.inmunidadesCondicion.length > 0 && <p><b>Inmune a condiciones:</b> {h.inmunidadesCondicion.map(titulo).join(', ')}</p>}
         {h.bonosCondicionales.map((b, i) => <p key={i} className="sutil">{b.texto} — {b.origen}</p>)}
       </section>
+
+      <Acciones h={h} nombrePj={p.nombre} ventaja={ventaja} />
     </div>
   )
 }

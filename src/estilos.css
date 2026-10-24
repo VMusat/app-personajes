@@ -505,3 +505,14 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .activable-texto { color: var(--texto-suave); font-size: 0.8rem; }
 .aviso-texto { color: var(--aviso); font-size: 0.8rem; }
 .nota-ataque { display: block; color: var(--acento); font-size: 0.75rem; }
+
+/* Acciones de combate */
+.lista-acciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.6rem; }
+.accion { padding: 0.6rem 0.75rem; border: 1px solid var(--borde); border-radius: 10px; background: var(--fondo-2); display: flex; flex-direction: column; gap: 0.35rem; }
+.accion-cabecera { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.accion-cabecera b { margin-right: auto; }
+.tipo-accion { font-size: 0.7rem; }
+.accion-texto { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
+.accion-datos { margin: 0; font-size: 0.85rem; }
+.accion-tiradas { gap: 0.35rem; flex-wrap: wrap; }
+.accion-tiradas .boton-tirada { font-size: 0.8rem; }
