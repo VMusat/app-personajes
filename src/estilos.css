@@ -506,13 +506,34 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .aviso-texto { color: var(--aviso); font-size: 0.8rem; }
 .nota-ataque { display: block; color: var(--acento); font-size: 0.75rem; }
 
-/* Acciones de combate */
-.lista-acciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.6rem; }
-.accion { padding: 0.6rem 0.75rem; border: 1px solid var(--borde); border-radius: 10px; background: var(--fondo-2); display: flex; flex-direction: column; gap: 0.35rem; }
-.accion-cabecera { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
-.accion-cabecera b { margin-right: auto; }
-.tipo-accion { font-size: 0.7rem; }
-.accion-texto { margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
-.accion-datos { margin: 0; font-size: 0.85rem; }
-.accion-tiradas { gap: 0.35rem; flex-wrap: wrap; }
-.accion-tiradas .boton-tirada { font-size: 0.8rem; }
+/* Secciones de la pestaña Combate: cada una en su tarjeta */
+.pestaña-combate { display: flex; flex-direction: column; gap: 14px; }
+.pestaña-combate > section {
+  background: var(--fondo-2); border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 12px 14px; box-shadow: var(--sombra); margin: 0;
+}
+.pestaña-combate > section > h3,
+.pestaña-combate > section > .fila-titulo h3 {
+  margin: 0 0 8px; padding-left: 8px; border-left: 3px solid var(--acento); line-height: 1.2;
+}
+.pestaña-combate > section > .fila-titulo { margin-bottom: 8px; }
+.pestaña-combate > section > .fila-titulo h3 { margin: 0; }
+.pestaña-combate .lista-activables .activable { background: var(--fondo); }
+
+/* Acciones de combate: filas compactas con la explicación plegada */
+.lista-acciones { list-style: none; margin: 0; padding: 0; }
+.accion { border-bottom: 1px solid var(--borde); padding: 5px 0; }
+.accion:last-child { border-bottom: 0; }
+.accion-fila { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.accion-nombre { display: flex; align-items: center; gap: 5px; flex: 0 1 230px; min-width: 0; }
+.accion-datos { display: flex; align-items: center; gap: 6px; flex: 1 1 160px; flex-wrap: wrap; font-size: 0.88rem; }
+.accion-datos .boton-tirada { font-size: 0.8rem; padding: 1px 8px; }
+.tipo-accion { font-size: 0.66rem; padding: 0 5px; border-radius: 4px; border: 1px solid var(--borde); color: var(--texto-suave); white-space: nowrap; }
+.tipo-bonus { border-color: var(--acento); color: var(--acento); }
+.tipo-reaction { border-color: var(--aviso); color: var(--aviso); }
+.boton-ayuda {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--borde); background: var(--fondo);
+  color: var(--texto-suave); font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 0; margin-left: auto;
+}
+.boton-ayuda.activo, .boton-ayuda:hover { border-color: var(--acento); color: var(--acento); }
+.accion-texto { margin: 4px 0 2px; font-size: 0.84rem; color: var(--texto-suave); }
