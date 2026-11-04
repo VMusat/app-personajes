@@ -2,6 +2,7 @@
 // Dos implementaciones con la misma interfaz: Firebase (compartido) y local (este navegador).
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from './objetosCampaña'
+import type { NotaSesion, PantallaDM } from './pantalla'
 
 export interface Usuario {
   uid: string
@@ -60,6 +61,13 @@ export interface Repo {
   solicitudes(cb: (s: SolicitudAcceso[]) => void): Cancelar
   /** El DM acepta (añade el email a la lista) o rechaza una solicitud. */
   resolverSolicitud(s: SolicitudAcceso, aceptar: boolean): Promise<void>
+  /** Pantalla del DM: el escenario de la sesión (solo DM). */
+  pantalla(cb: (p: PantallaDM | null) => void, alError?: (e: Error) => void): Cancelar
+  guardarPantalla(p: PantallaDM): Promise<void>
+  /** Notas de sesión importadas de la bóveda (solo DM). */
+  sesiones(cb: (ns: NotaSesion[]) => void, alError?: (e: Error) => void): Cancelar
+  guardarSesion(n: NotaSesion): Promise<void>
+  borrarSesion(id: string): Promise<void>
 }
 
 // ── Modo local
@@ -82,7 +90,13 @@ const escribir = (k: string, v: unknown) => {
 }
 
 export function repoLocal(): Repo {
-  const oyentes = { personajes: new Set<(ps: Personaje[]) => void>(), objetos: new Set<(os: ObjetoCampaña[]) => void>(), tiradas: new Set<(t: TiradaCompartida[]) => void>() }
+  const oyentes = {
+    personajes: new Set<(ps: Personaje[]) => void>(),
+    objetos: new Set<(os: ObjetoCampaña[]) => void>(),
+    tiradas: new Set<(t: TiradaCompartida[]) => void>(),
+    pantalla: new Set<(p: PantallaDM | null) => void>(),
+    sesiones: new Set<(ns: NotaSesion[]) => void>(),
+  }
   const usuario: Usuario = { uid: 'local', nombre: 'Este navegador', email: '' }
   const avisar = () => {
     const ps = leer<Personaje[]>('personajes', [])
@@ -91,6 +105,10 @@ export function repoLocal(): Repo {
     oyentes.objetos.forEach((cb) => cb(os))
     const ts = leer<TiradaCompartida[]>('tiradas', [])
     oyentes.tiradas.forEach((cb) => cb(ts))
+    const pd = leer<PantallaDM | null>('pantalla', null)
+    oyentes.pantalla.forEach((cb) => cb(pd))
+    const ns = leer<NotaSesion[]>('sesiones', [])
+    oyentes.sesiones.forEach((cb) => cb(ns))
   }
   return {
     modo: 'local',
@@ -155,5 +173,27 @@ export function repoLocal(): Repo {
       return () => {}
     },
     async resolverSolicitud() {},
+    pantalla(cb) {
+      oyentes.pantalla.add(cb)
+      cb(leer<PantallaDM | null>('pantalla', null))
+      return () => oyentes.pantalla.delete(cb)
+    },
+    async guardarPantalla(p) {
+      escribir('pantalla', p)
+      avisar()
+    },
+    sesiones(cb) {
+      oyentes.sesiones.add(cb)
+      cb(leer('sesiones', []))
+      return () => oyentes.sesiones.delete(cb)
+    },
+    async guardarSesion(n) {
+      escribir('sesiones', [...leer<NotaSesion[]>('sesiones', []).filter((x) => x.id !== n.id), n])
+      avisar()
+    },
+    async borrarSesion(id) {
+      escribir('sesiones', leer<NotaSesion[]>('sesiones', []).filter((x) => x.id !== id))
+      avisar()
+    },
   }
 }

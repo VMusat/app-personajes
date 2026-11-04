@@ -113,6 +113,7 @@ export function Inicio() {
         <section>
           <h2>Herramientas del DM</h2>
           <div className="fila-botones">
+            <button className="boton" onClick={() => ir({ tipo: 'pantalla' })}>Pantalla del DM</button>
             <button className="boton secundario" onClick={() => ir({ tipo: 'almacen' })}>Objetos de la campaña ({objetos.length})</button>
             {repo.modo === 'firebase' && (
               <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>

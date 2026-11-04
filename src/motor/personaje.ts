@@ -47,6 +47,38 @@ export interface EstadoJuego {
   concentracion?: string
   /** Efectos temporales activos (Rage, Bladesong, Mage Armor...), por nombre. */
   activos?: string[]
+  /** Familiares, invocaciones y compañeros activos. */
+  aliados?: Aliado[]
+  /** Forma adoptada (Wild Shape...). */
+  forma?: Forma
+}
+
+/** Cómo entra en la iniciativa algo que trae un PJ (2024): propia, justo después del PJ o dentro de su turno. */
+export type ModoIniciativa = 'propia' | 'tras' | 'turno'
+
+/** Familiar, invocación, compañero u objeto animado que acompaña al PJ. */
+export interface Aliado {
+  id: string
+  nombre: string
+  tipo: 'familiar' | 'invocacion' | 'compañero' | 'objeto' | 'otro'
+  iniciativa: ModoIniciativa
+  /** Bono de iniciativa, si tira la suya. */
+  bonoIniciativa?: number
+  pg: number
+  pgMax: number
+  ca: number
+  percepcionPasiva?: number
+  condiciones?: string[]
+  notas?: string
+}
+
+/** Forma que ha adoptado el PJ (Wild Shape y similares). */
+export interface Forma {
+  nombre: string
+  ca?: number
+  velocidad?: string
+  notas?: string
+  desde: string
 }
 
 export interface Nota {

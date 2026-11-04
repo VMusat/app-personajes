@@ -13,6 +13,7 @@ import { SubirNivel } from './ui/creador/SubirNivel'
 import { Almacen } from './ui/dm/Almacen'
 import { PanelCampaña } from './ui/dm/PanelCampaña'
 import { Guia } from './ui/Guia'
+import { PantallaDM } from './ui/dm/PantallaDM'
 
 // Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
 let promesaRepo: Promise<Repo> | undefined
@@ -91,15 +92,16 @@ export default function App() {
     contenido = <Cargando texto={`Cargando reglas de D&D 2024… ${Math.round((100 * h) / t)}%`} />
   } else if (!usuario || !campaña) contenido = <Inicio />
   else if (vista.tipo === 'crear') contenido = <Creador id={vista.id} />
-  else if (vista.tipo === 'hoja') contenido = <HojaPersonaje id={vista.id} pestañaInicial={vista.pestaña} />
+  else if (vista.tipo === 'hoja') contenido = <HojaPersonaje key={vista.id} id={vista.id} pestañaInicial={vista.pestaña} />
   else if (vista.tipo === 'nivel') contenido = <SubirNivel id={vista.id} />
   else if (vista.tipo === 'almacen') contenido = <Almacen />
   else if (vista.tipo === 'campaña') contenido = <PanelCampaña />
+  else if (vista.tipo === 'pantalla') contenido = repo.esDM() ? <PantallaDM /> : <Inicio />
   else contenido = <Inicio />
 
   return (
     <>
-      <main className="app">{contenido}</main>
+      <main className={vista.tipo === 'pantalla' ? 'app app-ancha' : 'app'}>{contenido}</main>
       {vista.tipo !== 'guia' && <Bandeja />}
       <Detalle />
     </>

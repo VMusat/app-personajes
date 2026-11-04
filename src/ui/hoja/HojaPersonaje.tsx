@@ -20,6 +20,7 @@ import { Entradas } from '../Entradas'
 import { VentanaApariencia } from '../Apariencia'
 import DISOLUCION from '../../setting/disolucion.json'
 import { aplicarEquipo, equipoPendiente } from '../equipo'
+import { Compania } from './Compania'
 
 export type Act = (f: (p: Personaje) => void) => void
 export type PropsPestaña = { p: Personaje; h: Hoja; actualizar: Act }
@@ -110,6 +111,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
       )}
 
       <BarraVital {...props} />
+      <Compania {...props} />
 
       <Pestañas valor={pestaña} opciones={pestañas} alCambiar={setPestaña} />
       <div className="pestaña-cuerpo">
@@ -214,7 +216,9 @@ function BarraVital({ p, h, actualizar }: PropsPestaña) {
       </div>
 
       <div className="stats-grandes">
-        <div title={h.ca.detalle}><span>AC</span><b>{h.ca.valor}</b></div>
+        <div title={p.estado.forma ? `AC de la forma (${p.estado.forma.nombre})` : h.ca.detalle} className={p.estado.forma?.ca !== undefined ? 'en-forma' : ''}>
+          <span>AC</span><b>{p.estado.forma?.ca ?? h.ca.valor}</b>
+        </div>
         <button onClick={() => tirar({ etiqueta: 'Iniciativa', formula: `1d20${conSigno(h.iniciativa + h.penalizacionD20)}`, d20: true, personaje: p.nombre })}>
           <span>Iniciativa</span><b>{conSigno(h.iniciativa)}</b>
         </button>

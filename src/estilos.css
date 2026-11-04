@@ -544,3 +544,110 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .boton-ayuda.activo, .boton-ayuda:hover { border-color: var(--acento); color: var(--acento); }
 .accion-texto { margin: 4px 0 2px; font-size: 0.84rem; color: var(--texto-suave); }
+
+/* ── Aliados y formas del PJ (hoja) */
+.compania { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+.banda-forma { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radio); background: var(--acento-suave); border: 2px solid var(--acento); }
+.banda-forma > div { flex: 1; }
+.forma-icono { font-size: 1.8rem; }
+.rejilla-aliados { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.tarjeta-aliado { background: var(--fondo-2); border: 1px solid var(--borde); border-left: 4px solid var(--acento); border-radius: var(--radio); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.tarjeta-aliado header { display: flex; align-items: center; gap: 6px; }
+.tarjeta-aliado header b { flex: 1; }
+.tarjeta-aliado p { margin: 0; }
+.tarjeta-aliado.caido, .tarjeta-mesa.caido { opacity: 0.55; }
+.boton-convocar { align-self: flex-start; }
+.lista-sugerencias { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.sugerencia { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 8px 10px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--fondo-2); color: var(--texto); cursor: pointer; }
+.sugerencia:hover:not(:disabled) { border-color: var(--acento); }
+.sugerencia:disabled { opacity: 0.5; cursor: not-allowed; }
+.stats-grandes .en-forma b { color: var(--acento); }
+.rejilla-campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; }
+.rejilla-campos.car { grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 8px 0; }
+.campo { display: flex; flex-direction: column; gap: 3px; font-size: 0.9rem; color: var(--texto-suave); }
+.campo input, .campo select, .campo textarea { color: var(--texto); }
+.campo input.error { border-color: var(--peligro); }
+
+/* ── Pantalla del DM */
+.app.app-ancha { max-width: 1600px; }
+.pantalla-barra { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pantalla-barra h1 { margin: 0; font-size: 1.4rem; flex: 1; }
+.pantalla-pestañas { display: none; }
+.pantalla-cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pantalla-nota { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; padding-right: 6px; }
+.pantalla-mesa { display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 1000px) {
+  .pantalla-pestañas { display: block; }
+  .pantalla-cuerpo { grid-template-columns: 1fr; }
+  .pantalla-nota { position: static; max-height: none; overflow: visible; }
+  .pantalla-cuerpo.ver-mesa .pantalla-nota, .pantalla-cuerpo.ver-nota .pantalla-mesa { display: none; }
+}
+.panel-nota.arrastrando { outline: 2px dashed var(--acento); outline-offset: 4px; border-radius: var(--radio); }
+.nota-controles { flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.nota-controles select { flex: 1; min-width: 200px; }
+.filtros-nota { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.filtros-nota .chip { cursor: pointer; border-left-width: 4px; }
+.nota-sesion { font-size: 0.97rem; line-height: 1.5; }
+.nota-sesion .sesion-titulo { margin: 1.2em 0 0.4em; }
+.nota-sesion h2.sesion-titulo { font-size: 1.5rem; }
+.nota-sesion h3.sesion-titulo { font-size: 1.2rem; border-bottom: 1px solid var(--borde); padding-bottom: 4px; }
+.sesion-lista { padding-left: 1.2em; margin: 0.4em 0; }
+.sesion-lista .sesion-lista { margin: 0.2em 0; }
+.sesion-tarea { list-style: none; margin-left: -1.2em; }
+.sesion-tarea > label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.sesion-tarea > label input { margin-top: 0.3em; }
+.sesion-tarea.hecha > label span { text-decoration: line-through; color: var(--texto-suave); }
+.sesion-dado { display: inline-block; padding: 0 3px; border-radius: 4px; background: var(--acento-suave); }
+.sesion-callout { border: 1px solid var(--borde); border-left: 4px solid var(--borde); border-radius: 8px; padding: 6px 10px; margin: 6px 0; background: var(--fondo-2); }
+.sesion-callout > summary, .sesion-callout-titulo { cursor: pointer; font-weight: 600; }
+.sesion-callout[open] > summary { margin-bottom: 4px; }
+.sesion-callout p { margin: 0.35em 0; }
+.sesion-tipo { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--texto-suave); margin-right: 4px; }
+.c-narracion { border-left-color: #4f7cac; }
+.c-dialogo { border-left-color: #7a5aa8; }
+.c-dialogo p, .c-narracion p { font-style: italic; }
+.c-tirada { border-left-color: #2f8a4c; }
+.c-reto { border-left-color: #b8741a; }
+.c-salvacion { border-left-color: #b8323a; }
+.c-dm { border-left-color: #6a6372; background: var(--fondo-3); }
+.c-info { border-left-color: var(--acento); }
+.grupo-mesa { background: var(--fondo-2); border: 1px solid var(--borde); border-radius: var(--radio); padding: 10px 12px; }
+.grupo-cabecera { justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.grupo-cabecera h3 { margin: 0; }
+.rejilla-pjs, .feed-escenario { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 8px; }
+.tarjeta-mesa { border: 1px solid var(--borde); border-radius: var(--radio); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--fondo); }
+.tarjeta-mesa.pj { border-top: 4px solid var(--acento); }
+.tarjeta-mesa.criatura { border-top: 4px solid var(--peligro); }
+.tarjeta-mesa.oculta { opacity: 0.6; border-style: dashed; }
+.tarjeta-mesa header { display: flex; align-items: center; gap: 6px; }
+.tarjeta-mesa header .enlace { font-weight: 700; font-size: 1.05rem; }
+.tarjeta-mesa header .sutil { flex: 1; font-size: 0.85rem; }
+.enlace { background: none; border: none; padding: 0; color: var(--texto); cursor: pointer; text-align: left; }
+.enlace:hover { color: var(--acento); text-decoration: underline; }
+.mini-pg { display: flex; flex-direction: column; gap: 3px; font-size: 0.9rem; }
+.mini-pg .temp { color: var(--acento); }
+.datos-mesa { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.88rem; color: var(--texto-suave); }
+.datos-mesa b { color: var(--texto); }
+.datos-mesa.grandes { font-size: 1rem; gap: 6px 18px; margin: 8px 0; }
+.chips-mesa { display: flex; flex-wrap: wrap; gap: 4px; }
+.chips-mesa .chip { font-size: 0.8rem; }
+.chip.condicion { border-color: var(--peligro); color: var(--peligro); cursor: pointer; }
+.forma-mesa { background: var(--acento-suave); border-radius: 6px; padding: 4px 8px; font-size: 0.9rem; }
+.aliados-mesa { margin: 0; padding-left: 1.1em; font-size: 0.88rem; }
+.lista-iniciativa { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.fila-ini { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--borde); background: var(--fondo); }
+.fila-ini input { width: 3.2em; text-align: center; font-weight: 700; }
+.fila-ini .ini-tras { width: 3.2em; text-align: center; color: var(--texto-suave); }
+.fila-ini .ini-nombre { flex: 1; }
+.fila-ini.t-pj { border-left: 4px solid var(--acento); }
+.fila-ini.t-criatura { border-left: 4px solid var(--peligro); }
+.fila-ini.t-aliado { border-left: 4px solid #7a5aa8; margin-left: 12px; }
+.fila-ini.turno { background: var(--acento-suave); border-color: var(--acento); box-shadow: var(--sombra); }
+.fila-ini.caido { opacity: 0.5; text-decoration: line-through; }
+.caracteristicas-criatura { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; text-align: center; margin: 8px 0; }
+.caracteristicas-criatura div { display: flex; flex-direction: column; border: 1px solid var(--borde); border-radius: 6px; padding: 4px; }
+.caracteristicas-criatura span { font-size: 0.75rem; color: var(--texto-suave); }
+.texto-criatura { white-space: pre-line; }
+.tarjeta-aliado .hp-acciones, .tarjeta-mesa .hp-acciones { flex-wrap: nowrap; gap: 4px; }
+.tarjeta-aliado .hp-acciones input, .tarjeta-mesa .hp-acciones input { width: 3.5em; min-width: 0; }
+.tarjeta-aliado .hp-acciones .boton, .tarjeta-mesa .hp-acciones .boton { padding: 0.3em 0.7em; }

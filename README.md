@@ -45,5 +45,12 @@ npm run dev     # http://localhost:5173
 | `src/ui/` | Interfaz: creador, subida de nivel, hoja, almacén del DM |
 | `tests/` | Tests del motor (`cobertura.test.ts` sube cada subclase del 1 al 20) |
 
+## Pantalla del DM
+Solo la ve el DM (botón «Pantalla del DM» en el inicio, o `#/pantalla`).
+- **La nota de sesión:** se importa arrastrando un `.md` de `Sesiones/` de la bóveda, o con «Importar .md». Se guarda solo para el DM, porque lleva secretos: no va en el código de la app, que es público. Al volver a importarla se actualiza y conserva lo tachado.
+- **La mesa:** los PJs activos en vivo (PG, AC, Percepción pasiva, condiciones, forma y aliados), el combate (iniciativa, ronda y turno) y el escenario de criaturas.
+- **Iniciativa:** las tiradas de iniciativa que comparten los jugadores desde su hoja entran solas. Los aliados de los PJs siguen las reglas de 2024: tiran la suya (familiares), actúan justo después del PJ (invocaciones) o dentro de su turno (Eldritch Cannon, Primal Companion).
+- **Firestore:** la pantalla y las notas van en la colección `dm`, que solo puede leer y escribir el DM. Hay que publicar la versión actual de `firestore.rules`.
+
 ## Si cambia una regla del setting
 Edita el JSON de `src/setting/` y sube `version` en `src/setting/campaña.json` para que los navegadores recarguen los datos.

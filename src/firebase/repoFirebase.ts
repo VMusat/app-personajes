@@ -1,5 +1,6 @@
 // Implementación del almacén con Firebase: login con Google y Firestore con caché offline.
-// Estructura: campanas/{id} (nombre, dms, miembros) con subcolecciones personajes, objetos y tiradas.
+// Estructura: campanas/{id} (nombre, dms, miembros) con subcolecciones personajes, objetos y tiradas,
+// y «dm» (solo el DM): el documento «pantalla» y las notas de sesión («sesion-<id>»).
 // Los personajes se guardan serializados en el campo «datos» (sus claves internas contienen «/» y «|»).
 import { initializeApp } from 'firebase/app'
 import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
@@ -11,6 +12,7 @@ import { CAMPAÑA_ID, firebaseConfig } from './config'
 import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } from '../almacen/repo'
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
+import type { NotaSesion, PantallaDM } from '../almacen/pantalla'
 
 export function repoFirebase(): Repo {
   const app = initializeApp(firebaseConfig)
@@ -122,6 +124,37 @@ export function repoFirebase(): Repo {
         await setDoc(campRef, info)
       }
       await deleteDoc(doc(campRef, 'solicitudes', s.uid))
+    },
+    pantalla(cb, alError) {
+      if (!usuario || !esDM()) {
+        cb(null)
+        return () => {}
+      }
+      return onSnapshot(
+        doc(campRef, 'dm', 'pantalla'),
+        (s) => cb(s.exists() ? (JSON.parse(s.data().datos) as PantallaDM) : null),
+        (e) => alError?.(e),
+      )
+    },
+    async guardarPantalla(p) {
+      await setDoc(doc(campRef, 'dm', 'pantalla'), { tipo: 'pantalla', datos: JSON.stringify(p) })
+    },
+    sesiones(cb, alError) {
+      if (!usuario || !esDM()) {
+        cb([])
+        return () => {}
+      }
+      return onSnapshot(
+        query(collection(campRef, 'dm'), where('tipo', '==', 'sesion')),
+        (snap) => cb(snap.docs.map((d) => JSON.parse(d.data().datos) as NotaSesion)),
+        (e) => alError?.(e),
+      )
+    },
+    async guardarSesion(n) {
+      await setDoc(doc(campRef, 'dm', `sesion-${n.id}`), { tipo: 'sesion', titulo: n.titulo, datos: JSON.stringify(n) })
+    },
+    async borrarSesion(id) {
+      await deleteDoc(doc(campRef, 'dm', `sesion-${id}`))
     },
   }
 }
