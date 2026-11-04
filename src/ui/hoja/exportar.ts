@@ -26,7 +26,7 @@ const texto = (s?: string) => (s ?? '').trim()
 /** Lista de Markdown, o «- » vacío como en la plantilla. */
 const lista = (items: string[]) => (items.length ? items.map((x) => `- ${x}`).join('\n') : '- ')
 
-/** Dinero con los nombres del setting: «27 sellos (GP) · 4 estrellas (SP)». */
+/** Dinero con los nombres del setting: «27 aros (GP) · 4 estrellas (SP)». */
 export function dineroSetting(m: Personaje['monedas']): string {
   const partes = MONEDAS.filter((k) => (m[k] ?? 0) > 0).map((k) => {
     const n = m[k]

@@ -230,10 +230,10 @@ function ModalCopiarLibro({ libro, p, actualizar, alCerrar }: PropsPestaña & { 
     <Modal titulo="Copiar conjuro al libro" alCerrar={alCerrar} ancho="ancho">
       <p className="sutil">
         Puedes copiar al libro cualquier conjuro de mago de un nivel que puedas lanzar, si lo encuentras (pergamino, otro libro...).
-        Copiar cuesta 2 horas y 50 sellos (GP) por nivel del conjuro. Estos conjuros se suman a los dos que aprendes en cada nivel.
+        Copiar cuesta 2 horas y 50 aros (GP) por nivel del conjuro. Estos conjuros se suman a los dos que aprendes en cada nivel.
       </p>
       <label className="fila">
-        <input type="checkbox" checked={pagar} onChange={(e) => setPagar(e.target.checked)} /> Descontar el coste de mi dinero (tienes {oro} sellos (GP) contando los PP)
+        <input type="checkbox" checked={pagar} onChange={(e) => setPagar(e.target.checked)} /> Descontar el coste de mi dinero (tienes {oro} aros (GP) contando los PP)
       </label>
       {copiados.length > 0 && (
         <>

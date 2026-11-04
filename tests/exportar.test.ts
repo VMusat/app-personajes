@@ -53,12 +53,12 @@ describe('nota para Obsidian', () => {
     expect(nota).toMatch(/Level 1: .*\*Expeditious Retreat\*/)
     // Equipo, dinero del setting y objetos destacados
     expect(nota).toContain('- Quarterstaff (equipado)')
-    expect(nota).toContain('- Dinero: 27 sellos (GP) · 1 estrella (SP) · 4 puntas (CP)')
+    expect(nota).toContain('- Dinero: 27 aros (GP) · 1 estrella (SP) · 4 puntas (CP)')
     expect(nota.split('## Objetos destacados')[1].split('##')[0]).toContain('Bag of Holding')
   })
 
   it('dinero con los nombres del setting', () => {
-    expect(dineroSetting({ pp: 2, gp: 1, sp: 0, cp: 10 })).toBe('2 PP · 1 sello (GP) · 10 puntas (CP)')
+    expect(dineroSetting({ pp: 2, gp: 1, sp: 0, cp: 10 })).toBe('2 PP · 1 aro (GP) · 10 puntas (CP)')
     expect(dineroSetting({ pp: 0, gp: 0, sp: 0, cp: 0 })).toBe('sin dinero')
   })
 })
