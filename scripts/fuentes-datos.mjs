@@ -5,4 +5,5 @@ const version = ts.match(/VERSION_5ETOOLS = '([^']+)'/)[1]
 const clases = [...ts.match(/CLASES_5ETOOLS = \[([\s\S]*?)\]/)[1].matchAll(/'([^']+)'/g)].map((m) => m[1])
 const otros = [...ts.match(/ARCHIVOS_5ETOOLS = \[([\s\S]*?)\n\]/)[1].matchAll(/'([^']+\.json)'/g)].map((m) => m[1])
 export const URL_BASE = `https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/${version}/data/`
-export const ARCHIVOS = [...clases.map((c) => `class/class-${c}.json`), ...otros]
+const bestiarios = [...ts.match(/BESTIARIOS_5ETOOLS = \[([^\]]*)\]/)[1].matchAll(/'([^']+\.json)'/g)].map((m) => m[1])
+export const ARCHIVOS = [...clases.map((c) => `class/class-${c}.json`), ...otros, ...bestiarios]

@@ -1,17 +1,21 @@
 // Familiares, invocaciones, compañeros y formas del PJ: los gestiona el jugador desde su hoja,
 // y el DM los ve en vivo en su pantalla (con su iniciativa según las reglas).
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useEstado } from '../../estado/store'
 import { nuevoId, type Aliado, type Forma, type ModoIniciativa } from '../../motor/personaje'
 import { MODO_INICIATIVA, PLANTILLAS, sugerencias, TIPO_ALIADO } from '../../motor/compania'
 import { Modal } from '../comun'
+import { bestiaPermitida, formaDeBestia, limiteWildShape, nombreBestia, textoCr, type Bestia, type LimiteWildShape } from '../../motor/formas'
+import { cargarBestias } from '../../datos/cargarBestias'
+import { modificador } from '../../motor/personaje'
+import { TextoConDados } from '../dm/FichaCriatura'
 import { CONDICIONES, conSigno } from '../glosario'
 import type { PropsPestaña } from './HojaPersonaje'
 
 export function Compania({ p, h, actualizar }: PropsPestaña) {
   const tirar = useEstado((s) => s.tirar)
   const [editar, setEditar] = useState<{ aliado: Aliado; nuevo: boolean }>()
-  const [formaNueva, setFormaNueva] = useState<{ pgTemporales: number }>()
+  const [formaNueva, setFormaNueva] = useState<{ pgTemporales: number; wildShape?: boolean }>()
   const [elegir, setElegir] = useState(false)
   const aliados = p.estado.aliados ?? []
   const forma = p.estado.forma
@@ -35,6 +39,13 @@ export function Compania({ p, h, actualizar }: PropsPestaña) {
             </div>
           </div>
           <button className="boton secundario" onClick={() => actualizar((x) => void (x.estado.forma = undefined))}>Volver a tu forma</button>
+          {forma.acciones && (
+            <details className="ficha-forma-desplegable" open>
+              <summary>Estadísticas de la forma</summary>
+              <FichaForma forma={forma} />
+              <p className="sutil">Conservas tus PG, tus Dados de Golpe, tu Inteligencia, Sabiduría y Carisma, tus rasgos de clase, competencias y dotes. Si un bono de habilidad o salvación de la bestia es mayor que el tuyo, usa el suyo. No puedes lanzar conjuros.</p>
+            </details>
+          )}
         </div>
       )}
 
@@ -120,6 +131,7 @@ export function Compania({ p, h, actualizar }: PropsPestaña) {
       {formaNueva && (
         <NuevaForma
           pgTemporales={formaNueva.pgTemporales}
+          limite={formaNueva.wildShape ? limiteWildShape(h) : undefined}
           alCerrar={() => setFormaNueva(undefined)}
           alGuardar={(f, temp) => {
             actualizar((x) => {
@@ -207,23 +219,87 @@ function EditarAliado({ inicial, nuevo, alCerrar, alGuardar }: { inicial: Aliado
   )
 }
 
-function NuevaForma({ pgTemporales, alCerrar, alGuardar }: { pgTemporales: number; alCerrar: () => void; alGuardar: (f: Forma, temp: number) => void }) {
+/** Bloque de estadísticas de la forma (de la bestia elegida en la lista). */
+export function FichaForma({ forma }: { forma: Forma }) {
+  const car = (n: string, v?: number) => v !== undefined && <span><b>{n}</b> {v} ({conSigno(modificador(v))})</span>
+  return (
+    <div className="ficha-forma">
+      <p className="sutil">{[forma.tamaño, forma.cr !== undefined && `VD ${forma.cr}`, forma.ca !== undefined && `AC ${forma.ca}`, forma.velocidad && `Speed ${forma.velocidad}`].filter(Boolean).join(' · ')}</p>
+      <p className="ficha-forma-cars">{car('FUE', forma.fue)}{car('DES', forma.des)}{car('CON', forma.con)}</p>
+      {forma.habilidades && <p><b>Skills</b> {forma.habilidades}</p>}
+      {forma.sentidos && <p><b>Senses</b> {forma.sentidos}</p>}
+      {(forma.rasgos ?? []).map((r) => <p key={r.nombre}><b><i>{r.nombre}.</i></b> {r.texto}</p>)}
+      {(forma.acciones ?? []).map((a) => (
+        <p key={a.nombre}><b><i>{a.nombre}.</i></b> <TextoConDados texto={a.texto} etiqueta={`${forma.nombre} · ${a.nombre.replace(/^(Bonus Action|Reaction): /, '')}`} /></p>
+      ))}
+    </div>
+  )
+}
+
+function NuevaForma({ pgTemporales, limite, alCerrar, alGuardar }: { pgTemporales: number; limite?: LimiteWildShape; alCerrar: () => void; alGuardar: (f: Forma, temp: number) => void }) {
   const [f, setF] = useState<Forma>({ nombre: '', desde: new Date().toISOString() })
   const [temp, setTemp] = useState(pgTemporales)
+  const [bestias, setBestias] = useState<Bestia[]>()
+  const [error, setError] = useState<string>()
+  const [todas, setTodas] = useState(!limite)
+  useEffect(() => {
+    cargarBestias().then(setBestias, (e: Error) => setError(e.message))
+  }, [])
+  const grupos = useMemo(() => {
+    const g = new Map<string, Bestia[]>()
+    for (const b of bestias ?? []) if (todas || !limite || bestiaPermitida(b, limite)) g.set(b.crTexto, [...(g.get(b.crTexto) ?? []), b])
+    return [...g]
+  }, [bestias, todas, limite])
+  const bestia = bestias?.find((x) => x.clave === f.ref)
+  const elegir = (clave: string) => {
+    const b = bestias?.find((x) => x.clave === clave)
+    setF(b ? formaDeBestia(b, limite) : { nombre: '', desde: new Date().toISOString() })
+  }
   return (
-    <Modal titulo="Transformarte" alCerrar={alCerrar}>
-      <p className="sutil">Usa la ficha de la forma. Conservas tus PG, tus rasgos y tu Inteligencia, Sabiduría y Carisma.</p>
+    <Modal titulo={limite ? 'Wild Shape' : 'Transformarte'} alCerrar={alCerrar}>
+      {limite && (
+        <p className="sutil">
+          Druida de nivel {limite.nivel}{limite.luna ? ' del Círculo de la Luna' : ''}: bestias de VD {textoCr(limite.crMax)} o menos
+          {limite.vuelo ? '' : ', sin velocidad de vuelo'}. Conoces {limite.conocidas} formas
+          {limite.luna ? `; tu AC en la forma es como mínimo ${limite.caMinima} (13 + Sabiduría)` : ''}.
+        </p>
+      )}
+      <label className="campo">
+        Bestia
+        <select value={f.ref ?? ''} onChange={(e) => elegir(e.target.value)} disabled={!bestias}>
+          <option value="">{bestias ? '— Elige una bestia (o escribe la forma a mano) —' : error ? 'No se pudo cargar la lista' : 'Cargando bestias…'}</option>
+          {grupos.map(([cr, bs]) => (
+            <optgroup key={cr} label={`VD ${cr}`}>
+              {bs.map((b) => (
+                <option key={b.clave} value={b.clave}>
+                  {nombreBestia(b)}{b.vuela ? ' · vuela' : ''}{b.nada ? ' · nada' : ''}{limite && !bestiaPermitida(b, limite) ? ' (fuera de tu límite)' : ''}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+      {error && <p className="error">{error}</p>}
+      {limite && (
+        <label className="interruptor"><input type="checkbox" checked={todas} onChange={(e) => setTodas(e.target.checked)} /> Ver también las que superan tu límite</label>
+      )}
       <div className="rejilla-campos">
-        <label className="campo">Forma<input value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} placeholder="Wolf" /></label>
+        <label className="campo">Forma<input value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} placeholder="Lobo" /></label>
         <label className="campo">AC de la forma<input inputMode="numeric" value={f.ca ?? ''} onChange={(e) => setF({ ...f, ca: e.target.value ? Number(e.target.value.replace(/\D/g, '')) : undefined })} /></label>
         <label className="campo">Speed<input value={f.velocidad ?? ''} onChange={(e) => setF({ ...f, velocidad: e.target.value || undefined })} placeholder="40 ft" /></label>
         <label className="campo">PG temporales<input inputMode="numeric" value={temp} onChange={(e) => setTemp(Number(e.target.value.replace(/\D/g, '')) || 0)} /></label>
       </div>
-      <label className="campo">Notas<textarea rows={3} value={f.notas ?? ''} onChange={(e) => setF({ ...f, notas: e.target.value || undefined })} placeholder="Mordisco +4 (2d4+2), Pack Tactics…" /></label>
+      {bestia && f.acciones && (
+        <>
+          {bestia.entornos.length > 0 && <p className="sutil">Dónde se ve: {bestia.entornos.join(', ')}.</p>}
+          <FichaForma forma={f} />
+        </>
+      )}
+      <p className="sutil">Conservas tus PG, tus rasgos y tu Inteligencia, Sabiduría y Carisma.</p>
+      <label className="campo">Notas<textarea rows={2} value={f.notas ?? ''} onChange={(e) => setF({ ...f, notas: e.target.value || undefined })} placeholder="Lo que quieras recordar de la forma" /></label>
       <div className="fila-botones">
         <button className="boton" disabled={!f.nombre.trim()} onClick={() => alGuardar(f, temp)}>Transformarte</button>
       </div>
     </Modal>
   )
 }
-

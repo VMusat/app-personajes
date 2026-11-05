@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useEstado } from '../../estado/store'
 import { nuevoId, type ItemInventario } from '../../motor/personaje'
 import { Buscador, Modal, Pestañas, normalizar } from '../comun'
-import { MONEDAS, NOMBRE_MONEDA, titulo } from '../glosario'
+import { MONEDAS, MONEDA_SETTING, NOMBRE_MONEDA, titulo } from '../glosario'
+import { gastarMonedas, moverEn, sumarMonedas, valorTotal, type Cantidades } from '../../motor/monedas'
 import { abrirDetalle } from '../Detalle'
 import type { PropsPestaña } from './HojaPersonaje'
 import { Entradas } from '../Entradas'
@@ -14,6 +15,9 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
   const { datos, objetos } = useEstado()
   const [añadir, setAñadir] = useState(false)
   const [verCamp, setVerCamp] = useState<string>()
+  const [arrastrando, setArrastrando] = useState<number>()
+  const [encima, setEncima] = useState<number>()
+  const mover = (de: number, a: number) => actualizar((x) => moverEn(x.inventario, de, a))
   const def = (it: ItemInventario): Crudo | undefined =>
     it.origen === '5etools' ? datos?.objetos.find((o) => o._clave === it.ref) : it.origen === 'campaña' ? (() => {
       const c = objetos.find((o) => o.id === it.ref)
@@ -28,20 +32,7 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
 
   return (
     <div className="pestaña-inventario">
-      <section className="monedas">
-        {MONEDAS.map((m) => (
-          <label key={m} className="moneda">
-            {NOMBRE_MONEDA[m]}
-            <input type="number" min={0} value={p.monedas[m]} onChange={(e) => actualizar((x) => void (x.monedas[m] = Math.max(0, Number(e.target.value) || 0)))} />
-          </label>
-        ))}
-        {(p.monedas.ep ?? 0) > 0 && (
-          <p className="aviso-texto">
-            Tienes {p.monedas.ep} EP, que ya no se usan.{' '}
-            <button className="boton-mini" onClick={() => actualizar((x) => void ((x.monedas.sp += 5 * (x.monedas.ep ?? 0)), delete x.monedas.ep))}>Cambiar por {5 * p.monedas.ep!} estrellas</button>
-          </p>
-        )}
-      </section>
+      <Monedero p={p} actualizar={actualizar} />
 
       <div className="fila-titulo">
         <h3>Objetos</h3>
@@ -51,14 +42,27 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
       {h.sintonizados > MAX_SINTONIA && <p className="error">Más de {MAX_SINTONIA} objetos sintonizados.</p>}
 
       <ul className="lista-inventario">
-        {p.inventario.map((it) => {
+        {p.inventario.map((it, i) => {
           const d = def(it)
           const tipo = String(d?.type ?? '').split('|')[0]
           const equipable = d && (d.weapon || d.armor || ['S', 'LA', 'MA', 'HA', 'RG', 'WD', 'RD', 'ST'].includes(tipo) || d.wondrous || d.campaña || d.baseItem)
           const requiere = !!d?.reqAttune
           return (
-            <li key={it.id} className={it.equipado || it.sintonizado ? 'activo' : ''}>
+            <li
+              key={it.id}
+              className={[it.equipado || it.sintonizado ? 'activo' : '', arrastrando === i ? 'arrastrando' : '', encima === i && arrastrando !== i ? 'destino' : ''].join(' ')}
+              onDragOver={(e) => { if (arrastrando !== undefined) { e.preventDefault(); setEncima(i) } }}
+              onDrop={(e) => { e.preventDefault(); if (arrastrando !== undefined) mover(arrastrando, i); setArrastrando(undefined); setEncima(undefined) }}
+            >
               <div className="inv-principal">
+                <span
+                  className="asa-mover"
+                  draggable
+                  onDragStart={(e) => { setArrastrando(i); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', it.id) }}
+                  onDragEnd={() => { setArrastrando(undefined); setEncima(undefined) }}
+                  title="Arrastra para cambiar el orden"
+                  aria-hidden
+                >⠿</span>
                 <button
                   className="enlace"
                   onClick={() => (it.origen === '5etools' && it.ref ? abrirDetalle({ tipo: 'objeto', clave: it.ref }) : it.origen === 'campaña' ? setVerCamp(it.ref) : undefined)}
@@ -82,6 +86,10 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
                     <input type="checkbox" checked={!!it.sintonizado} disabled={!it.sintonizado && h.sintonizados >= MAX_SINTONIA} onChange={(e) => cambiar(it.id, (x) => void (x.sintonizado = e.target.checked))} /> Sintonizado
                   </label>
                 )}
+                <span className="inv-orden">
+                  <button className="boton-mini" disabled={i === 0} onClick={() => mover(i, i - 1)} aria-label={`Subir ${it.nombre}`} title="Subir">▲</button>
+                  <button className="boton-mini" disabled={i === p.inventario.length - 1} onClick={() => mover(i, i + 1)} aria-label={`Bajar ${it.nombre}`} title="Bajar">▼</button>
+                </span>
                 <button className="boton-mini" aria-label="Quitar" onClick={() => confirm(`¿Quitar ${it.nombre}?`) && actualizar((x) => void (x.inventario = x.inventario.filter((i) => i.id !== it.id)))}>✕</button>
               </div>
               <input className="inv-notas" placeholder="Notas" value={it.notas ?? ''} onChange={(e) => cambiar(it.id, (x) => void (x.notas = e.target.value))} />
@@ -103,6 +111,85 @@ export function PestañaInventario({ p, h, actualizar }: PropsPestaña) {
         ) : null
       })()}
     </div>
+  )
+}
+
+/** El dinero: se escribe cuánto entra o sale y se suma o se gasta (con cambio si hace falta). */
+function Monedero({ p, actualizar }: Pick<PropsPestaña, 'p' | 'actualizar'>) {
+  const [q, setQ] = useState<Record<string, string>>({})
+  const nombreCorto = (m: (typeof MONEDAS)[number]) => MONEDA_SETTING[m]?.[1] ?? m.toUpperCase()
+  const [aviso, setAviso] = useState<{ texto: string; error?: boolean }>()
+  const [aMano, setAMano] = useState(false)
+  const cantidades: Cantidades = Object.fromEntries(MONEDAS.map((m) => [m, Math.max(0, parseInt(q[m] ?? '', 10) || 0)]))
+  const hay = valorTotal(cantidades) > 0
+  const resumen = MONEDAS.filter((m) => cantidades[m]).map((m) => `${cantidades[m]} ${nombreCorto(m)}`).join(', ')
+  const aplicar = (gastar: boolean) => {
+    if (!hay) return
+    if (gastar && valorTotal(cantidades) > valorTotal(p.monedas)) {
+      setAviso({ texto: 'No tienes dinero suficiente.', error: true })
+      return
+    }
+    actualizar((x) => {
+      if (gastar) gastarMonedas(x.monedas, cantidades)
+      else sumarMonedas(x.monedas, cantidades)
+    })
+    setAviso({ texto: `${gastar ? 'Gastado' : 'Añadido'}: ${resumen}.` })
+    setQ({})
+  }
+  const total = valorTotal(p.monedas) / 100
+  return (
+    <section className="monedero">
+      <div className="monedas">
+        {MONEDAS.map((m) => (
+          <div key={m} className="moneda">
+            <span>{NOMBRE_MONEDA[m]}</span>
+            {aMano ? (
+              <input type="number" min={0} value={p.monedas[m]} onChange={(e) => actualizar((x) => void (x.monedas[m] = Math.max(0, Number(e.target.value) || 0)))} />
+            ) : (
+              <b className="moneda-valor">{p.monedas[m]}</b>
+            )}
+          </div>
+        ))}
+        <div className="moneda total">
+          <span>En total</span>
+          <b className="moneda-valor">{total.toLocaleString('es', { maximumFractionDigits: 2 })} aros</b>
+        </div>
+      </div>
+      <form
+        className="monedas-cambio"
+        onSubmit={(e) => {
+          e.preventDefault()
+          aplicar(false)
+        }}
+      >
+        {MONEDAS.map((m) => (
+          <label key={m} className="campo-moneda">
+            <span>{nombreCorto(m)}</span>
+            <input
+              inputMode="numeric"
+              placeholder="0"
+              value={q[m] ?? ''}
+              onChange={(e) => { setQ({ ...q, [m]: e.target.value.replace(/\D/g, '') }); setAviso(undefined) }}
+              aria-label={`Cantidad de ${NOMBRE_MONEDA[m]}`}
+            />
+          </label>
+        ))}
+        <div className="monedas-botones">
+          <button type="submit" className="boton exito" disabled={!hay}>+ Añadir</button>
+          <button type="button" className="boton peligro" disabled={!hay} onClick={() => aplicar(true)}>− Gastar</button>
+        </div>
+      </form>
+      <div className="fila monedas-pie">
+        {aviso ? <span className={aviso.error ? 'error' : 'sutil'}>{aviso.texto}</span> : <span className="sutil">Si no tienes monedas de un tipo, se paga con otras y se te da el cambio.</span>}
+        <button className="boton-mini" onClick={() => setAMano(!aMano)}>{aMano ? 'Hecho' : 'Corregir a mano'}</button>
+      </div>
+      {(p.monedas.ep ?? 0) > 0 && (
+        <p className="aviso-texto">
+          Tienes {p.monedas.ep} EP, que ya no se usan.{' '}
+          <button className="boton-mini" onClick={() => actualizar((x) => void ((x.monedas.sp += 5 * (x.monedas.ep ?? 0)), delete x.monedas.ep))}>Cambiar por {5 * p.monedas.ep!} estrellas</button>
+        </p>
+      )}
+    </section>
   )
 }
 

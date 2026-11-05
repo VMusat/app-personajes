@@ -801,3 +801,35 @@ input.corto { width: 4em; text-align: center; }
   .reloj-vista.grande .reloj-tiempo { font-size: 2rem; }
   .pantalla-barra { flex-wrap: wrap; }
 }
+
+/* ── Formas de Wild Shape */
+.banda-forma { flex-wrap: wrap; }
+.banda-forma > .ficha-forma-desplegable { flex-basis: 100%; }
+.ficha-forma-desplegable summary { cursor: pointer; font-weight: 600; }
+.ficha-forma { background: var(--fondo); border: 1px solid var(--borde); border-radius: var(--radio); padding: 8px 12px; margin: 8px 0; font-size: 0.92rem; }
+.ficha-forma p { margin: 4px 0; }
+.ficha-forma-cars { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ── Monedero e inventario ordenable */
+.monedero { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.monedero .monedas { gap: 8px 16px; align-items: flex-end; }
+.moneda-valor { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.moneda span { color: var(--texto-suave); font-weight: 600; }
+.moneda.total { margin-left: auto; text-align: right; }
+.moneda.total .moneda-valor { font-size: 1.05rem; }
+.monedas-cambio { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 8px; border: 1px dashed var(--borde); border-radius: var(--radio); }
+.campo-moneda { display: flex; flex-direction: column; font-size: 0.85em; font-weight: 600; }
+.campo-moneda input { width: 76px; }
+.monedas-botones { display: flex; gap: 6px; margin-left: auto; }
+.monedas-pie { justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.asa-mover { cursor: grab; color: var(--texto-suave); padding: 0 6px 0 0; user-select: none; }
+.asa-mover:active { cursor: grabbing; }
+.inv-orden { display: inline-flex; gap: 2px; }
+.lista-inventario li.arrastrando { opacity: 0.45; }
+.lista-inventario li.destino { box-shadow: 0 -3px 0 var(--acento) inset; }
+@media (max-width: 600px) {
+  .monedas-botones { margin-left: 0; width: 100%; }
+  .monedas-botones .boton { flex: 1; }
+  .moneda.total { margin-left: 0; text-align: left; }
+  .asa-mover { display: none; }
+}

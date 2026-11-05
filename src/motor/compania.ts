@@ -5,6 +5,7 @@
 //  - turno: actúa dentro del turno del PJ y no tiene turno propio (Primal Companion, Eldritch Cannon).
 import type { Hoja } from './derivar'
 import type { Aliado, ModoIniciativa } from './personaje'
+import { limiteWildShape, textoCr } from './formas'
 
 export const MODO_INICIATIVA: Record<ModoIniciativa, string> = {
   propia: 'Tira su propia iniciativa',
@@ -35,7 +36,7 @@ export interface Sugerencia {
   detalle: string
   aliado?: PlantillaAliado
   /** Para las transformaciones: nombre de la forma y PG temporales que da. */
-  forma?: { pgTemporales: number }
+  forma?: { pgTemporales: number; wildShape?: boolean }
 }
 
 const nivelDe = (h: Hoja, clase: string) => h.resolucion.clases.find((c) => c.clase.name === clase)?.nivel ?? 0
@@ -47,8 +48,13 @@ export function sugerencias(h: Hoja): Sugerencia[] {
   const out: Sugerencia[] = []
   const druida = nivelDe(h, 'Druid')
   const artificiero = nivelDe(h, 'Artificer')
+  const ws = limiteWildShape(h)
   if (tieneRasgo(h, 'Wild Shape'))
-    out.push({ texto: 'Wild Shape', detalle: `Te transformas en una bestia. Ganas ${druida} PG temporales y usas su AC y su Speed.`, forma: { pgTemporales: druida } })
+    out.push({
+      texto: 'Wild Shape',
+      detalle: `Te transformas en una bestia de VD ${textoCr(ws?.crMax ?? 0.25)} o menos${ws?.vuelo ? '' : ', sin velocidad de vuelo'}. Ganas ${ws?.pgTemporales ?? druida} PG temporales.`,
+      forma: { pgTemporales: ws?.pgTemporales ?? druida, wildShape: true },
+    })
   if (tieneRasgo(h, 'Wild Companion'))
     out.push({ texto: 'Wild Companion', detalle: 'Find Familiar gastando un uso de Wild Shape. Es un feérico y tira su propia iniciativa.', aliado: { nombre: 'Familiar', tipo: 'familiar', iniciativa: 'propia', bonoIniciativa: 2, pg: 1, pgMax: 1, ca: 12 } })
   else if (tieneConjuro(h, (n) => n === 'Find Familiar'))

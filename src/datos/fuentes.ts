@@ -26,6 +26,9 @@ export const ARCHIVOS_5ETOOLS = [
   'conditionsdiseases.json',
 ]
 
+/** Bestiarios de las fuentes activas: las formas de Wild Shape. Se descargan aparte, solo al transformarse. */
+export const BESTIARIOS_5ETOOLS = ['bestiary/bestiary-xmm.json', 'bestiary/bestiary-xdmg.json']
+
 /** Fuentes permitidas por la adaptación (ver Reglas/Adaptación a D&D 2024 en la bóveda). */
 export const FUENTES_PERMITIDAS = ['XPHB', 'XDMG', 'XMM', 'FRHoF', 'FRAiF', 'EFA', 'AU', 'SETTING']
 /** Fuentes de las que salen clases y subclases jugables. */

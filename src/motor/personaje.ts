@@ -79,6 +79,17 @@ export interface Forma {
   velocidad?: string
   notas?: string
   desde: string
+  /** Bestia de 5etools (nombre|fuente) si se eligió de la lista de Wild Shape. */
+  ref?: string
+  cr?: string
+  tamaño?: string
+  fue?: number
+  des?: number
+  con?: number
+  sentidos?: string
+  habilidades?: string
+  rasgos?: { nombre: string; texto: string }[]
+  acciones?: { nombre: string; texto: string }[]
 }
 
 export interface Nota {
