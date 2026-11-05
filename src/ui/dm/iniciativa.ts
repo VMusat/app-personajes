@@ -11,7 +11,7 @@ export interface PjMesa {
 
 export interface FilaIniciativa {
   id: string
-  tipo: 'pj' | 'criatura' | 'aliado'
+  tipo: 'pj' | 'criatura' | 'aliado' | 'guarida'
   nombre: string
   valor?: number
   bono: number
@@ -26,10 +26,12 @@ export interface FilaIniciativa {
 export const idPj = (id: string) => `pj:${id}`
 export const idCriatura = (id: string) => `cr:${id}`
 export const idAliado = (pj: string, a: string) => `al:${pj}:${a}`
+export const idGuarida = (id: string) => `gu:${id}`
 
 /**
  * Filas ordenadas de mayor a menor iniciativa (empate: mayor bono; después, PJ antes que criatura).
  * Los aliados «tras» van justo detrás de su PJ con su mismo valor; los «turno» van dentro de la fila del PJ.
+ * Las criaturas que luchan en su guarida y tienen acciones de guarida añaden una fila en la iniciativa 20, que pierde los empates.
  * Las filas sin valor quedan al final, en el orden en que se añadieron.
  */
 export function ordenIniciativa(p: PantallaDM, pjs: PjMesa[]): FilaIniciativa[] {
@@ -42,6 +44,13 @@ export function ordenIniciativa(p: PantallaDM, pjs: PjMesa[]): FilaIniciativa[] 
   }
   for (const c of p.criaturas.filter((c) => !c.oculta))
     filas.push({ id: idCriatura(c.id), tipo: 'criatura', nombre: c.nombre, valor: v[idCriatura(c.id)], bono: c.plantilla.bonoIniciativa, criatura: c, enSuTurno: [] })
+  // Una sola acción de guarida por tipo de criatura, aunque haya varias en la misma guarida
+  const guaridas = new Set<string>()
+  for (const c of p.criaturas.filter((c) => !c.oculta && c.enGuarida && c.pg > 0 && c.plantilla.guarida?.acciones.length)) {
+    if (guaridas.has(c.plantilla.nombre)) continue
+    guaridas.add(c.plantilla.nombre)
+    filas.push({ id: idGuarida(c.id), tipo: 'guarida', nombre: `Guarida de ${c.plantilla.nombre}`, valor: 20, bono: -100, criatura: c, enSuTurno: [] })
+  }
 
   const conValor = filas.filter((f) => f.valor !== undefined)
   const sinValor = filas.filter((f) => f.valor === undefined)

@@ -48,9 +48,18 @@ npm run dev     # http://localhost:5173
 ## Pantalla del DM
 Solo la ve el DM (botón «Pantalla del DM» en el inicio, o `#/pantalla`).
 - **La nota de sesión:** se importa arrastrando un `.md` de `Sesiones/` de la bóveda, o con «Importar .md». Se guarda solo para el DM, porque lleva secretos: no va en el código de la app, que es público. Al volver a importarla se actualiza y conserva lo tachado.
+- **Editar la nota:** con «✏ Editar» cada texto se cambia en el sitio, con su formato (negrita, cursiva, enlaces). Intro crea otra línea debajo y el botón ＋ entre bloques añade líneas de escena y tarjetas (narración, diálogo, tirada, reto, salvación, DM). Los cambios se guardan en la app; «Exportar .md» descarga la nota para sustituirla en la bóveda. `src/ui/dm/editarSesion.ts` hace los cambios línea a línea sin tocar el resto del texto.
 - **La mesa:** los PJs activos en vivo (PG, AC, Percepción pasiva, condiciones, forma y aliados), el combate (iniciativa, ronda y turno) y el escenario de criaturas.
+- **En pantallas anchas** la ventana no se desliza: la nota y la mesa tienen cada una su scroll.
 - **Iniciativa:** las tiradas de iniciativa que comparten los jugadores desde su hoja entran solas. Los aliados de los PJs siguen las reglas de 2024: tiran la suya (familiares), actúan justo después del PJ (invocaciones) o dentro de su turno (Eldritch Cannon, Primal Companion).
 - **Firestore:** la pantalla y las notas van en la colección `dm`, que solo puede leer y escribir el DM. Hay que publicar la versión actual de `firestore.rules`.
+
+## Bestiario
+Catálogo de criaturas del DM (botón «Bestiario» en el inicio, o `#/bestiario`). Se guarda en la colección `dm` (documentos `criatura-<id>`).
+- Se crean en la app o se importan arrastrando notas de `Bestiario/` de la bóveda; al reimportar se actualiza la criatura. «Exportar .md» genera la nota con la plantilla «Criatura».
+- El formato de la ficha (sección `## Estadísticas`) está explicado al principio de `src/almacen/criaturas.ts` y en la nota «App de personajes» de la bóveda.
+- En el escenario de la Pantalla del DM cada criatura lleva su estado: usos «(N/día)», recargas «(Recarga X-6)» (se tiran solas al empezar su turno), acciones legendarias (se recuperan al empezar su turno), guarida (acción de guarida en la iniciativa 20, que pierde los empates), dominio de los acechadores y sinergias con otras criaturas o PJs presentes.
+- Las fórmulas de dados y los bonos de ataque de la ficha se tiran al pulsarlos (tiradas privadas del DM).
 
 ## Si cambia una regla del setting
 Edita el JSON de `src/setting/` y sube `version` en `src/setting/campaña.json` para que los navegadores recarguen los datos.

@@ -1,23 +1,9 @@
 // Pantalla del DM: el escenario de la sesión (PJs activos, criaturas, iniciativa) y las notas de sesión.
 // Solo los lee y escribe el DM (en Firebase, la colección «dm» de la campaña).
-import type { Caracteristica } from '../datos/tipos'
+import type { Criatura } from './criaturas'
 
-/** Ficha de una criatura. Hoy se crea a mano; más adelante saldrá del catálogo de criaturas de la app. */
-export interface PlantillaCriatura {
-  nombre: string
-  tipo?: string
-  vd?: string
-  ca: number
-  pgMax: number
-  /** Fórmula de PG para tirarlos («2d8+4»); si no hay, se usa pgMax. */
-  pgFormula?: string
-  bonoIniciativa: number
-  percepcionPasiva?: number
-  velocidad?: string
-  caracteristicas?: Partial<Record<Caracteristica, number>>
-  /** Rasgos, acciones y lo demás, en texto libre. */
-  texto?: string
-}
+/** Ficha de una criatura del escenario: una copia de la del Bestiario (o una escrita a mano en fichas antiguas). */
+export type PlantillaCriatura = Criatura
 
 export interface CriaturaEscenario {
   id: string
@@ -29,6 +15,18 @@ export interface CriaturaEscenario {
   notas?: string
   /** Oculta: está en el escenario pero aún no ha aparecido. */
   oculta?: boolean
+  /** Lucha en su guarida: acciones de guarida en la iniciativa 20 y más acciones legendarias. */
+  enGuarida?: boolean
+  /** Acciones legendarias gastadas desde su último turno. */
+  legendariasUsadas?: number
+  /** Usos gastados de las entradas «(N/día)», por clave de entrada. */
+  usos?: Record<string, number>
+  /** Entradas con recarga gastadas (se tiran al empezar su turno). */
+  gastadas?: string[]
+  /** El dominio del acechador está roto. */
+  dominioRoto?: boolean
+  /** Último aviso automático (recargas al empezar su turno). */
+  aviso?: string
 }
 
 export interface Combate {
@@ -50,7 +48,7 @@ export interface PantallaDM {
   pjs: string[]
   criaturas: CriaturaEscenario[]
   combate: Combate
-  /** Plantillas usadas en la campaña, para reutilizarlas. */
+  /** Fichas escritas a mano antes del Bestiario (ya no se usan; se conservan por compatibilidad). */
   plantillas: PlantillaCriatura[]
   /** Líneas tachadas por nota: índices de tarea. */
   tachadas: Record<string, number[]>
@@ -62,6 +60,12 @@ export interface NotaSesion {
   titulo: string
   texto: string
   actualizado: string
+  /** Nombre del archivo importado, para exportarla con el mismo nombre. */
+  archivo?: string
+  /** Momento del último cambio hecho en la app (si es posterior a la importación, Obsidian no lo tiene). */
+  editada?: string
+  /** Momento de la última importación desde Obsidian. */
+  importada?: string
 }
 
 export function pantallaVacia(): PantallaDM {

@@ -15,6 +15,7 @@ export type Vista =
   | { tipo: 'campaña' }
   | { tipo: 'guia' }
   | { tipo: 'pantalla' }
+  | { tipo: 'bestiario' }
 
 interface Estado {
   datos?: Datos
@@ -79,6 +80,7 @@ export function vistaDeHash(h: string): Vista {
   if (tipo === 'campana') return { tipo: 'campaña' }
   if (tipo === 'guia') return { tipo: 'guia' }
   if (tipo === 'pantalla') return { tipo: 'pantalla' }
+  if (tipo === 'bestiario') return { tipo: 'bestiario' }
   return { tipo: 'inicio' }
 }
 
@@ -89,6 +91,7 @@ export function ir(v: Vista) {
     v.tipo === 'campaña' ? '#/campana' :
     v.tipo === 'guia' ? '#/guia' :
     v.tipo === 'pantalla' ? '#/pantalla' :
+    v.tipo === 'bestiario' ? '#/bestiario' :
     v.tipo === 'hoja' ? `#/hoja/${v.id}${v.pestaña ? `/${v.pestaña}` : ''}` :
     `#/${v.tipo}/${v.id}`
   if (location.hash !== h) location.hash = h

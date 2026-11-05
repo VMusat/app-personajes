@@ -1,6 +1,6 @@
 // Implementación del almacén con Firebase: login con Google y Firestore con caché offline.
 // Estructura: campanas/{id} (nombre, dms, miembros) con subcolecciones personajes, objetos y tiradas,
-// y «dm» (solo el DM): el documento «pantalla» y las notas de sesión («sesion-<id>»).
+// y «dm» (solo el DM): el documento «pantalla», las notas de sesión («sesion-<id>») y el Bestiario («criatura-<id>»).
 // Los personajes se guardan serializados en el campo «datos» (sus claves internas contienen «/» y «|»).
 import { initializeApp } from 'firebase/app'
 import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
@@ -13,6 +13,7 @@ import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } f
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
 import type { NotaSesion, PantallaDM } from '../almacen/pantalla'
+import type { Criatura } from '../almacen/criaturas'
 
 export function repoFirebase(): Repo {
   const app = initializeApp(firebaseConfig)
@@ -155,6 +156,24 @@ export function repoFirebase(): Repo {
     },
     async borrarSesion(id) {
       await deleteDoc(doc(campRef, 'dm', `sesion-${id}`))
+    },
+    criaturas(cb, alError) {
+      if (!usuario || !esDM()) {
+        cb([])
+        return () => {}
+      }
+      return onSnapshot(
+        query(collection(campRef, 'dm'), where('tipo', '==', 'criatura')),
+        (snap) => cb(snap.docs.map((d) => JSON.parse(d.data().datos) as Criatura)),
+        (e) => alError?.(e),
+      )
+    },
+    async guardarCriatura(c) {
+      const datos = { ...c, actualizado: new Date().toISOString() }
+      await setDoc(doc(campRef, 'dm', `criatura-${c.id}`), { tipo: 'criatura', nombre: c.nombre, datos: JSON.stringify(datos) })
+    },
+    async borrarCriatura(id) {
+      await deleteDoc(doc(campRef, 'dm', `criatura-${id}`))
     },
   }
 }

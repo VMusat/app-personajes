@@ -14,6 +14,7 @@ import { Almacen } from './ui/dm/Almacen'
 import { PanelCampaña } from './ui/dm/PanelCampaña'
 import { Guia } from './ui/Guia'
 import { PantallaDM } from './ui/dm/PantallaDM'
+import { Bestiario } from './ui/dm/Bestiario'
 
 // Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
 let promesaRepo: Promise<Repo> | undefined
@@ -97,6 +98,7 @@ export default function App() {
   else if (vista.tipo === 'almacen') contenido = <Almacen />
   else if (vista.tipo === 'campaña') contenido = <PanelCampaña />
   else if (vista.tipo === 'pantalla') contenido = repo.esDM() ? <PantallaDM /> : <Inicio />
+  else if (vista.tipo === 'bestiario') contenido = repo.esDM() ? <Bestiario /> : <Inicio />
   else contenido = <Inicio />
 
   return (

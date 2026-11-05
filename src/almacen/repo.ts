@@ -3,6 +3,7 @@
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from './objetosCampaña'
 import type { NotaSesion, PantallaDM } from './pantalla'
+import type { Criatura } from './criaturas'
 
 export interface Usuario {
   uid: string
@@ -68,6 +69,10 @@ export interface Repo {
   sesiones(cb: (ns: NotaSesion[]) => void, alError?: (e: Error) => void): Cancelar
   guardarSesion(n: NotaSesion): Promise<void>
   borrarSesion(id: string): Promise<void>
+  /** Bestiario: el catálogo de criaturas (solo DM). */
+  criaturas(cb: (cs: Criatura[]) => void, alError?: (e: Error) => void): Cancelar
+  guardarCriatura(c: Criatura): Promise<void>
+  borrarCriatura(id: string): Promise<void>
 }
 
 // ── Modo local
@@ -96,6 +101,7 @@ export function repoLocal(): Repo {
     tiradas: new Set<(t: TiradaCompartida[]) => void>(),
     pantalla: new Set<(p: PantallaDM | null) => void>(),
     sesiones: new Set<(ns: NotaSesion[]) => void>(),
+    criaturas: new Set<(cs: Criatura[]) => void>(),
   }
   const usuario: Usuario = { uid: 'local', nombre: 'Este navegador', email: '' }
   const avisar = () => {
@@ -109,6 +115,8 @@ export function repoLocal(): Repo {
     oyentes.pantalla.forEach((cb) => cb(pd))
     const ns = leer<NotaSesion[]>('sesiones', [])
     oyentes.sesiones.forEach((cb) => cb(ns))
+    const cs = leer<Criatura[]>('criaturas', [])
+    oyentes.criaturas.forEach((cb) => cb(cs))
   }
   return {
     modo: 'local',
@@ -193,6 +201,19 @@ export function repoLocal(): Repo {
     },
     async borrarSesion(id) {
       escribir('sesiones', leer<NotaSesion[]>('sesiones', []).filter((x) => x.id !== id))
+      avisar()
+    },
+    criaturas(cb) {
+      oyentes.criaturas.add(cb)
+      cb(leer('criaturas', []))
+      return () => oyentes.criaturas.delete(cb)
+    },
+    async guardarCriatura(c) {
+      escribir('criaturas', [...leer<Criatura[]>('criaturas', []).filter((x) => x.id !== c.id), { ...c, actualizado: new Date().toISOString() }])
+      avisar()
+    },
+    async borrarCriatura(id) {
+      escribir('criaturas', leer<Criatura[]>('criaturas', []).filter((x) => x.id !== id))
       avisar()
     },
   }

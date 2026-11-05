@@ -574,12 +574,18 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .pantalla-barra h1 { margin: 0; font-size: 1.4rem; flex: 1; }
 .pantalla-pestañas { display: none; }
 .pantalla-cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-.pantalla-nota { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; padding-right: 6px; }
 .pantalla-mesa { display: flex; flex-direction: column; gap: 16px; }
+/* En pantallas anchas la ventana no se desliza: cada columna lleva su propio scroll */
+@media (min-width: 1001px) {
+  .app.app-ancha { height: 100dvh; box-sizing: border-box; padding-bottom: 12px; display: flex; flex-direction: column; overflow: hidden; }
+  .pantalla-dm { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .pantalla-cuerpo { flex: 1; min-height: 0; align-items: stretch; }
+  .pantalla-nota, .pantalla-mesa { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 6px 80px 0; }
+  .nota-cabecera { position: sticky; top: 0; z-index: 2; background: var(--fondo); padding-bottom: 4px; }
+}
 @media (max-width: 1000px) {
   .pantalla-pestañas { display: block; }
   .pantalla-cuerpo { grid-template-columns: 1fr; }
-  .pantalla-nota { position: static; max-height: none; overflow: visible; }
   .pantalla-cuerpo.ver-mesa .pantalla-nota, .pantalla-cuerpo.ver-nota .pantalla-mesa { display: none; }
 }
 .panel-nota.arrastrando { outline: 2px dashed var(--acento); outline-offset: 4px; border-radius: var(--radio); }
@@ -645,9 +651,67 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .fila-ini.turno { background: var(--acento-suave); border-color: var(--acento); box-shadow: var(--sombra); }
 .fila-ini.caido { opacity: 0.5; text-decoration: line-through; }
 .caracteristicas-criatura { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; text-align: center; margin: 8px 0; }
-.caracteristicas-criatura div { display: flex; flex-direction: column; border: 1px solid var(--borde); border-radius: 6px; padding: 4px; }
+.caracteristicas-criatura div, .caracteristicas-criatura button { display: flex; flex-direction: column; border: 1px solid var(--borde); border-radius: 6px; padding: 4px; background: var(--fondo); color: var(--texto); font: inherit; }
+.caracteristicas-criatura button { cursor: pointer; }
+.caracteristicas-criatura button:hover { border-color: var(--acento); }
 .caracteristicas-criatura span { font-size: 0.75rem; color: var(--texto-suave); }
 .texto-criatura { white-space: pre-line; }
 .tarjeta-aliado .hp-acciones, .tarjeta-mesa .hp-acciones { flex-wrap: nowrap; gap: 4px; }
 .tarjeta-aliado .hp-acciones input, .tarjeta-mesa .hp-acciones input { width: 3.5em; min-width: 0; }
 .tarjeta-aliado .hp-acciones .boton, .tarjeta-mesa .hp-acciones .boton { padding: 0.3em 0.7em; }
+
+/* ── Edición de la nota de sesión */
+.ayuda-edicion { font-size: 0.85rem; margin: 0 0 6px; }
+.ayuda-edicion kbd { border: 1px solid var(--borde); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; font-size: 0.8em; }
+.editable { outline: none; border-radius: 4px; padding: 0 2px; min-width: 2em; cursor: text; transition: background 0.1s; }
+.editable:hover { background: var(--acento-suave); }
+.editable:focus { background: var(--fondo); box-shadow: 0 0 0 2px var(--acento); }
+.editable:empty::before { content: attr(data-vacio); color: var(--texto-suave); font-style: italic; }
+.editable .wl, .nota-sesion .wl { color: var(--acento); }
+.sesion-editable-fila { display: flex; align-items: flex-start; gap: 6px; }
+.sesion-editable-fila > .editable { flex: 1; }
+.sesion-editable-fila input[type='checkbox'] { margin-top: 0.3em; }
+.sesion-borrar { opacity: 0; font-size: 0.8rem; padding: 0 4px; }
+.sesion-editable-fila:hover .sesion-borrar, .sesion-callout-titulo:hover .sesion-borrar, .sesion-borrar:focus { opacity: 0.7; }
+.sesion-tarea.hecha .editable { text-decoration: line-through; color: var(--texto-suave); }
+.sesion-callout.editando .sesion-callout-titulo { cursor: default; gap: 6px; align-items: center; margin-bottom: 4px; flex-wrap: nowrap; }
+.sesion-callout.editando .sesion-callout-titulo > .editable { flex: 1; }
+.sesion-tipo-select { font-size: 0.75rem; padding: 1px 4px; width: auto; }
+.sesion-insertar { position: relative; height: 6px; margin: 0; display: flex; justify-content: center; align-items: center; }
+.sesion-insertar.abierto { height: auto; margin: 6px 0; }
+.sesion-mas { opacity: 0; position: absolute; z-index: 1; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--acento); background: var(--fondo); color: var(--acento); font-size: 0.85rem; line-height: 1; padding: 0; cursor: pointer; transition: opacity 0.1s; }
+.sesion-insertar:hover .sesion-mas, .sesion-mas:focus-visible { opacity: 1; }
+.sesion-insertar:hover::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed var(--acento); }
+.sesion-menu { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 6px; border: 1px dashed var(--acento); border-radius: 8px; background: var(--fondo); }
+.sesion-menu .chip { cursor: pointer; border-left-width: 4px; font-size: 0.82rem; }
+@media (hover: none) { .sesion-mas, .sesion-borrar { opacity: 0.6; } }
+
+/* ── Bestiario y fichas de criatura */
+.tarjeta-bestia { cursor: pointer; }
+.tarjeta-bestia:hover { border-color: var(--acento); }
+.ficha-criatura h4 { margin: 12px 0 4px; border-bottom: 1px solid var(--borde); padding-bottom: 2px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ficha-criatura h5 { margin: 8px 0 2px; }
+.lineas-ficha { display: flex; flex-direction: column; gap: 2px; font-size: 0.92rem; }
+.entrada-ficha { margin: 4px 0; white-space: pre-line; }
+.entrada-ficha.gastada { opacity: 0.6; }
+.entrada-nombre { font-style: italic; }
+.entrada-estado { display: inline-flex; gap: 4px; align-items: center; margin-left: 6px; vertical-align: middle; }
+.seccion-ficha.apagada { opacity: 0.55; }
+.seccion-ficha .interruptor { font-size: 0.85rem; font-weight: normal; }
+.sinergia-activa { border-left: 3px solid var(--acento); padding-left: 6px; }
+.dado-texto { border: none; background: var(--acento-suave); color: var(--texto); border-radius: 4px; padding: 0 4px; margin: 0 1px; font: inherit; cursor: pointer; }
+.dado-texto:hover { background: var(--acento); color: var(--acento-texto); }
+.pips { display: inline-flex; gap: 3px; vertical-align: middle; }
+.pip { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--acento); background: var(--acento); padding: 0; cursor: pointer; }
+.pip.gastado { background: transparent; }
+.pip:disabled { cursor: default; }
+.recursos-criatura .chip { cursor: pointer; }
+.chip.exito { border-color: var(--exito); color: var(--exito); }
+.aviso-criatura { font-size: 0.85rem; background: var(--acento-suave); border-radius: 6px; padding: 3px 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.fila-ini.t-guarida { border-left: 4px solid #6a6372; background: var(--fondo-3); }
+.lista-elegir { display: flex; flex-direction: column; gap: 4px; max-height: 40vh; overflow-y: auto; margin: 8px 0; }
+.fila-elegir { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; padding: 6px 10px; border: 1px solid var(--borde); border-radius: 8px; background: var(--fondo-2); color: var(--texto); cursor: pointer; }
+.fila-elegir:hover { border-color: var(--acento); }
+.fila-elegir.elegida { border-color: var(--acento); background: var(--acento-suave); }
+.previa-criatura { margin-top: 8px; }
+.previa-criatura summary { cursor: pointer; color: var(--acento); }

@@ -98,6 +98,22 @@ export function Inicio() {
         </div>
       </header>
 
+      {esDM && (
+        <section>
+          <h2>Herramientas del DM</h2>
+          <div className="fila-botones">
+            <button className="boton" onClick={() => ir({ tipo: 'pantalla' })}>Pantalla del DM</button>
+            <button className="boton secundario" onClick={() => ir({ tipo: 'bestiario' })}>Bestiario</button>
+            <button className="boton secundario" onClick={() => ir({ tipo: 'almacen' })}>Objetos de la campaña ({objetos.length})</button>
+            {repo.modo === 'firebase' && (
+              <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>
+                Jugadores y campaña{solicitudes.length ? ` (${solicitudes.length} pendiente${solicitudes.length > 1 ? 's' : ''})` : ''}
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
       <section>
         <div className="fila-titulo">
           <h2>Mis personajes</h2>
@@ -109,26 +125,12 @@ export function Inicio() {
         </div>
       </section>
 
-      {esDM && (
+      {ajenos.length > 0 && (
         <section>
-          <h2>Herramientas del DM</h2>
-          <div className="fila-botones">
-            <button className="boton" onClick={() => ir({ tipo: 'pantalla' })}>Pantalla del DM</button>
-            <button className="boton secundario" onClick={() => ir({ tipo: 'almacen' })}>Objetos de la campaña ({objetos.length})</button>
-            {repo.modo === 'firebase' && (
-              <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>
-                Jugadores y campaña{solicitudes.length ? ` (${solicitudes.length} pendiente${solicitudes.length > 1 ? 's' : ''})` : ''}
-              </button>
-            )}
+          <h2>Personajes de los jugadores</h2>
+          <div className="rejilla-tarjetas">
+            {ajenos.map((p) => <TarjetaPersonaje key={p.id} p={p} />)}
           </div>
-          {ajenos.length > 0 && (
-            <>
-              <h3>Personajes de los jugadores</h3>
-              <div className="rejilla-tarjetas">
-                {ajenos.map((p) => <TarjetaPersonaje key={p.id} p={p} />)}
-              </div>
-            </>
-          )}
         </section>
       )}
     </div>
