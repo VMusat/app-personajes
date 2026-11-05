@@ -1,6 +1,7 @@
 // Implementación del almacén con Firebase: login con Google y Firestore con caché offline.
 // Estructura: campanas/{id} (nombre, dms, miembros) con subcolecciones personajes, objetos y tiradas,
-// y «dm» (solo el DM): el documento «pantalla», las notas de sesión («sesion-<id>») y el Bestiario («criatura-<id>»).
+// «dm» (solo el DM): el documento «pantalla», las notas de sesión («sesion-<id>») y el Bestiario («criatura-<id>»),
+// y «publico/mesa»: la mesa que ven los jugadores (iniciativa y relojes), que solo publica el DM.
 // Los personajes se guardan serializados en el campo «datos» (sus claves internas contienen «/» y «|»).
 import { initializeApp } from 'firebase/app'
 import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
@@ -14,6 +15,7 @@ import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
 import type { NotaSesion, PantallaDM } from '../almacen/pantalla'
 import type { Criatura } from '../almacen/criaturas'
+import type { MesaPublica } from '../almacen/mesa'
 
 export function repoFirebase(): Repo {
   const app = initializeApp(firebaseConfig)
@@ -174,6 +176,17 @@ export function repoFirebase(): Repo {
     },
     async borrarCriatura(id) {
       await deleteDoc(doc(campRef, 'dm', `criatura-${id}`))
+    },
+    mesa(cb) {
+      if (!usuario) return () => {}
+      return onSnapshot(
+        doc(campRef, 'publico', 'mesa'),
+        (s) => cb(s.exists() ? (JSON.parse(s.data().datos) as MesaPublica) : null),
+        () => cb(null),
+      )
+    },
+    async publicarMesa(m) {
+      await setDoc(doc(campRef, 'publico', 'mesa'), { datos: JSON.stringify(m) })
     },
   }
 }

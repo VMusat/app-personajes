@@ -147,3 +147,21 @@ function envolver(s: string, marca: string): string {
   const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s)!
   return `${m[1]}${marca}${m[2]}${marca}${m[3]}`
 }
+
+export const TITULO_APUNTES = 'Apuntes de la mesa'
+
+/** Añade líneas al final de la sección «## Apuntes de la mesa» (la crea al final de la nota si no está). */
+export function añadirApuntes(texto: string, nuevas: string[]): string {
+  const { lineas, nl } = partir(texto)
+  const i = lineas.findIndex((l) => new RegExp(`^##\\s+${TITULO_APUNTES}\\s*$`, 'i').test(l))
+  if (i < 0) {
+    while (lineas.length && !lineas[lineas.length - 1].trim()) lineas.pop()
+    return [...lineas, '', `## ${TITULO_APUNTES}`, ...nuevas, ''].join(nl)
+  }
+  let fin = lineas.findIndex((l, k) => k > i && /^#{1,2}\s/.test(l))
+  if (fin < 0) fin = lineas.length
+  let ultima = fin - 1
+  while (ultima > i && !lineas[ultima].trim()) ultima--
+  lineas.splice(ultima + 1, 0, ...nuevas)
+  return lineas.join(nl)
+}

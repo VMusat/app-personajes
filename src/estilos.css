@@ -715,3 +715,89 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .fila-elegir.elegida { border-color: var(--acento); background: var(--acento-suave); }
 .previa-criatura { margin-top: 8px; }
 .previa-criatura summary { cursor: pointer; color: var(--acento); }
+
+/* ── Mesa: turno, acciones rápidas, aplicar a varios */
+.tarjeta-mesa.turno { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento), var(--sombra); }
+.chip.ultimo-daño { cursor: pointer; white-space: nowrap; }
+.boton-mini.activo { background: var(--acento-suave); border-color: var(--acento); }
+.acciones-rapidas { border-top: 1px dashed var(--borde); padding-top: 4px; }
+.acciones-rapidas summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.acciones-rapidas ul { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 3px; }
+.acciones-rapidas li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.9rem; }
+.acciones-rapidas li.gastada .accion-nombre { opacity: 0.55; text-decoration: line-through; }
+.acciones-rapidas .accion-nombre { flex: 1; min-width: 8em; color: var(--texto); }
+.acciones-rapidas .accion-botones { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.acciones-rapidas .accion-botones .chip { font-size: 0.8rem; padding: 0 0.5em; }
+.acciones-rapidas .accion-texto { flex-basis: 100%; font-size: 0.85rem; background: var(--fondo-3); border-radius: 6px; padding: 4px 8px; }
+.lista-varios { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
+.lista-varios li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 6px; border-bottom: 1px solid var(--borde); }
+.segmentos { display: inline-flex; border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.segmentos button { background: transparent; border: none; padding: 0.25em 0.7em; cursor: pointer; color: var(--texto); }
+.segmentos button + button { border-left: 1px solid var(--borde); }
+.segmentos button.activo { background: var(--acento); color: var(--acento-texto); }
+
+/* ── Relojes y apuntes */
+.relojes-cabecera { display: flex; gap: 6px; flex-wrap: wrap; }
+.nuevo-reloj { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px dashed var(--borde); border-radius: var(--radio); margin-bottom: 8px; }
+.nuevo-reloj .fila { flex-wrap: wrap; gap: 6px; align-items: center; }
+input.corto { width: 4em; text-align: center; }
+.lista-relojes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.reloj-dm { border: 1px solid var(--borde); border-radius: var(--radio); padding: 8px 10px; background: var(--fondo); display: flex; flex-direction: column; gap: 6px; }
+.reloj-controles { gap: 4px; flex-wrap: wrap; }
+.reloj-vista { display: flex; flex-direction: column; gap: 2px; }
+.reloj-vista.pasos { flex-direction: row; align-items: center; gap: 10px; }
+.reloj-nombre { font-weight: 600; }
+.reloj-tiempo { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.reloj-vista.parado .reloj-tiempo { color: var(--texto-suave); }
+.reloj-barra { height: 5px; background: var(--fondo-3); border-radius: 3px; overflow: hidden; }
+.reloj-barra div { height: 100%; background: var(--acento); transition: width 0.25s linear; }
+.reloj-vista.agotado .reloj-tiempo, .reloj-dm.agotado .reloj-tiempo { color: var(--peligro); animation: parpadeo 1s steps(2) infinite; }
+.reloj-dm.agotado { border-color: var(--peligro); }
+@keyframes parpadeo { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .reloj-vista.agotado .reloj-tiempo, .reloj-dm.agotado .reloj-tiempo { animation: none; } }
+.circulo-pasos { width: 52px; height: 52px; flex-shrink: 0; }
+.circulo-pasos.grande { width: 88px; height: 88px; }
+.circulo-pasos path { fill: var(--fondo-3); stroke: var(--borde); stroke-width: 1.5; }
+.circulo-pasos path.lleno { fill: var(--peligro); }
+.circulo-pasos.pulsable path { cursor: pointer; }
+.circulo-pasos.pulsable path:hover { opacity: 0.8; }
+.lista-apuntes { list-style: none; padding: 0; margin: 8px 0 0; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.lista-apuntes li { display: flex; gap: 8px; align-items: baseline; padding: 2px 0; border-bottom: 1px solid var(--borde); font-size: 0.92rem; }
+.lista-apuntes .sutil { white-space: nowrap; font-size: 0.8rem; }
+.lista-apuntes .apunte-texto { flex: 1; overflow-wrap: anywhere; }
+
+/* ── Vista de mesa (jugadores y pantalla compartida) */
+.app.app-mesa { max-width: 900px; }
+.cabecera-mesa { gap: 12px; align-items: center; margin-bottom: 12px; }
+.cabecera-mesa h1 { margin: 0; flex: 1; }
+.relojes-mesa { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.relojes-mesa .reloj-vista { border: 1px solid var(--borde); border-radius: var(--radio); padding: 10px 14px; background: var(--fondo-2); }
+.reloj-vista.grande .reloj-tiempo { font-size: 2.6rem; }
+.turno-mesa { font-size: 1.3rem; margin: 0 0 10px; padding: 8px 12px; border-radius: var(--radio); background: var(--acento-suave); }
+.turno-mesa.tuyo { background: var(--acento); color: var(--acento-texto); }
+.iniciativa-mesa { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.iniciativa-mesa li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--fondo-2); font-size: 1.1rem; }
+.iniciativa-mesa li.t-pj { border-left: 5px solid var(--acento); }
+.iniciativa-mesa li.t-criatura { border-left: 5px solid var(--peligro); }
+.iniciativa-mesa li.t-aliado { border-left: 5px solid #7a5aa8; margin-left: 16px; }
+.iniciativa-mesa li.t-guarida { border-left: 5px solid #6a6372; background: var(--fondo-3); }
+.iniciativa-mesa li.turno { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento), var(--sombra); }
+.iniciativa-mesa li.mio .ini-nombre { font-weight: 700; }
+.iniciativa-mesa li.caido { opacity: 0.5; }
+.iniciativa-mesa .ini-valor { width: 2.2em; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--texto-suave); }
+.iniciativa-mesa .ini-nombre { flex: 1; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; min-width: 0; }
+.iniciativa-mesa .ini-pg { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.salud { font-size: 0.85rem; padding: 0.1em 0.6em; border-radius: 999px; border: 1px solid var(--borde); white-space: nowrap; }
+.salud.s-herido { border-color: #c08a2b; color: #c08a2b; }
+.salud.s-malherido { border-color: var(--peligro); color: var(--peligro); }
+.salud.s-caido { background: var(--peligro); border-color: var(--peligro); color: #fff; }
+.aviso-mesa { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; width: 100%; text-align: left; margin: 0 0 14px; padding: 8px 12px; border: 1px solid var(--acento); border-radius: var(--radio); background: var(--acento-suave); color: var(--texto); cursor: pointer; font: inherit; }
+.aviso-mesa .sutil { margin-left: auto; }
+.aviso-mesa.tuyo { background: var(--acento); color: var(--acento-texto); }
+.aviso-mesa.tuyo .sutil { color: inherit; }
+.aviso-reloj { font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .iniciativa-mesa li { font-size: 1rem; padding: 6px 8px; gap: 8px; }
+  .reloj-vista.grande .reloj-tiempo { font-size: 2rem; }
+  .pantalla-barra { flex-wrap: wrap; }
+}

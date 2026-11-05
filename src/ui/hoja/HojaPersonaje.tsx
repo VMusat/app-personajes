@@ -18,6 +18,7 @@ import { exportarJSON, exportarObsidian } from './exportar'
 import { aspectoEsInvertido } from '../../motor/resolver'
 import { Entradas } from '../Entradas'
 import { VentanaApariencia } from '../Apariencia'
+import { AvisoMesa } from '../VistaMesa'
 import DISOLUCION from '../../setting/disolucion.json'
 import { aplicarEquipo, equipoPendiente } from '../equipo'
 import { Compania } from './Compania'
@@ -97,6 +98,7 @@ export function HojaPersonaje({ id, pestañaInicial }: { id: string; pestañaIni
           )}
         </div>
       </header>
+      <AvisoMesa pj={p.id} />
 
       {equipoPendiente(p, h) && (
         <div className="aviso-banda equipo">

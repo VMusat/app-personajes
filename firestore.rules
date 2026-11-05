@@ -4,6 +4,7 @@ rules_version = '2';
 // - Cada jugador lee y edita solo sus personajes; el DM lee y edita todos.
 // - Solo el DM crea y edita objetos de la campaña.
 // - Solo el DM lee y escribe la Pantalla del DM y las notas de sesión (colección «dm»).
+// - Todos leen la mesa compartida (colección «publico»); solo el DM la escribe.
 service cloud.firestore {
   match /databases/{database}/documents {
     function campana(c) {
@@ -48,6 +49,12 @@ service cloud.firestore {
       // Pantalla del DM y notas de sesión: solo el DM (llevan secretos)
       match /dm/{d} {
         allow read, write: if esDM(c);
+      }
+
+      // La mesa que ven los jugadores (iniciativa del combate y relojes): la publica el DM desde su pantalla
+      match /publico/{d} {
+        allow read: if esMiembro(c);
+        allow write: if esDM(c);
       }
 
       match /tiradas/{t} {

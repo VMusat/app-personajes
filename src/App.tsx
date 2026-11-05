@@ -15,6 +15,7 @@ import { PanelCampaña } from './ui/dm/PanelCampaña'
 import { Guia } from './ui/Guia'
 import { PantallaDM } from './ui/dm/PantallaDM'
 import { Bestiario } from './ui/dm/Bestiario'
+import { VistaMesa } from './ui/VistaMesa'
 
 // Una sola instancia: Firebase no admite inicializarse dos veces (React StrictMode monta los efectos dos veces)
 let promesaRepo: Promise<Repo> | undefined
@@ -60,11 +61,13 @@ export default function App() {
     const c2 = repo.objetos((os) => set({ objetos: [...os].sort((a, b) => a.nombre.localeCompare(b.nombre)) }))
     const c3 = repo.tiradas((ts) => set({ tiradasCompartidas: ts }))
     const c4 = repo.solicitudes((s) => set({ solicitudes: s }))
+    const c5 = repo.mesa((m) => set({ mesa: m }))
     return () => {
       c1()
       c2()
       c3()
       c4()
+      c5()
     }
   }, [repo, usuario, campaña, set])
 
@@ -99,11 +102,12 @@ export default function App() {
   else if (vista.tipo === 'campaña') contenido = <PanelCampaña />
   else if (vista.tipo === 'pantalla') contenido = repo.esDM() ? <PantallaDM /> : <Inicio />
   else if (vista.tipo === 'bestiario') contenido = repo.esDM() ? <Bestiario /> : <Inicio />
+  else if (vista.tipo === 'mesa') contenido = <VistaMesa />
   else contenido = <Inicio />
 
   return (
     <>
-      <main className={vista.tipo === 'pantalla' ? 'app app-ancha' : 'app'}>{contenido}</main>
+      <main className={vista.tipo === 'pantalla' ? 'app app-ancha' : vista.tipo === 'mesa' ? 'app app-mesa' : 'app'}>{contenido}</main>
       {vista.tipo !== 'guia' && <Bandeja />}
       <Detalle />
     </>

@@ -5,6 +5,7 @@ import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
 import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } from '../almacen/repo'
 import type { PeticionTirada, ResultadoTirada } from '../dados/tiradas'
+import type { MesaPublica } from '../almacen/mesa'
 
 export type Vista =
   | { tipo: 'inicio' }
@@ -16,6 +17,7 @@ export type Vista =
   | { tipo: 'guia' }
   | { tipo: 'pantalla' }
   | { tipo: 'bestiario' }
+  | { tipo: 'mesa' }
 
 interface Estado {
   datos?: Datos
@@ -28,6 +30,8 @@ interface Estado {
   objetos: ObjetoCampaña[]
   tiradasCompartidas: TiradaCompartida[]
   solicitudes: SolicitudAcceso[]
+  /** La mesa que publica el DM (combate y relojes). */
+  mesa: MesaPublica | null
   vista: Vista
   /** Historial local de tiradas. */
   tiradas: ResultadoTirada[]
@@ -43,6 +47,7 @@ export const useEstado = create<Estado>((set) => ({
   objetos: [],
   tiradasCompartidas: [],
   solicitudes: [],
+  mesa: null,
   vista: { tipo: 'inicio' },
   tiradas: [],
   colaTiradas: [],
@@ -69,7 +74,7 @@ export function guardarPreferencia(k: string, v: unknown) {
   }
 }
 
-// ── Enrutado por hash: #/hoja/<id>, #/crear/<id>, #/nivel/<id>, #/almacen, #/campaña, #/guia, #/pantalla
+// ── Enrutado por hash: #/hoja/<id>, #/crear/<id>, #/nivel/<id>, #/almacen, #/campaña, #/guia, #/pantalla, #/bestiario, #/mesa
 
 export function vistaDeHash(h: string): Vista {
   const [, tipo, id, pestaña] = h.replace(/^#/, '').split('/')
@@ -81,6 +86,7 @@ export function vistaDeHash(h: string): Vista {
   if (tipo === 'guia') return { tipo: 'guia' }
   if (tipo === 'pantalla') return { tipo: 'pantalla' }
   if (tipo === 'bestiario') return { tipo: 'bestiario' }
+  if (tipo === 'mesa') return { tipo: 'mesa' }
   return { tipo: 'inicio' }
 }
 
@@ -92,6 +98,7 @@ export function ir(v: Vista) {
     v.tipo === 'guia' ? '#/guia' :
     v.tipo === 'pantalla' ? '#/pantalla' :
     v.tipo === 'bestiario' ? '#/bestiario' :
+    v.tipo === 'mesa' ? '#/mesa' :
     v.tipo === 'hoja' ? `#/hoja/${v.id}${v.pestaña ? `/${v.pestaña}` : ''}` :
     `#/${v.tipo}/${v.id}`
   if (location.hash !== h) location.hash = h

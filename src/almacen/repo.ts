@@ -4,6 +4,7 @@ import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from './objetosCampaña'
 import type { NotaSesion, PantallaDM } from './pantalla'
 import type { Criatura } from './criaturas'
+import type { MesaPublica } from './mesa'
 
 export interface Usuario {
   uid: string
@@ -73,6 +74,9 @@ export interface Repo {
   criaturas(cb: (cs: Criatura[]) => void, alError?: (e: Error) => void): Cancelar
   guardarCriatura(c: Criatura): Promise<void>
   borrarCriatura(id: string): Promise<void>
+  /** La mesa que ven los jugadores (todos la leen; solo el DM la publica). */
+  mesa(cb: (m: MesaPublica | null) => void): Cancelar
+  publicarMesa(m: MesaPublica): Promise<void>
 }
 
 // ── Modo local
@@ -102,6 +106,7 @@ export function repoLocal(): Repo {
     pantalla: new Set<(p: PantallaDM | null) => void>(),
     sesiones: new Set<(ns: NotaSesion[]) => void>(),
     criaturas: new Set<(cs: Criatura[]) => void>(),
+    mesa: new Set<(m: MesaPublica | null) => void>(),
   }
   const usuario: Usuario = { uid: 'local', nombre: 'Este navegador', email: '' }
   const avisar = () => {
@@ -117,7 +122,12 @@ export function repoLocal(): Repo {
     oyentes.sesiones.forEach((cb) => cb(ns))
     const cs = leer<Criatura[]>('criaturas', [])
     oyentes.criaturas.forEach((cb) => cb(cs))
+    const m = leer<MesaPublica | null>('mesa', null)
+    oyentes.mesa.forEach((cb) => cb(m))
   }
+  window.addEventListener('storage', (e) => {
+    if (e.key?.startsWith(CLAVE)) avisar()
+  })
   return {
     modo: 'local',
     alCambiarUsuario(cb) {
@@ -214,6 +224,15 @@ export function repoLocal(): Repo {
     },
     async borrarCriatura(id) {
       escribir('criaturas', leer<Criatura[]>('criaturas', []).filter((x) => x.id !== id))
+      avisar()
+    },
+    mesa(cb) {
+      oyentes.mesa.add(cb)
+      cb(leer<MesaPublica | null>('mesa', null))
+      return () => oyentes.mesa.delete(cb)
+    },
+    async publicarMesa(m) {
+      escribir('mesa', m)
       avisar()
     },
   }

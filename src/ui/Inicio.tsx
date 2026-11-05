@@ -6,6 +6,7 @@ import { derivar } from '../motor/derivar'
 import type { Datos } from '../datos/tipos'
 import { Modal } from './comun'
 import { VentanaApariencia } from './Apariencia'
+import { AvisoMesa } from './VistaMesa'
 
 export function resumenPersonaje(p: Personaje, d: Datos): string {
   const especie = d.especies.find((e) => e._clave === p.especie)?._nombre
@@ -98,12 +99,15 @@ export function Inicio() {
         </div>
       </header>
 
+      <AvisoMesa />
+
       {esDM && (
         <section>
           <h2>Herramientas del DM</h2>
           <div className="fila-botones">
             <button className="boton" onClick={() => ir({ tipo: 'pantalla' })}>Pantalla del DM</button>
             <button className="boton secundario" onClick={() => ir({ tipo: 'bestiario' })}>Bestiario</button>
+            <button className="boton secundario" onClick={() => ir({ tipo: 'mesa' })} title="Lo que ven los jugadores (sirve para una pantalla en la mesa)">Vista de mesa</button>
             <button className="boton secundario" onClick={() => ir({ tipo: 'almacen' })}>Objetos de la campaña ({objetos.length})</button>
             {repo.modo === 'firebase' && (
               <button className="boton secundario" onClick={() => ir({ tipo: 'campaña' })}>

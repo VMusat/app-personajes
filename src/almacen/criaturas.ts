@@ -359,3 +359,65 @@ export function exportarCriatura(c: Criatura): string {
     '',
   ].join('\n')
 }
+
+// ── Resumen de una acción para la mesa: ataque, salvación y daño
+
+export interface ResumenAccion {
+  /** Bono de ataque. */
+  ataque?: number
+  /** Salvación que pide: CD y característica (FUE, DES…). */
+  cd?: number
+  car?: string
+  /** Daño total de un golpe (las partes unidas con «y», «más» o «plus» se suman). */
+  dano?: { formula: string; tipo: string }
+}
+
+// Nombres completos sin distinguir mayúsculas; abreviaturas solo en mayúsculas («con» y «fue» son palabras)
+const CARS_TEXTO: [RegExp, RegExp, string][] = [
+  [/\b(fuerza|strength)\b/i, /\b(FUE|STR)\b/, 'FUE'],
+  [/\b(destreza|dexterity)\b/i, /\b(DES|DEX)\b/, 'DES'],
+  [/\b(constituci[oó]n|constitution)\b/i, /\bCON\b/, 'CON'],
+  [/\b(inteligencia|intelligence)\b/i, /\bINT\b/, 'INT'],
+  [/(\bsabidur[ií]a|\bwisdom)\b/i, /\b(SAB|WIS)\b/, 'SAB'],
+  [/\b(carisma|charisma)\b/i, /\b(CAR|CHA)\b/, 'CAR'],
+]
+/** La característica que se nombra primero en el texto. */
+function carDe(s: string): string | undefined {
+  let mejor: { car: string; i: number } | undefined
+  for (const [nombre, abrev, car] of CARS_TEXTO)
+    for (const re of [nombre, abrev]) {
+      const i = s.search(re)
+      if (i >= 0 && (!mejor || i < mejor.i)) mejor = { car, i }
+    }
+  return mejor?.car
+}
+
+export function resumenAccion(e: Entrada): ResumenAccion {
+  const t = sinEnlaces(e.texto).replace(/[−–]/g, '-')
+  const out: ResumenAccion = {}
+  const a = /(?:^|[\s(])([+-]\d+)\s*(?=,|para impactar|to hit|\))/i.exec(t) ?? /(?:Roll|ataque|impactar):\s*([+-]\d+)/i.exec(t)
+  if (a) out.ataque = Number(a[1])
+  const cd = /\b(?:CD|DC)\s*(\d+)/.exec(t)
+  if (cd) {
+    out.cd = Number(cd[1])
+    const alrededor = t.slice(Math.max(0, cd.index - 40), cd.index + 40)
+    out.car = carDe(alrededor)
+  }
+  const re = /(\d+d\d+(?:\s*[+-]\s*\d+)?)\)?\s*(?:de daño\s+|damage\s+)?([a-záéíóúñü]+)?/gi
+  const partes: { formula: string; tipo?: string; ini: number; fin: number }[] = []
+  let m: RegExpExecArray | null
+  while ((m = re.exec(t))) {
+    const tipo = m[2] && !/^(de|y|and|plus|m[aá]s|a|en|si|if|or|o)$/i.test(m[2]) ? m[2].toLowerCase() : undefined
+    partes.push({ formula: m[1].replace(/\s+/g, ''), tipo, ini: m.index, fin: m.index + m[0].length })
+  }
+  if (partes.length) {
+    const golpe = [partes[0]]
+    for (let i = 1; i < partes.length; i++) {
+      const entre = t.slice(partes[i - 1].fin, partes[i].ini)
+      if (entre.length < 30 && !/[.;:]/.test(entre) && /\b(y|más|mas|plus|and)\b/i.test(entre)) golpe.push(partes[i])
+      else break
+    }
+    out.dano = { formula: golpe.map((p) => p.formula).join('+'), tipo: golpe.map((p) => p.tipo).filter(Boolean).join(' + ') }
+  }
+  return out
+}

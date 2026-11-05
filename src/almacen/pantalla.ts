@@ -1,6 +1,7 @@
 // Pantalla del DM: el escenario de la sesión (PJs activos, criaturas, iniciativa) y las notas de sesión.
 // Solo los lee y escribe el DM (en Firebase, la colección «dm» de la campaña).
 import type { Criatura } from './criaturas'
+import type { Apunte, Reloj } from './mesa'
 
 /** Ficha de una criatura del escenario: una copia de la del Bestiario (o una escrita a mano en fichas antiguas). */
 export type PlantillaCriatura = Criatura
@@ -52,6 +53,12 @@ export interface PantallaDM {
   plantillas: PlantillaCriatura[]
   /** Líneas tachadas por nota: índices de tarea. */
   tachadas: Record<string, number[]>
+  /** Relojes de la mesa (cuentas atrás y relojes de pasos). */
+  relojes?: Reloj[]
+  /** Apuntes rápidos de la sesión. */
+  apuntes?: Apunte[]
+  /** El combate no se comparte con los jugadores. */
+  mesaOculta?: boolean
   actualizado: string
 }
 

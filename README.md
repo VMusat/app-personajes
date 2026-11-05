@@ -50,9 +50,18 @@ Solo la ve el DM (botón «Pantalla del DM» en el inicio, o `#/pantalla`).
 - **La nota de sesión:** se importa arrastrando un `.md` de `Sesiones/` de la bóveda, o con «Importar .md». Se guarda solo para el DM, porque lleva secretos: no va en el código de la app, que es público. Al volver a importarla se actualiza y conserva lo tachado.
 - **Editar la nota:** con «✏ Editar» cada texto se cambia en el sitio, con su formato (negrita, cursiva, enlaces). Intro crea otra línea debajo y el botón ＋ entre bloques añade líneas de escena y tarjetas (narración, diálogo, tirada, reto, salvación, DM). Los cambios se guardan en la app; «Exportar .md» descarga la nota para sustituirla en la bóveda. `src/ui/dm/editarSesion.ts` hace los cambios línea a línea sin tocar el resto del texto.
 - **La mesa:** los PJs activos en vivo (PG, AC, Percepción pasiva, condiciones, forma y aliados), el combate (iniciativa, ronda y turno) y el escenario de criaturas.
+- **Daño y condiciones a los PJs:** cada tarjeta de PJ tiene Daño, Curar, Temp y condiciones (también Exhaustion). Se guarda en la hoja del jugador al momento. El daño sigue las reglas de 2024 (`dañarPj` en `src/almacen/mesa.ts`): gasta antes los PG temporales, avisa de la salvación de Concentración (CD), de caer a 0, de las salvaciones de muerte falladas y de la muerte instantánea.
+- **Última tirada de daño:** el chip 🎲 de las tarjetas pone el total de la última tirada de daño (del DM o compartida por un jugador, de los últimos 5 minutos). «½» la parte por la mitad. «💥 Aplicar a varios» reparte daño o curación (todo, mitad o nada por objetivo) y una condición opcional.
+- **Acciones de las criaturas:** cada tarjeta lleva sus acciones, adicionales, reacciones y legendarias con el bono de ataque, la CD de salvación y el daño pulsables (`resumenAccion` en `src/almacen/criaturas.ts`). Se abren solas en su turno. Tirar el daño de algo con recarga lo marca como gastado.
+- **Relojes:** cuentas atrás en tiempo real (pitan al acabar y siguen en la cabecera) y relojes de pasos. Cada uno se puede enseñar a los jugadores u ocultar.
+- **Apuntes:** notas rápidas con la hora y la ronda. «Pasar a la nota» las añade a la nota de sesión, en «## Apuntes de la mesa».
 - **En pantallas anchas** la ventana no se desliza: la nota y la mesa tienen cada una su scroll.
 - **Iniciativa:** las tiradas de iniciativa que comparten los jugadores desde su hoja entran solas. Los aliados de los PJs siguen las reglas de 2024: tiran la suya (familiares), actúan justo después del PJ (invocaciones) o dentro de su turno (Eldritch Cannon, Primal Companion).
 - **Firestore:** la pantalla y las notas van en la colección `dm`, que solo puede leer y escribir el DM. Hay que publicar la versión actual de `firestore.rules`.
+
+## La mesa (jugadores)
+`#/mesa`, para todos. Mientras hay un combate (salvo que el DM lo oculte con «📺 Lo ven»), muestra el orden de iniciativa, la ronda y de quién es el turno. También muestra los relojes visibles. De las criaturas solo se ve cómo están (ileso, herido, malherido, caído), nunca sus PG ni las ocultas. En el inicio y en la hoja aparece un aviso con el turno («¡Te toca!») que lleva a la mesa. Sirve también para una pantalla grande en la mesa de juego.
+- La publica la Pantalla del DM en `campanas/<id>/publico/mesa` (`construirMesa` en `src/almacen/mesa.ts`): la leen todos los miembros y solo la escribe el DM. Hay que publicar la versión actual de `firestore.rules`.
 
 ## Bestiario
 Catálogo de criaturas del DM (botón «Bestiario» en el inicio, o `#/bestiario`). Se guarda en la colección `dm` (documentos `criatura-<id>`).
