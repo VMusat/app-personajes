@@ -330,6 +330,20 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
     setEditando(true)
   }
 
+  const borrarNota = async () => {
+    if (!nota) return
+    const aviso = sinExportar ? '\n\nTiene cambios hechos en la app que no están en Obsidian: exporta antes si quieres conservarlos.' : ''
+    if (!confirm(`¿Borrar la nota «${nota.titulo}» de la app? No se puede deshacer.${aviso}`)) return
+    const resto = notas.filter((n) => n.id !== nota.id)
+    delete historial.current[nota.id]
+    setEditando(false)
+    actualizar((p) => {
+      delete p.tachadas[nota.id]
+      p.sesion = resto[resto.length - 1]?.id
+    })
+    await repo?.borrarSesion(nota.id)
+  }
+
   const puedeDeshacer = (historial.current[nota?.id ?? '']?.length ?? 0) > 0
 
   return (
@@ -372,6 +386,9 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             </button>
           )}
           <button className="boton secundario" onClick={() => void nuevaNota()} title="Empezar una nota de sesión en la app">+ Nueva</button>
+          {nota && (
+            <button className="boton secundario" onClick={() => void borrarNota()} title="Borrar esta nota de la app (no toca la bóveda)" aria-label={`Borrar la nota ${nota.titulo}`}>🗑</button>
+          )}
           {nota && tachadas.length > 0 && !editando && (
             <button className="boton secundario" onClick={() => actualizar((p) => void (p.tachadas[nota.id] = []))}>Destachar todo</button>
           )}
