@@ -247,14 +247,19 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
   const bloques = useMemo(() => (nota ? leerSesion(actual) : []), [nota, actual])
   const tachadas = nota ? pantalla.tachadas[nota.id] ?? [] : []
   const secs = useMemo(() => secciones(bloques), [bloques])
-  const sec = nota ? secs.find((s) => s.id === pantalla.escenarios?.[nota.id]) : undefined
-  const visibles = sec ? bloques.slice(sec.desde, sec.hasta) : bloques
+  // Escenarios elegidos: sin valor guardado, todos; se pueden marcar varios
+  const guardados = nota ? pantalla.escenarios?.[nota.id] : undefined
+  const elegidos = guardados === undefined ? secs : secs.filter((s) => [guardados].flat().includes(s.id))
+  const todos = elegidos.length === secs.length
+  const sec = elegidos.length === 1 ? elegidos[0] : undefined
+  const visibles = todos || secs.length < 2 ? bloques : elegidos.flatMap((s) => bloques.slice(s.desde, s.hasta))
   const articulo = useRef<HTMLElement>(null)
-  const elegirEscenario = (id: string | undefined) => {
+  /** Guarda la selección: `undefined` son todos. */
+  const elegirEscenarios = (ids: string[] | undefined) => {
     if (!nota) return
     actualizar((p) => {
       p.escenarios = { ...p.escenarios }
-      if (id) p.escenarios[nota.id] = id
+      if (ids && ids.length < secs.length) p.escenarios[nota.id] = ids
       else delete p.escenarios[nota.id]
     })
     // Vuelve arriba: en escritorio se desliza la columna; en el móvil, la página
@@ -268,6 +273,10 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
     return { hechas, total: s.tareas.length }
   }
   const posicion = sec ? secs.indexOf(sec) : -1
+  const alternar = (id: string) => {
+    const ids = elegidos.map((s) => s.id)
+    elegirEscenarios(ids.includes(id) ? ids.filter((x) => x !== id) : secs.filter((s) => s.id === id || ids.includes(s.id)).map((s) => s.id))
+  }
   const sinExportar = !!nota?.editada && (!nota.importada || nota.editada > nota.importada)
 
   const guardarTexto = (nuevo: string, tachadasNuevas: number[]) => {
@@ -432,7 +441,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
       </div>
       {secs.length > 1 && (
         <nav className="escenarios-nota" aria-label="Escenarios de la nota">
-          <button className={`chip ${!sec ? 'activo' : ''}`} aria-pressed={!sec} onClick={() => elegirEscenario(undefined)} title="Ver la nota entera">
+          <button className={`chip ${todos ? 'activo' : ''}`} aria-pressed={todos} onClick={() => elegirEscenarios(todos ? [] : undefined)} title={todos ? 'Desmarcar todos' : 'Marcar todos'}>
             Todo
           </button>
           {secs.map((s) => {
@@ -440,9 +449,9 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             return (
               <button
                 key={s.id}
-                className={`chip ${sec === s ? 'activo' : ''} ${total > 0 && hechas === total ? 'completo' : ''}`}
-                aria-pressed={sec === s}
-                onClick={() => elegirEscenario(s.id)}
+                className={`chip ${elegidos.includes(s) ? 'activo' : ''} ${total > 0 && hechas === total ? 'completo' : ''}`}
+                aria-pressed={elegidos.includes(s)}
+                onClick={() => alternar(s.id)}
                 title={textoPlano(s.texto)}
               >
                 <span className="escenario-nombre">{textoPlano(s.texto)}</span>
@@ -472,14 +481,15 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
               })
             }
           />
+          {secs.length > 1 && elegidos.length === 0 && <p className="sutil">Ningún escenario marcado: pulsa uno o «Todo».</p>}
           {sec && (
             <div className="fila escenarios-pie">
               {posicion > 0 && (
-                <button className="boton secundario" onClick={() => elegirEscenario(secs[posicion - 1].id)}>← {textoPlano(secs[posicion - 1].texto)}</button>
+                <button className="boton secundario" onClick={() => elegirEscenarios([secs[posicion - 1].id])}>← {textoPlano(secs[posicion - 1].texto)}</button>
               )}
-              <button className="boton secundario" onClick={() => elegirEscenario(undefined)}>Nota entera</button>
+              <button className="boton secundario" onClick={() => elegirEscenarios(undefined)}>Nota entera</button>
               {posicion < secs.length - 1 && (
-                <button className="boton secundario" onClick={() => elegirEscenario(secs[posicion + 1].id)}>{textoPlano(secs[posicion + 1].texto)} →</button>
+                <button className="boton secundario" onClick={() => elegirEscenarios([secs[posicion + 1].id])}>{textoPlano(secs[posicion + 1].texto)} →</button>
               )}
             </div>
           )}

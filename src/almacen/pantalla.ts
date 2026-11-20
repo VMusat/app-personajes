@@ -53,8 +53,8 @@ export interface PantallaDM {
   plantillas: PlantillaCriatura[]
   /** Líneas tachadas por nota: índices de tarea. */
   tachadas: Record<string, number[]>
-  /** Escenario («##») que se está viendo en cada nota; sin valor, la nota entera. */
-  escenarios?: Record<string, string>
+  /** Escenarios («##») elegidos en cada nota: sin valor, todos; lista vacía, ninguno (un texto suelto es de versiones anteriores). */
+  escenarios?: Record<string, string | string[]>
   /** Relojes de la mesa (cuentas atrás y relojes de pasos). */
   relojes?: Reloj[]
   /** Apuntes rápidos de la sesión. */

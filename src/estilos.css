@@ -593,7 +593,7 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .nota-controles select { flex: 1; min-width: 200px; }
 .filtros-nota { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .filtros-nota .chip { cursor: pointer; border-left-width: 4px; }
-.escenarios-nota { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); min-width: 0; }
+.escenarios-nota { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); width: 100%; max-width: 100%; box-sizing: border-box; gap: 4px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); min-width: 0; }
 .escenarios-nota .chip { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
 .escenarios-nota .chip { font: inherit; font-size: 0.85rem; color: inherit; max-width: 100%; }
 .escenarios-nota .chip.activo { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); }
