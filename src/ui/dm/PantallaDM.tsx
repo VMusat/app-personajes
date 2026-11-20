@@ -257,15 +257,12 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
       if (id) p.escenarios[nota.id] = id
       else delete p.escenarios[nota.id]
     })
+    // Vuelve arriba: en escritorio se desliza la columna; en el móvil, la página
     const caja = articulo.current?.closest('.pantalla-nota')
     if (caja) caja.scrollTop = 0
-    else articulo.current?.scrollIntoView({ block: 'start' })
+    const barra = caja?.querySelector('.escenarios-nota')
+    if (barra && barra.getBoundingClientRect().top < 0) barra.scrollIntoView({ block: 'start' })
   }
-  // La barra de escenarios es una sola fila: el elegido, siempre a la vista
-  const barra = useRef<HTMLElement>(null)
-  useEffect(() => {
-    barra.current?.querySelector('.chip.activo')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
-  }, [sec?.id])
   const progreso = (s: (typeof secs)[number]) => {
     const hechas = s.tareas.filter((t) => t.hecha || tachadas.includes(t.n)).length
     return { hechas, total: s.tareas.length }
@@ -426,28 +423,6 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             </label>
           ))}
         </div>
-        {secs.length > 1 && (
-          <nav ref={barra} className="escenarios-nota" aria-label="Escenarios de la nota">
-            <button className={`chip ${!sec ? 'activo' : ''}`} aria-pressed={!sec} onClick={() => elegirEscenario(undefined)} title="Ver la nota entera">
-              Todo
-            </button>
-            {secs.map((s) => {
-              const { hechas, total } = progreso(s)
-              return (
-                <button
-                  key={s.id}
-                  className={`chip ${sec === s ? 'activo' : ''} ${total > 0 && hechas === total ? 'completo' : ''}`}
-                  aria-pressed={sec === s}
-                  onClick={() => elegirEscenario(s.id)}
-                  title={textoPlano(s.texto)}
-                >
-                  <span className="escenario-nombre">{textoPlano(s.texto)}</span>
-                  {total > 0 && <small>{hechas}/{total}</small>}
-                </button>
-              )
-            })}
-          </nav>
-        )}
         {editando && (
           <p className="sutil ayuda-edicion">
             Pulsa en cualquier texto para cambiarlo (<kbd>Ctrl</kbd>+<kbd>B</kbd> negrita, <kbd>Ctrl</kbd>+<kbd>I</kbd> cursiva). <kbd>Intro</kbd> guarda y, en una línea, crea otra debajo; <kbd>Esc</kbd> deshace. Con <b>＋</b> añades líneas y tarjetas.
@@ -455,6 +430,28 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
           </p>
         )}
       </div>
+      {secs.length > 1 && (
+        <nav className="escenarios-nota" aria-label="Escenarios de la nota">
+          <button className={`chip ${!sec ? 'activo' : ''}`} aria-pressed={!sec} onClick={() => elegirEscenario(undefined)} title="Ver la nota entera">
+            Todo
+          </button>
+          {secs.map((s) => {
+            const { hechas, total } = progreso(s)
+            return (
+              <button
+                key={s.id}
+                className={`chip ${sec === s ? 'activo' : ''} ${total > 0 && hechas === total ? 'completo' : ''}`}
+                aria-pressed={sec === s}
+                onClick={() => elegirEscenario(s.id)}
+                title={textoPlano(s.texto)}
+              >
+                <span className="escenario-nombre">{textoPlano(s.texto)}</span>
+                {total > 0 && <small>{hechas}/{total}</small>}
+              </button>
+            )
+          })}
+        </nav>
+      )}
       {!nota ? (
         <p className="sutil">
           Arrastra aquí una nota de <code>Sesiones/</code> de la bóveda, o pulsa «Importar .md». Se guarda solo para el DM. Si la cambias en Obsidian, vuelve a importarla: se actualiza y conserva lo tachado.
