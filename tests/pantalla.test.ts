@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { leerSesion, type BloqueSesion, type ItemLista } from '../src/ui/dm/notaSesion'
+import { leerSesion, secciones, textoPlano, type BloqueSesion, type ItemLista } from '../src/ui/dm/notaSesion'
 import { ordenIniciativa, siguienteTurno, type PjMesa } from '../src/ui/dm/iniciativa'
 import { pantallaVacia, tituloNota } from '../src/almacen/pantalla'
 import type { Aliado } from '../src/motor/personaje'
@@ -58,6 +58,31 @@ describe('nota de sesión', () => {
     const dm = bs.find((b) => b.tipo === 'callout' && b.clase === 'dm')
     const tabla = dm?.tipo === 'callout' ? dm.hijos.find((h) => h.tipo === 'tabla') : undefined
     expect(tabla?.tipo === 'tabla' && tabla.filas[0]).toEqual(['[[Marcos|el charlatán]]', '15'])
+  })
+
+  it('parte la nota en escenarios por sus «##», con sus tareas', () => {
+    const conInicio = leerSesion(`# T
+
+> [!dm]- Calendario
+> x
+
+## Escena 1 · **La Clavija**
+- [ ] a
+
+---
+
+## Escena 2
+- [x] b
+- [ ] c
+`)
+    const ss = secciones(conInicio)
+    expect(ss.map((s) => s.texto)).toEqual(['Inicio', 'Escena 1 · **La Clavija**', 'Escena 2'])
+    expect(ss.map((s) => s.tareas.length)).toEqual([0, 1, 2])
+    expect(ss[2].tareas[0]).toEqual({ n: 1, hecha: true })
+    expect(ss[1].hasta).toBe(ss[2].desde)
+    expect(textoPlano(ss[1].texto)).toBe('Escena 1 · La Clavija')
+    expect(secciones(leerSesion('# Solo título\n\n## A\n- [ ] x'))[0].texto).toBe('A')
+    expect(secciones(leerSesion('- [ ] sin títulos'))).toEqual([])
   })
 
   const nota = path.resolve(__dirname, '../../Campaign/Sesiones/Sesión 01 - El fallo de los portales.md')

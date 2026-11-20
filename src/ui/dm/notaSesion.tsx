@@ -95,6 +95,48 @@ export function lineasDeTareas(texto: string): number[] {
   return out
 }
 
+export interface Seccion {
+  /** «inicio» para lo que va antes del primer «##»; si no, el id del título. */
+  id: string
+  texto: string
+  /** Bloques [desde, hasta) de la nota. */
+  desde: number
+  hasta: number
+  /** Tareas de la sección: su índice y si ya venían tachadas en la nota. */
+  tareas: { n: number; hecha: boolean }[]
+}
+
+/** Los escenarios de una nota: cada «##» con lo que tiene debajo hasta el siguiente. Lo anterior al primero es «Inicio». */
+export function secciones(bs: BloqueSesion[]): Seccion[] {
+  const out: Seccion[] = []
+  const primera = bs.findIndex((b) => b.tipo === 'titulo' && b.nivel === 2)
+  if (primera < 0) return out
+  if (bs.slice(0, primera).some((b) => !(b.tipo === 'titulo' && b.nivel === 1) && b.tipo !== 'separador'))
+    out.push({ id: 'inicio', texto: 'Inicio', desde: 0, hasta: primera, tareas: [] })
+  bs.forEach((b, i) => {
+    if (b.tipo !== 'titulo' || b.nivel !== 2) return
+    if (out.length) out[out.length - 1].hasta = i
+    out.push({ id: b.id, texto: b.texto, desde: i, hasta: bs.length, tareas: [] })
+  })
+  for (const s of out) {
+    const rec = (xs: BloqueSesion[]) =>
+      xs.forEach((b) => {
+        if (b.tipo === 'callout') rec(b.hijos)
+        if (b.tipo === 'lista') {
+          const items = (is: ItemLista[]) => is.forEach((it) => (it.tarea !== undefined && s.tareas.push({ n: it.tarea, hecha: !!it.hechaEnNota }), items(it.hijos)))
+          items(b.items)
+        }
+      })
+    rec(bs.slice(s.desde, s.hasta))
+  }
+  return out
+}
+
+/** Texto sin formato de Markdown ni enlaces (para etiquetas). */
+export function textoPlano(texto: string): string {
+  return texto.replace(/\[\[([^\]|\\]+)\\?\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]]+)\]\]/g, '$1').replace(/[*`]/g, '').trim()
+}
+
 function bloques(lineas: L[], ctx: Ctx): BloqueSesion[] {
   const out: BloqueSesion[] = []
   let i = 0

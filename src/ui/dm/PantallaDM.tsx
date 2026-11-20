@@ -14,7 +14,7 @@ import { Buscador, Modal, normalizar, Pestañas } from '../comun'
 import { CONDICIONES, conSigno } from '../glosario'
 import { descargar } from '../hoja/exportar'
 import { idAliado, idCriatura, idPj, ordenIniciativa, siguienteTurno, type FilaIniciativa, type PjMesa } from './iniciativa'
-import { leerSesion, lineasDeTareas, PintarSesion, type Edicion } from './notaSesion'
+import { leerSesion, lineasDeTareas, PintarSesion, secciones, textoPlano, type Edicion } from './notaSesion'
 import { añadirApuntes, borrar as borrarLineas, cambiarTipo, escribirFila, insertar, reemplazar, trasladarTachadas, TITULO_APUNTES, type Cambio } from './editarSesion'
 import { FichaCriatura, TextoConDados, useCriaturas } from './FichaCriatura'
 import { lineaApunte, PanelApuntes, PanelRelojes, useAhora } from './Herramientas'
@@ -246,6 +246,31 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
   const actual = texto.current.texto
   const bloques = useMemo(() => (nota ? leerSesion(actual) : []), [nota, actual])
   const tachadas = nota ? pantalla.tachadas[nota.id] ?? [] : []
+  const secs = useMemo(() => secciones(bloques), [bloques])
+  const sec = nota ? secs.find((s) => s.id === pantalla.escenarios?.[nota.id]) : undefined
+  const visibles = sec ? bloques.slice(sec.desde, sec.hasta) : bloques
+  const articulo = useRef<HTMLElement>(null)
+  const elegirEscenario = (id: string | undefined) => {
+    if (!nota) return
+    actualizar((p) => {
+      p.escenarios = { ...p.escenarios }
+      if (id) p.escenarios[nota.id] = id
+      else delete p.escenarios[nota.id]
+    })
+    const caja = articulo.current?.closest('.pantalla-nota')
+    if (caja) caja.scrollTop = 0
+    else articulo.current?.scrollIntoView({ block: 'start' })
+  }
+  // La barra de escenarios es una sola fila: el elegido, siempre a la vista
+  const barra = useRef<HTMLElement>(null)
+  useEffect(() => {
+    barra.current?.querySelector('.chip.activo')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [sec?.id])
+  const progreso = (s: (typeof secs)[number]) => {
+    const hechas = s.tareas.filter((t) => t.hecha || tachadas.includes(t.n)).length
+    return { hechas, total: s.tareas.length }
+  }
+  const posicion = sec ? secs.indexOf(sec) : -1
   const sinExportar = !!nota?.editada && (!nota.importada || nota.editada > nota.importada)
 
   const guardarTexto = (nuevo: string, tachadasNuevas: number[]) => {
@@ -401,6 +426,28 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             </label>
           ))}
         </div>
+        {secs.length > 1 && (
+          <nav ref={barra} className="escenarios-nota" aria-label="Escenarios de la nota">
+            <button className={`chip ${!sec ? 'activo' : ''}`} aria-pressed={!sec} onClick={() => elegirEscenario(undefined)} title="Ver la nota entera">
+              Todo
+            </button>
+            {secs.map((s) => {
+              const { hechas, total } = progreso(s)
+              return (
+                <button
+                  key={s.id}
+                  className={`chip ${sec === s ? 'activo' : ''} ${total > 0 && hechas === total ? 'completo' : ''}`}
+                  aria-pressed={sec === s}
+                  onClick={() => elegirEscenario(s.id)}
+                  title={textoPlano(s.texto)}
+                >
+                  <span className="escenario-nombre">{textoPlano(s.texto)}</span>
+                  {total > 0 && <small>{hechas}/{total}</small>}
+                </button>
+              )
+            })}
+          </nav>
+        )}
         {editando && (
           <p className="sutil ayuda-edicion">
             Pulsa en cualquier texto para cambiarlo (<kbd>Ctrl</kbd>+<kbd>B</kbd> negrita, <kbd>Ctrl</kbd>+<kbd>I</kbd> cursiva). <kbd>Intro</kbd> guarda y, en una línea, crea otra debajo; <kbd>Esc</kbd> deshace. Con <b>＋</b> añades líneas y tarjetas.
@@ -413,9 +460,9 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
           Arrastra aquí una nota de <code>Sesiones/</code> de la bóveda, o pulsa «Importar .md». Se guarda solo para el DM. Si la cambias en Obsidian, vuelve a importarla: se actualiza y conserva lo tachado.
         </p>
       ) : (
-        <article className={`nota-sesion ${editando ? 'editando' : ''}`}>
+        <article ref={articulo} className={`nota-sesion ${editando ? 'editando' : ''}`}>
           <PintarSesion
-            bloques={bloques}
+            bloques={visibles}
             tachadas={tachadas}
             ocultos={ocultos}
             edicion={editando ? edicion : undefined}
@@ -428,6 +475,17 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
               })
             }
           />
+          {sec && (
+            <div className="fila escenarios-pie">
+              {posicion > 0 && (
+                <button className="boton secundario" onClick={() => elegirEscenario(secs[posicion - 1].id)}>← {textoPlano(secs[posicion - 1].texto)}</button>
+              )}
+              <button className="boton secundario" onClick={() => elegirEscenario(undefined)}>Nota entera</button>
+              {posicion < secs.length - 1 && (
+                <button className="boton secundario" onClick={() => elegirEscenario(secs[posicion + 1].id)}>{textoPlano(secs[posicion + 1].texto)} →</button>
+              )}
+            </div>
+          )}
         </article>
       )}
     </div>
