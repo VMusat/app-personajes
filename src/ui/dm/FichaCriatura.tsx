@@ -23,13 +23,14 @@ export function useCriaturas(): [Criatura[], string | undefined] {
   return [lista, error]
 }
 
-const tirar = (etiqueta: string, formula: string, d20 = false) => {
+const tirar = (etiqueta: string, formula: string, d20 = false, personaje?: string) => {
   const f = formula.replace(/[−–]/g, '-').replace(/\s+/g, '')
-  if (formulaValida(f)) useEstado.getState().tirar({ etiqueta, formula: f, d20 })
+  if (formulaValida(f)) useEstado.getState().tirar({ etiqueta, formula: f, d20, personaje })
 }
 
-/** Texto de una entrada con las fórmulas de dados y los bonos de ataque pulsables. */
-export function TextoConDados({ texto, etiqueta }: { texto: string; etiqueta: string }): ReactNode {
+/** Texto de una entrada con las fórmulas de dados y los bonos de ataque pulsables.
+ *  Con «personaje», la tirada se comparte con la mesa como las de la hoja. */
+export function TextoConDados({ texto, etiqueta, personaje }: { texto: string; etiqueta: string; personaje?: string }): ReactNode {
   const piezas = sinEnlaces(texto).split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
   return piezas.map((p, i) => {
     if (/^\*\*.+\*\*$/.test(p)) return <b key={i}>{p.slice(2, -2)}</b>
@@ -40,9 +41,9 @@ export function TextoConDados({ texto, etiqueta }: { texto: string; etiqueta: st
         {trozos.map((t, j) => {
           if (!t) return null
           if (/^\d+d\d+/.test(t))
-            return <button key={j} className="dado-texto" title={`Tirar ${t}`} onClick={() => tirar(`${etiqueta} · daño`, t)}>{t}</button>
+            return <button key={j} className="dado-texto" title={`Tirar ${t}`} onClick={() => tirar(`${etiqueta} · daño`, t, false, personaje)}>{t}</button>
           if (/^[+−-]\d+$/.test(t))
-            return <button key={j} className="dado-texto" title="Tirar el ataque" onClick={() => tirar(`${etiqueta} · ataque`, formulaD20(Number(t.replace('−', '-'))), true)}>{t}</button>
+            return <button key={j} className="dado-texto" title="Tirar el ataque" onClick={() => tirar(`${etiqueta} · ataque`, formulaD20(Number(t.replace('−', '-'))), true, personaje)}>{t}</button>
           return <Fragment key={j}>{t}</Fragment>
         })}
       </Fragment>

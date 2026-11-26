@@ -6,6 +6,7 @@ import { nuevoId } from '../../motor/personaje'
 import type { PropsPestaña } from './HojaPersonaje'
 import { abrirDetalle } from '../Detalle'
 import { Acciones } from './Acciones'
+import { TextoConDados } from '../dm/FichaCriatura'
 
 export type ModoD20 = 'normal' | 'ventaja' | 'desventaja'
 
@@ -203,7 +204,7 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
           <h3>A tener en cuenta</h3>
           <ul className="lista-notas-rasgos">
             {h.notas.map((n, i) => (
-              <li key={i}>{n.texto} <small className="sutil">— {n.origen}</small></li>
+              <li key={i}><TextoConDados texto={n.texto} etiqueta={n.texto.split(':')[0].replace(/\s*\(.*$/, '')} personaje={p.nombre} /> <small className="sutil">— {n.origen}</small></li>
             ))}
           </ul>
         </section>

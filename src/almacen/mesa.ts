@@ -80,7 +80,7 @@ export function construirMesa(p: PantallaDM, filas: FilaIniciativa[], pjs: PjPub
       }
     }
     if (f.tipo === 'aliado' && f.aliado)
-      return { id: f.id, tipo: f.tipo, nombre: f.nombre, valor: f.valor, condiciones: f.aliado.condiciones ?? [], salud: saludDe(f.aliado.pg, f.aliado.pgMax), pg: `${f.aliado.pg}/${f.aliado.pgMax}` }
+      return { id: f.id, tipo: f.tipo, nombre: f.nombre, valor: f.valor, condiciones: f.aliado.condiciones ?? [], salud: saludDe(f.aliado.pg, f.aliado.pgMax), pg: `${f.aliado.pg}/${f.aliado.pgMax}${f.aliado.pgTemporales ? ` +${f.aliado.pgTemporales}` : ''}` }
     if (f.tipo === 'guarida') return { id: f.id, tipo: f.tipo, nombre: 'Guarida', valor: f.valor, condiciones: [] }
     const c = f.criatura!
     return { id: f.id, tipo: f.tipo, nombre: f.nombre, valor: f.valor, condiciones: c.condiciones, salud: saludDe(c.pg, c.plantilla.pgMax) }

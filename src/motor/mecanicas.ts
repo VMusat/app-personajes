@@ -26,6 +26,17 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Barbarian||5|Fast Movement': [{ tipo: 'velocidad', valor: 10, condicion: 'sin armadura pesada' }],
   'Bard|Dance|3|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+cha', sinArmadura: true }],
   'Bard||2|Jack of All Trades': [{ tipo: 'mitadCompetencia' }],
+  'Barbarian||2|Danger Sense': [
+    { tipo: 'ventaja', objetivo: 'salvacion:dex' },
+    { tipo: 'nota', texto: 'Danger Sense: la ventaja en las salvaciones de DEX no se aplica si tienes la condición Incapacitated.' },
+  ],
+  'Barbarian|World Tree|3|Vitality of the Tree': [
+    { tipo: 'nota', texto: 'Vitality Surge: al entrar en Furia, ganas {nivel:Barbarian} HP temporales.' },
+    { tipo: 'nota', texto: 'Life-Giving Force: al empezar cada uno de tus turnos en Furia, otra criatura a 10 ft gana {escala(nivel:Barbarian,1,2,9,3,16,4)}d6 HP temporales (desaparecen al acabar la Furia).' },
+  ],
+  'Druid|Sea|3|Wrath of the Sea': [
+    { tipo: 'nota', texto: 'Wrath of the Sea (acción adicional, gasta un uso de Wild Shape): emanación de 5 ft durante 10 minutos. Al crearla y como acción adicional en tus turnos siguientes, una criatura que veas dentro hace una salvación de CON contra DC {8+pb+wis} o recibe {max(1,wis)}d6 cold y, si es Large o menor, sale empujada 15 ft.' },
+  ],
   "Bard|Moon|3|Moon's Inspiration": [
     { tipo: 'nota', texto: 'Inspired Eclipse: al dar Bardic Inspiration con una acción adicional, quedas Invisible y te teletransportas hasta 30 ft (hasta el inicio de tu turno, o hasta que ataques, hagas daño o lances un conjuro).' },
     { tipo: 'nota', texto: 'Lunar Vitality: una vez por turno, al curar con un conjuro, gasta un dado de Bardic Inspiration y súmalo a la curación; el curado gana +10 ft de Speed hasta el final de su siguiente turno.' },
@@ -184,7 +195,7 @@ export const MECANICAS: Record<string, Efecto[]> = {
 export interface MecanicaEspecie {
   efectos?: Efecto[]
   /** Competencia en una habilidad a elegir, que se puede cambiar tras un descanso largo (Severed from Dreams). */
-  habilidadCambiante?: { etiqueta: string }
+  habilidadCambiante?: { etiqueta: string; /** También herramientas (Skill Versatility). */ herramientas?: boolean }
   /** Nivel de personaje a partir del cual se obtiene. */
   nivelMin?: number
   /** Opción a elegir al crear el personaje, con los efectos de cada una. */
@@ -229,6 +240,12 @@ export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
       { tipo: 'activable', nombre: 'Large Form', texto: 'Tamaño Large durante 10 minutos: ventaja en pruebas de STR y +10 ft de Speed.', efectos: [{ tipo: 'velocidad', valor: 10 }] },
     ],
   },
+  'Elf|Fey Ancestry': { efectos: [{ tipo: 'nota', texto: 'Fey Ancestry: ventaja en las salvaciones para evitar o acabar la condición Charmed.' }] },
+  'Khoravar|Fey Ancestry': { efectos: [{ tipo: 'nota', texto: 'Fey Ancestry: ventaja en las salvaciones para evitar o acabar la condición Charmed.' }] },
+  'Khoravar|Skill Versatility': { habilidadCambiante: { etiqueta: 'Skill Versatility (cambia tras un descanso largo)', herramientas: true } },
+  'Halfling|Brave': { efectos: [{ tipo: 'nota', texto: 'Brave: ventaja en las salvaciones para evitar o acabar la condición Frightened.' }] },
+  'Halfling|Luck': { efectos: [{ tipo: 'nota', texto: 'Luck: si sacas un 1 en el d20 de una prueba, ataque o salvación, repite el dado y usa el nuevo resultado.' }] },
+  'Human|Resourceful': { efectos: [{ tipo: 'nota', texto: 'Resourceful: ganas Heroic Inspiration al acabar cada descanso largo.' }] },
   'Gnome|Gnomish Cunning': {
     efectos: (['int', 'wis', 'cha'] as const).map((c) => ({ tipo: 'ventaja', objetivo: `salvacion:${c}` }) as Efecto),
   },
@@ -245,7 +262,7 @@ export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
   'Orc|Adrenaline Rush': { efectos: [r('Adrenaline Rush', 'pb', 'corto')] },
   'Orc|Relentless Endurance': { efectos: [r('Relentless Endurance', 1, 'largo')] },
   'Shifter|Shifting': {
-    efectos: [r('Shifting', 'pb', 'largo')],
+    efectos: [r('Shifting', 'pb', 'largo'), { tipo: 'nota', texto: 'Shifting: al cambiar, ganas {2*pb} HP temporales.' }],
     eleccion: {
       etiqueta: 'Shifting',
       opciones: {

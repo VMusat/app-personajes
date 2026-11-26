@@ -618,7 +618,7 @@ function TarjetaPj({ p, h, quitar, ultimo, turno }: { p: Personaje; h: Hoja; qui
         <ul className="aliados-mesa">
           {(e.aliados ?? []).map((a) => (
             <li key={a.id}>
-              <b>{a.nombre}</b> <span className="sutil">{TIPO_ALIADO[a.tipo]}</span> · {a.pg}/{a.pgMax} PG · AC {a.ca}
+              <b>{a.nombre}</b> <span className="sutil">{TIPO_ALIADO[a.tipo]}</span> · {a.pg}/{a.pgMax} PG{a.pgTemporales ? ` +${a.pgTemporales}` : ''} · AC {a.ca}
               {(a.condiciones ?? []).length > 0 && <span className="sutil"> · {a.condiciones!.join(', ')}</span>}
               <div className="sutil">{MODO_INICIATIVA[a.iniciativa]}</div>
             </li>
@@ -727,7 +727,7 @@ function FilaIni({ f, turno, actualizar }: { f: FilaIniciativa; turno: boolean; 
       </span>
       {f.criatura && f.tipo === 'criatura' && <span className="sutil">{f.criatura.pg}/{f.criatura.plantilla.pgMax} · AC {f.criatura.plantilla.ca}</span>}
       {f.tipo === 'guarida' && <span className="sutil">🏰 acción de guarida (pierde empates)</span>}
-      {f.aliado && <span className="sutil">{f.aliado.pg}/{f.aliado.pgMax} · AC {f.aliado.ca}</span>}
+      {f.aliado && <span className="sutil">{f.aliado.pg}/{f.aliado.pgMax}{f.aliado.pgTemporales ? ` +${f.aliado.pgTemporales}` : ''} · AC {f.aliado.ca}</span>}
       <button className="boton-icono" title="Darle el turno" onClick={() => actualizar((p) => { p.combate.turno = f.id; alEmpezarTurno(p, f.id) })}>▶</button>
     </li>
   )

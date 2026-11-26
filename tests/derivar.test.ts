@@ -3,6 +3,7 @@ import { datosDePrueba } from './datos'
 import { personajeVacio, type Personaje } from '../src/motor/personaje'
 import { derivar } from '../src/motor/derivar'
 import { resolver } from '../src/motor/resolver'
+import { sugerencias } from '../src/motor/compania'
 import { autocompletar } from './util'
 
 function crear(clase: string, nivel: number, base: Personaje['caracteristicas']['base'], extra: Record<string, string[]> = {}) {
@@ -231,6 +232,44 @@ describe('hoja derivada', () => {
     // Inspiring Leader: nivel + CHA en HP temporales, calculado en la nota
     expect(h.notas.some((n) => n.texto.includes(`${4 + h.car.cha.mod} HP temporales`))).toBe(true)
     expect(h.notas.some((n) => n.texto.startsWith('Inspired Eclipse'))).toBe(true)
+  })
+
+  it('bárbaro del Árbol del Mundo: Danger Sense y Vitality of the Tree', () => {
+    const { p, d } = crear('barbarian|xphb', 4, { str: 15, dex: 14, con: 15, int: 8, wis: 10, cha: 8 }, { 'cls:Barbarian:sub': ['path of the world tree|xphb'] })
+    const h = derivar(p, d)
+    expect(h.car.dex.ventajaSalv).toBeDefined()
+    expect(h.notas.some((n) => n.texto.includes('ganas 4 HP temporales'))).toBe(true)
+    expect(h.notas.some((n) => n.texto.includes('gana 2d6 HP temporales'))).toBe(true)
+  })
+
+  it('druida del Mar: Wrath of the Sea con su CD y sus dados', () => {
+    const { p, d } = crear('druid|xphb', 3, { str: 8, dex: 14, con: 14, int: 10, wis: 16, cha: 10 }, { 'cls:Druid:sub': ['circle of the sea|xphb'] })
+    const h = derivar(p, d)
+    const wis = h.car.wis.mod
+    expect(h.notas.some((n) => n.texto.includes(`DC ${8 + h.pb + wis}`) && n.texto.includes(`${Math.max(1, wis)}d6 cold`))).toBe(true)
+  })
+
+  it('artillero: el Eldritch Cannon trae sus tres activaciones con la CD y el ataque del artificiero', () => {
+    const { p, d } = crear('artificer|efa', 3, { str: 8, dex: 14, con: 14, int: 16, wis: 10, cha: 10 }, { 'cls:Artificer:sub': ['artillerist|efa'] })
+    const h = derivar(p, d)
+    const s = sugerencias(h).find((x) => x.texto === 'Eldritch Cannon')!
+    const l = h.lanzamiento.find((x) => x.clase === 'Artificer')!
+    expect(s.aliado!.pgMax).toBe(15)
+    expect(s.aliado!.acciones!.map((a) => a.nombre)).toEqual(['Flamethrower', 'Force Ballista', 'Protector'])
+    expect(s.aliado!.acciones![0].texto).toContain(`DC ${l.cd}`)
+    expect(s.aliado!.acciones![1].texto).toContain(`Roll: +${l.ataque}`)
+    expect(s.aliado!.acciones![2].texto).toContain(`1d8+${h.car.int.mod}`)
+  })
+
+  it('khoravar: Skill Versatility admite habilidad o herramienta y cambia tras un descanso largo', () => {
+    const { p, d } = crear('fighter|xphb', 1, { str: 15, dex: 14, con: 13, int: 8, wis: 12, cha: 10 })
+    p.especie = 'khoravar|efa'
+    p.elecciones['esp:Skill Versatility'] = ["herramienta:smith's tools"]
+    autocompletar(p, d)
+    const e = resolver(p, d).elecciones.find((x) => x.id === 'esp:Skill Versatility')!
+    expect(e.cambia).toBe('largo')
+    expect(e.opciones.some((o) => o.valor === 'stealth')).toBe(true)
+    expect(derivar(p, d).competencias.herramientas).toContain("smith's tools")
   })
 
   it('Warforged: +1 AC', () => {

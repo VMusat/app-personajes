@@ -43,6 +43,28 @@ const nivelDe = (h: Hoja, clase: string) => h.resolucion.clases.find((c) => c.cl
 const tieneRasgo = (h: Hoja, nombre: string) => h.rasgos.some((r) => r.nombre === nombre)
 const tieneConjuro = (h: Hoja, f: (n: string) => boolean) => h.conjuros.some((c) => f(c.conjuro.name))
 
+/** Eldritch Cannon (Artillerist, EFA): las tres activaciones con la CD y el ataque de conjuro del artificiero. */
+export function cañon(h: Hoja, nivel: number): Pick<Aliado, 'acciones' | 'notas'> {
+  const l = h.lanzamiento.find((x) => x.clase === 'Artificer') ?? h.lanzamiento[0]
+  const cd = l?.cd ?? 8 + h.pb
+  const ataque = l?.ataque ?? h.pb
+  const int = Math.max(1, h.car.int.mod)
+  // Explosive Cannon (nivel 9): +1d8 al daño y a los PG temporales de Protector
+  const explosivo = nivel >= 9
+  const dano = explosivo ? '3d8' : '2d8'
+  const acciones = [
+    { nombre: 'Flamethrower', texto: `Cono de 15 ft. Dexterity Saving Throw: DC ${cd}. Fallo: ${dano} fire; éxito: la mitad. Prende lo inflamable que nadie lleve puesto.` },
+    { nombre: 'Force Ballista', texto: `Ranged Spell Attack Roll: ${ataque >= 0 ? '+' : ''}${ataque}, alcance 120 ft. Hit: ${dano} force, y si es una criatura la empuja 5 ft.` },
+    { nombre: 'Protector', texto: `El cañón y las criaturas que elijas a 10 ft ganan 1d8+${int}${explosivo ? '+1d8' : ''} HP temporales.` },
+  ]
+  if (explosivo)
+    acciones.push({ nombre: 'Detonate (Reaction)', texto: `Cuando el cañón recibe daño y estás a 60 ft: lo destruyes, y cada criatura a 20 ft hace una Dexterity Saving Throw: DC ${cd}. Fallo: 3d10 force; éxito: la mitad.` })
+  return {
+    acciones,
+    notas: 'Acción adicional a 60 ft: una activación, y puede moverse 15 ft antes o después. Inmune a veneno y psíquico. Mending le cura 2d6. Desaparece a 0 PG o tras 1 hora.',
+  }
+}
+
 /** Lo que este PJ puede convocar o adoptar según sus rasgos y conjuros. */
 export function sugerencias(h: Hoja): Sugerencia[] {
   const out: Sugerencia[] = []
@@ -60,7 +82,11 @@ export function sugerencias(h: Hoja): Sugerencia[] {
   else if (tieneConjuro(h, (n) => n === 'Find Familiar'))
     out.push({ texto: 'Find Familiar', detalle: 'Tira su propia iniciativa y actúa en su turno.', aliado: { nombre: 'Familiar', tipo: 'familiar', iniciativa: 'propia', bonoIniciativa: 2, pg: 1, pgMax: 1, ca: 12 } })
   if (tieneRasgo(h, 'Eldritch Cannon'))
-    out.push({ texto: 'Eldritch Cannon', detalle: `AC 18 y ${5 * artificiero} PG. Lo activas con una acción adicional, dentro de tu turno.`, aliado: { nombre: 'Eldritch Cannon', tipo: 'objeto', iniciativa: 'turno', pg: 5 * artificiero, pgMax: 5 * artificiero, ca: 18 } })
+    out.push({
+      texto: 'Eldritch Cannon',
+      detalle: `AC 18 y ${5 * artificiero} PG. Lo activas con una acción adicional, dentro de tu turno: Flamethrower, Force Ballista o Protector.`,
+      aliado: { nombre: 'Eldritch Cannon', tipo: 'objeto', iniciativa: 'turno', pg: 5 * artificiero, pgMax: 5 * artificiero, ca: 18, ...cañon(h, artificiero) },
+    })
   if (tieneRasgo(h, 'Steel Defender'))
     out.push({ texto: 'Steel Defender', detalle: 'Comparte tu iniciativa y actúa justo después de ti. Completa sus valores con su ficha.', aliado: { nombre: 'Steel Defender', tipo: 'compañero', iniciativa: 'tras', pg: 10, pgMax: 10, ca: 15 } })
   if (tieneRasgo(h, 'Primal Companion'))

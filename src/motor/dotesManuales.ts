@@ -44,7 +44,17 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   ],
   'martial weapon training|xphb': [{ tipo: 'competencia', categoria: 'arma', valor: 'martial' }],
   'weapon master|xphb': [{ tipo: 'nota', texto: 'Maestría de un arma adicional (cambia tras un descanso largo).' }],
-  'great weapon master|xphb': [{ tipo: 'bono', objetivo: 'danoPesada', valor: 'pb' }],
+  'great weapon master|xphb': [
+    { tipo: 'bono', objetivo: 'danoPesada', valor: 'pb' },
+    { tipo: 'nota', texto: 'Great Weapon Master (Hew): tras un crítico con un arma cuerpo a cuerpo, o al dejar a una criatura a 0 HP, un ataque más con esa arma como acción adicional.' },
+  ],
+  'war caster|xphb': [{ tipo: 'nota', texto: 'War Caster: ventaja en las salvaciones de CON para mantener la concentración; puedes lanzar un conjuro en lugar del ataque de oportunidad.' }],
+  'spell sniper|xphb': [{ tipo: 'nota', texto: 'Spell Sniper: tus ataques de conjuro ignoran la cobertura media y tres cuartos, no tienen desventaja a 5 ft de un enemigo y tienen +60 ft de alcance.' }],
+  'arcane omens|au': [{ tipo: 'recurso', nombre: 'Helpful Premonition', usos: 'pb', recarga: 'largo', dado: '1d4' }],
+  'spell subterfuge|au': [
+    { tipo: 'recurso', nombre: 'Shrouding Spells', usos: 'max(1,int,wis,cha)', recarga: 'largo' },
+    { tipo: 'nota', texto: 'Shrouding Spells: tras lanzar un conjuro de 1 acción con un espacio, Dash y Hide como acción adicional. Los usos son el modificador de la característica que subiste con la dote (la hoja toma el mayor de INT, WIS y CHA).' },
+  ],
   'medium armor master|xphb': [{ tipo: 'bono', objetivo: 'destrezaMediaMax', valor: 1 }],
   'heavy armor master|xphb': [{ tipo: 'nota', texto: 'Con armadura pesada, reduce en PB el daño contundente, perforante y cortante de cada ataque.' }],
   'athlete|xphb': [{ tipo: 'velocidad', modo: 'trepar', valor: 'velocidad', fijar: true }],

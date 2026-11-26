@@ -42,7 +42,7 @@ export function Compania({ p, h, actualizar }: PropsPestaña) {
           {forma.acciones && (
             <details className="ficha-forma-desplegable" open>
               <summary>Estadísticas de la forma</summary>
-              <FichaForma forma={forma} />
+              <FichaForma forma={forma} personaje={p.nombre} />
               <p className="sutil">Conservas tus PG, tus Dados de Golpe, tu Inteligencia, Sabiduría y Carisma, tus rasgos de clase, competencias y dotes. Si un bono de habilidad o salvación de la bestia es mayor que el tuyo, usa el suyo. No puedes lanzar conjuros.</p>
             </details>
           )}
@@ -55,6 +55,7 @@ export function Compania({ p, h, actualizar }: PropsPestaña) {
             <TarjetaAliado
               key={a.id}
               a={a}
+              personaje={p.nombre}
               cambiar={(f) => cambiarAliado(a.id, f)}
               editar={() => setEditar({ aliado: structuredClone(a), nuevo: false })}
               quitar={() => actualizar((x) => void (x.estado.aliados = (x.estado.aliados ?? []).filter((y) => y.id !== a.id)))}
@@ -146,7 +147,7 @@ export function Compania({ p, h, actualizar }: PropsPestaña) {
   )
 }
 
-function TarjetaAliado({ a, cambiar, editar, quitar, tirarIniciativa }: { a: Aliado; cambiar: (f: (a: Aliado) => void) => void; editar: () => void; quitar: () => void; tirarIniciativa: () => void }) {
+function TarjetaAliado({ a, personaje, cambiar, editar, quitar, tirarIniciativa }: { a: Aliado; personaje: string; cambiar: (f: (a: Aliado) => void) => void; editar: () => void; quitar: () => void; tirarIniciativa: () => void }) {
   const [cantidad, setCantidad] = useState('')
   const n = Math.max(0, parseInt(cantidad, 10) || 0)
   const pct = Math.max(0, Math.min(100, (100 * a.pg) / Math.max(1, a.pgMax)))
@@ -159,14 +160,34 @@ function TarjetaAliado({ a, cambiar, editar, quitar, tirarIniciativa }: { a: Ali
         <button className="boton-icono" onClick={editar} aria-label="Editar" title="Editar">✎</button>
       </header>
       <div className="mini-pg">
-        <span><b>{a.pg}</b>/{a.pgMax} PG · AC <b>{a.ca}</b>{a.percepcionPasiva !== undefined && <> · Per. pasiva {a.percepcionPasiva}</>}</span>
+        <span><b>{a.pg}</b>/{a.pgMax} PG{a.pgTemporales ? <> <b>+{a.pgTemporales}</b> temp</> : null} · AC <b>{a.ca}</b>{a.percepcionPasiva !== undefined && <> · Per. pasiva {a.percepcionPasiva}</>}</span>
         <div className="hp-barra"><div style={{ width: `${pct}%` }} className={pct < 25 ? 'baja' : pct < 50 ? 'media' : ''} /></div>
       </div>
       <div className="fila hp-acciones">
         <input inputMode="numeric" value={cantidad} onChange={(e) => setCantidad(e.target.value.replace(/\D/g, ''))} placeholder="0" aria-label="Cantidad" />
-        <button className="boton peligro" disabled={!n} onClick={() => { cambiar((x) => void (x.pg = Math.max(0, x.pg - n))); setCantidad('') }}>Daño</button>
+        <button
+          className="boton peligro"
+          disabled={!n}
+          onClick={() => {
+            // Los PG temporales se gastan primero
+            cambiar((x) => {
+              const temp = x.pgTemporales ?? 0
+              x.pgTemporales = Math.max(0, temp - n) || undefined
+              x.pg = Math.max(0, x.pg - Math.max(0, n - temp))
+            })
+            setCantidad('')
+          }}
+        >Daño</button>
         <button className="boton exito" disabled={!n} onClick={() => { cambiar((x) => void (x.pg = Math.min(x.pgMax, x.pg + n))); setCantidad('') }}>Curar</button>
+        <button className="boton secundario" disabled={!n} title="Los PG temporales no se suman: se queda el mayor" onClick={() => { cambiar((x) => void (x.pgTemporales = Math.max(x.pgTemporales ?? 0, n))); setCantidad('') }}>Temp</button>
       </div>
+      {(a.acciones ?? []).length > 0 && (
+        <div className="acciones-aliado">
+          {a.acciones!.map((ac) => (
+            <p key={ac.nombre}><b><i>{ac.nombre}.</i></b> <TextoConDados texto={ac.texto} etiqueta={`${a.nombre} · ${ac.nombre}`} personaje={personaje} /></p>
+          ))}
+        </div>
+      )}
       <p className="sutil">{MODO_INICIATIVA[a.iniciativa]}</p>
       {a.notas && <p className="sutil">{a.notas}</p>}
       <div className="chips-mesa">
@@ -220,7 +241,7 @@ function EditarAliado({ inicial, nuevo, alCerrar, alGuardar }: { inicial: Aliado
 }
 
 /** Bloque de estadísticas de la forma (de la bestia elegida en la lista). */
-export function FichaForma({ forma }: { forma: Forma }) {
+export function FichaForma({ forma, personaje }: { forma: Forma; personaje?: string }) {
   const car = (n: string, v?: number) => v !== undefined && <span><b>{n}</b> {v} ({conSigno(modificador(v))})</span>
   return (
     <div className="ficha-forma">
@@ -230,7 +251,7 @@ export function FichaForma({ forma }: { forma: Forma }) {
       {forma.sentidos && <p><b>Senses</b> {forma.sentidos}</p>}
       {(forma.rasgos ?? []).map((r) => <p key={r.nombre}><b><i>{r.nombre}.</i></b> {r.texto}</p>)}
       {(forma.acciones ?? []).map((a) => (
-        <p key={a.nombre}><b><i>{a.nombre}.</i></b> <TextoConDados texto={a.texto} etiqueta={`${forma.nombre} · ${a.nombre.replace(/^(Bonus Action|Reaction): /, '')}`} /></p>
+        <p key={a.nombre}><b><i>{a.nombre}.</i></b> <TextoConDados texto={a.texto} etiqueta={`${forma.nombre} · ${a.nombre.replace(/^(Bonus Action|Reaction): /, '')}`} personaje={personaje} /></p>
       ))}
     </div>
   )

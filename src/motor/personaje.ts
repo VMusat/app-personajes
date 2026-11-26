@@ -70,6 +70,9 @@ export interface Aliado {
   percepcionPasiva?: number
   condiciones?: string[]
   notas?: string
+  pgTemporales?: number
+  /** Acciones con dados que se pueden tirar desde la hoja (Eldritch Cannon...). */
+  acciones?: { nombre: string; texto: string }[]
 }
 
 /** Forma que ha adoptado el PJ (Wild Shape y similares). */

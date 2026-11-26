@@ -303,11 +303,16 @@ function procesarEspecie(ctx: Ctx, e: Entidad) {
       for (const ef of m.eleccion.opciones[v] ?? []) ctx.efecto(conRasgo(ef, x.name), origen)
     }
     if (m?.habilidadCambiante) {
-      const vals = ctx.elegir({
-        id: `esp:${x.name}`, tipo: 'habilidad', etiqueta: m.habilidadCambiante.etiqueta, origen, nivel: 0, n: 1, cambia: 'largo',
-        opciones: ctx.d.habilidades.map((h) => ({ valor: h.clave, etiqueta: nombreHabilidad(ctx.d, h.clave) })),
-      })
-      for (const v of vals) ctx.efecto({ tipo: 'competencia', categoria: 'habilidad', valor: v }, origen)
+      // Con herramientas, las opciones llevan prefijo para distinguirlas («herramienta:smith's tools»)
+      const conHerr = !!m.habilidadCambiante.herramientas
+      const opciones = [
+        ...ctx.d.habilidades.map((h) => ({ valor: h.clave, etiqueta: nombreHabilidad(ctx.d, h.clave), ...(conHerr ? { grupo: 'Habilidades' } : {}) })),
+        ...(conHerr ? opcionesHerramienta('any').map((t) => ({ valor: `herramienta:${t}`, etiqueta: titulo(t), grupo: 'Herramientas' })) : []),
+      ]
+      const vals = ctx.elegir({ id: `esp:${x.name}`, tipo: conHerr ? 'opcion' : 'habilidad', etiqueta: m.habilidadCambiante.etiqueta, origen, nivel: 0, n: 1, cambia: 'largo', opciones })
+      for (const v of vals)
+        if (v.startsWith('herramienta:')) ctx.efecto({ tipo: 'competencia', categoria: 'herramienta', valor: v.slice(12) }, origen)
+        else ctx.efecto({ tipo: 'competencia', categoria: 'habilidad', valor: v }, origen)
     }
   }
   ctx.efecto({ tipo: 'velocidad', valor: typeof e.speed === 'number' ? e.speed : e.speed?.walk ?? 30, fijar: true }, origen)
