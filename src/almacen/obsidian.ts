@@ -100,6 +100,8 @@ export function describirEfecto(e: Efecto): string {
     case 'recurso': return `${e.nombre}: ${e.usos} usos (${e.recarga})`
     case 'caBase': return `AC base: ${e.formula}`
     case 'nota': return e.texto
+    case 'mitadCompetencia': return 'Mitad del PB en las pruebas de habilidad sin competencia'
+    case 'ventaja': return `Ventaja en ${e.objetivo.replace('salvacion:', 'salvaciones de ').toUpperCase()}`
     default: return e.tipo
   }
 }

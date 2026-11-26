@@ -25,6 +25,11 @@ export const MECANICAS: Record<string, Efecto[]> = {
   'Barbarian||1|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+con', sinArmadura: true, escudo: true }],
   'Barbarian||5|Fast Movement': [{ tipo: 'velocidad', valor: 10, condicion: 'sin armadura pesada' }],
   'Bard|Dance|3|Unarmored Defense': [{ tipo: 'caBase', nombre: 'Unarmored Defense', formula: '10+dex+cha', sinArmadura: true }],
+  'Bard||2|Jack of All Trades': [{ tipo: 'mitadCompetencia' }],
+  "Bard|Moon|3|Moon's Inspiration": [
+    { tipo: 'nota', texto: 'Inspired Eclipse: al dar Bardic Inspiration con una acción adicional, quedas Invisible y te teletransportas hasta 30 ft (hasta el inicio de tu turno, o hasta que ataques, hagas daño o lances un conjuro).' },
+    { tipo: 'nota', texto: 'Lunar Vitality: una vez por turno, al curar con un conjuro, gasta un dado de Bardic Inspiration y súmalo a la curación; el curado gana +10 ft de Speed hasta el final de su siguiente turno.' },
+  ],
   'Bard||1|Bardic Inspiration': [r('Bardic Inspiration', 'max(1,cha)', 'largo', { dado: 'col:Bardic_Die' })],
   'Bard||5|Font of Inspiration': [r('Bardic Inspiration', 'max(1,cha)', 'corto', { dado: 'col:Bardic_Die' })],
   'Cleric||2|Channel Divinity': [r('Channel Divinity', 'col:Channel_Divinity', 'largo', { recargaCorta: 1 })],
@@ -178,6 +183,8 @@ export const MECANICAS: Record<string, Efecto[]> = {
 // Clave «Especie|Rasgo». Los dados admiten fórmulas entre llaves: «{pb}d4».
 export interface MecanicaEspecie {
   efectos?: Efecto[]
+  /** Competencia en una habilidad a elegir, que se puede cambiar tras un descanso largo (Severed from Dreams). */
+  habilidadCambiante?: { etiqueta: string }
   /** Nivel de personaje a partir del cual se obtiene. */
   nivelMin?: number
   /** Opción a elegir al crear el personaje, con los efectos de cada una. */
@@ -221,6 +228,17 @@ export const MECANICAS_ESPECIE: Record<string, MecanicaEspecie> = {
       r('Large Form', 1, 'largo'),
       { tipo: 'activable', nombre: 'Large Form', texto: 'Tamaño Large durante 10 minutos: ventaja en pruebas de STR y +10 ft de Speed.', efectos: [{ tipo: 'velocidad', valor: 10 }] },
     ],
+  },
+  'Gnome|Gnomish Cunning': {
+    efectos: (['int', 'wis', 'cha'] as const).map((c) => ({ tipo: 'ventaja', objetivo: `salvacion:${c}` }) as Efecto),
+  },
+  'Kalashtar|Dual Mind': {
+    efectos: (['wis', 'cha'] as const).map((c) => ({ tipo: 'ventaja', objetivo: `salvacion:${c}` }) as Efecto),
+  },
+  'Kalashtar|Mind Link': { efectos: [{ tipo: 'sentido', nombre: 'Telepathy', valor: '10*nivel' }] },
+  'Kalashtar|Severed from Dreams': {
+    efectos: [{ tipo: 'nota', texto: 'Severed from Dreams: no puedes ser objetivo del conjuro Dream.' }],
+    habilidadCambiante: { etiqueta: 'Severed from Dreams (cambia tras un descanso largo)' },
   },
   'Warforged|Integrated Protection': { efectos: [{ tipo: 'bono', objetivo: 'ca', valor: 1 }] },
   'Khoravar|Lethargy Resilience': { efectos: [r('Lethargy Resilience (1d4 Long Rests)', 1, 'nunca')] },

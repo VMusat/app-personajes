@@ -190,7 +190,24 @@ export function PestañaCombate({ p, h, actualizar }: PropsPestaña) {
         {h.inmunidades.length > 0 && <p><b>Inmunidades:</b> {h.inmunidades.map(titulo).join(', ')}</p>}
         {h.inmunidadesCondicion.length > 0 && <p><b>Inmune a condiciones:</b> {h.inmunidadesCondicion.map(titulo).join(', ')}</p>}
         {h.bonosCondicionales.map((b, i) => <p key={i} className="sutil">{b.texto} — {b.origen}</p>)}
+        {(['wis', 'cha', 'str', 'dex', 'con', 'int'] as const).some((c) => h.car[c].ventajaSalv !== undefined) && (
+          <p>
+            <b>Ventaja en salvaciones:</b>{' '}
+            {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as const).filter((c) => h.car[c].ventajaSalv !== undefined).map((c) => c.toUpperCase()).join(', ')}
+          </p>
+        )}
       </section>
+
+      {h.notas.length > 0 && (
+        <section>
+          <h3>A tener en cuenta</h3>
+          <ul className="lista-notas-rasgos">
+            {h.notas.map((n, i) => (
+              <li key={i}>{n.texto} <small className="sutil">— {n.origen}</small></li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <Acciones h={h} nombrePj={p.nombre} ventaja={ventaja} />
     </div>

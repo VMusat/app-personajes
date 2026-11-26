@@ -49,6 +49,7 @@ export const DOTES_MANUALES: Record<string, Efecto[]> = {
   'heavy armor master|xphb': [{ tipo: 'nota', texto: 'Con armadura pesada, reduce en PB el daño contundente, perforante y cortante de cada ataque.' }],
   'athlete|xphb': [{ tipo: 'velocidad', modo: 'trepar', valor: 'velocidad', fijar: true }],
   'durable|xphb': [{ tipo: 'nota', texto: 'Ventaja en salvaciones de muerte; acción adicional para gastar un dado de golpe.' }],
+  'inspiring leader|xphb': [{ tipo: 'nota', texto: 'Inspiring Leader: al acabar un descanso corto o largo, hasta 6 aliados a 30 ft (tú incluido) ganan {nivel+max(wis,cha)} HP temporales. Cada uno los suma en su hoja.' }],
   'observant|xphb': [{ tipo: 'nota', texto: 'Búsqueda rápida como acción adicional.' }],
   // Dotes con usos limitados
   'boon of exquisite radiance|frhof': [{ tipo: 'recurso', nombre: 'Boon of Exquisite Radiance', usos: 1, recarga: 'largo' }],

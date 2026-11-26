@@ -84,7 +84,12 @@ export type Efecto = { origen?: string; condicion?: string } & (
   | { tipo: 'danoExtra'; dado: string; tipoDano?: string }
   /** Efecto temporal que se activa y desactiva en la hoja (Rage, Bladesong, Mage Armor...). */
   | { tipo: 'activable'; nombre: string; efectos: Efecto[]; requisito?: RequisitoArmadura; texto?: string }
+  /** Texto que se muestra en la hoja. Admite fórmulas entre llaves: «{nivel+cha} HP temporales». */
   | { tipo: 'nota'; texto: string }
+  /** Mitad del PB (redondeando abajo) en las pruebas de habilidad sin competencia (Jack of All Trades). */
+  | { tipo: 'mitadCompetencia' }
+  /** Ventaja permanente en una tirada (Dual Mind, Gnomish Cunning). */
+  | { tipo: 'ventaja'; objetivo: `salvacion:${Caracteristica}` }
 )
 
 export type RequisitoArmadura = 'sin armadura' | 'sin armadura ni escudo' | 'sin armadura pesada'

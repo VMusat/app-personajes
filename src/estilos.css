@@ -258,6 +258,9 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .marca-comp { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--borde); flex: none; }
 .marca-comp.competente { background: var(--acento); border-color: var(--acento); }
 .marca-comp.pericia { background: var(--iris); border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento-suave); }
+.marca-comp.mitad { background: linear-gradient(90deg, var(--acento) 50%, transparent 50%); border-color: var(--acento); }
+.lista-notas-rasgos { margin: 0; padding-left: 1.2em; }
+.lista-notas-rasgos li { margin-bottom: 0.4em; }
 .hab-boton { flex: 1; display: flex; justify-content: space-between; background: none; border: none; border-bottom: 1px dotted var(--borde); padding: 5px 2px; cursor: pointer; text-align: left; }
 .hab-boton:hover { color: var(--acento); }
 .lanzadores { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }

@@ -10,8 +10,11 @@ export function PestañaHabilidades({ p, h }: PropsPestaña) {
   const [modo, setModo] = useState<ModoD20>('normal')
   const ventaja = modo === 'normal' ? undefined : modo
   const pen = h.penalizacionD20
-  const t = (etiqueta: string, mod: number, extra = '') =>
-    tirar({ etiqueta, formula: `1d20${conSigno(mod + pen)}${extra}`, d20: true, ventaja, personaje: p.nombre })
+  const t = (etiqueta: string, mod: number, extra = '', v: ModoD20 | undefined = ventaja) =>
+    tirar({ etiqueta, formula: `1d20${conSigno(mod + pen)}${extra}`, d20: true, ventaja: v === 'normal' ? undefined : v, personaje: p.nombre })
+  // Ventaja propia de la salvación (Dual Mind...): se suma a la elegida; con desventaja, se anulan
+  const modoSalvacion = (propia?: string): ModoD20 | undefined =>
+    propia === undefined ? ventaja : modo === 'desventaja' ? 'normal' : 'ventaja'
 
   return (
     <div className="pestaña-habilidades">
@@ -25,8 +28,12 @@ export function PestañaHabilidades({ p, h }: PropsPestaña) {
             <span className="car-nombre" title={NOMBRE_CAR[c]}>{ABREV[c]}</span>
             <button className="car-mod" onClick={() => t(`Prueba de ${ABREV[c]}`, h.car[c].mod)} title="Prueba de característica">{conSigno(h.car[c].mod)}</button>
             <span className="car-valor">{h.car[c].valor}</span>
-            <button className={`car-salv ${h.car[c].competenteSalv ? 'competente' : ''}`} onClick={() => t(`Salvación de ${ABREV[c]}`, h.car[c].salvacion)}>
-              Save {conSigno(h.car[c].salvacion)}
+            <button
+              className={`car-salv ${h.car[c].competenteSalv ? 'competente' : ''}`}
+              title={h.car[c].ventajaSalv !== undefined ? `Ventaja (${h.car[c].ventajaSalv})` : undefined}
+              onClick={() => t(`Salvación de ${ABREV[c]}`, h.car[c].salvacion, '', modoSalvacion(h.car[c].ventajaSalv))}
+            >
+              Save {conSigno(h.car[c].salvacion)}{h.car[c].ventajaSalv !== undefined && <small> · V</small>}
             </button>
           </div>
         ))}
@@ -36,7 +43,10 @@ export function PestañaHabilidades({ p, h }: PropsPestaña) {
       <ul className="lista-habilidades">
         {h.habilidades.map((s) => (
           <li key={s.clave}>
-            <span className={`marca-comp ${s.pericia ? 'pericia' : s.competente ? 'competente' : ''}`} title={s.pericia ? 'Expertise' : s.competente ? 'Competente' : ''} />
+            <span
+              className={`marca-comp ${s.pericia ? 'pericia' : s.competente ? 'competente' : s.mitad ? 'mitad' : ''}`}
+              title={s.pericia ? 'Expertise' : s.competente ? 'Competente' : s.mitad ? 'Jack of All Trades: mitad del PB' : ''}
+            />
             <button
               className="hab-boton"
               onClick={() => {

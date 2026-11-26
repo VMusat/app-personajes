@@ -19,6 +19,8 @@ export interface HabilidadHoja {
   bono: number
   competente: boolean
   pericia: boolean
+  /** Suma la mitad del PB sin ser competente (Jack of All Trades). */
+  mitad?: boolean
   dados: string[]
 }
 
@@ -77,7 +79,7 @@ export interface RecursoHoja {
 export interface Hoja {
   nivel: number
   pb: number
-  car: Record<Caracteristica, { valor: number; mod: number; salvacion: number; competenteSalv: boolean }>
+  car: Record<Caracteristica, { valor: number; mod: number; salvacion: number; competenteSalv: boolean; ventajaSalv?: string }>
   habilidades: HabilidadHoja[]
   iniciativa: number
   ca: { valor: number; detalle: string }
@@ -269,20 +271,27 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
   const car = {} as Hoja['car']
   for (const c of CARACTERISTICAS) {
     const comp_ = salvComp.has(c)
-    car[c] = { valor: valores[c], mod: mod(c), competenteSalv: comp_, salvacion: mod(c) + (comp_ ? pb : 0) + bonos('salvaciones') + bonos(`salvacion:${c}`) }
+    const ventaja = efectos.find((e) => e.tipo === 'ventaja' && e.objetivo === `salvacion:${c}`)
+    car[c] = {
+      valor: valores[c], mod: mod(c), competenteSalv: comp_, salvacion: mod(c) + (comp_ ? pb : 0) + bonos('salvaciones') + bonos(`salvacion:${c}`),
+      ...(ventaja ? { ventajaSalv: ventaja.origen ?? '' } : {}),
+    }
   }
+  const mitadPb = efectos.some((e) => e.tipo === 'mitadCompetencia')
   const dadosHab = efectos.filter((e) => e.tipo === 'dadoHabilidad') as Extract<Efecto, { tipo: 'dadoHabilidad' }>[]
   const sustituidos = new Set(dadosHab.map((x) => x.sustituye).filter(Boolean))
   const habilidades: HabilidadHoja[] = d.habilidades.map((h) => {
     const competente = habComp.has(h.clave)
     const pericia = competente && pericias.has(h.clave)
+    const mitad = !competente && mitadPb
     return {
       clave: h.clave,
       nombre: h.nombre,
       car: h.caracteristica,
       competente,
       pericia,
-      bono: mod(h.caracteristica) + (pericia ? 2 * pb : competente ? pb : 0) + bonos('pruebas') + bonos(`prueba:${h.caracteristica}`) + bonos(`habilidad:${h.clave}`),
+      ...(mitad ? { mitad } : {}),
+      bono: mod(h.caracteristica) + (pericia ? 2 * pb : competente ? pb : mitad ? Math.floor(pb / 2) : 0) + bonos('pruebas') + bonos(`prueba:${h.caracteristica}`) + bonos(`habilidad:${h.clave}`),
       dados: dadosHab.filter((x) => x.habilidades.includes(h.clave) && !sustituidos.has(x.origen)).map((x) => x.dado),
     }
   })
@@ -496,7 +505,13 @@ export function derivar(p: Personaje, d: Datos, catalogo: ObjetoCampaña[] = [])
     }
   }
 
-  const notas = efectos.filter((e) => e.tipo === 'nota' && !/^(maestria|plano):/.test(e.texto)).map((e) => ({ texto: (e as { texto: string }).texto, origen: e.origen ?? '' }))
+  // Las fórmulas entre llaves se calculan («{nivel+cha} HP temporales»)
+  const conFormulas = (t: string) => t.replace(/\{([^}]+)\}/g, (x, f: string) => {
+    try { return String(ev(f)) } catch { return x }
+  })
+  const notas = efectos
+    .filter((e) => e.tipo === 'nota' && !/^(maestria|plano):/.test(e.texto))
+    .map((e) => ({ texto: conFormulas((e as { texto: string }).texto), origen: e.origen ?? '' }))
   const dex = mod('dex')
   const percepcion = habilidades.find((h) => h.clave === 'perception')!
   const peso = p.inventario.reduce((s, it) => s + (it.peso ?? Number(d.objetos.find((o) => o._clave === it.ref)?.weight ?? 0)) * it.cantidad, 0)

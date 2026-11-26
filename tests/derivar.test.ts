@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { datosDePrueba } from './datos'
 import { personajeVacio, type Personaje } from '../src/motor/personaje'
 import { derivar } from '../src/motor/derivar'
+import { resolver } from '../src/motor/resolver'
 import { autocompletar } from './util'
 
 function crear(clase: string, nivel: number, base: Personaje['caracteristicas']['base'], extra: Record<string, string[]> = {}) {
@@ -201,6 +202,35 @@ describe('hoja derivada', () => {
     const dex = derivar(p, d).car.dex.mod
     expect(q.dano).toBe(`1d8+${dex}`)
     expect(q.bonoAtaque).toBe(dex + 3)
+  })
+
+  it('bardo kalashtar de la Luna: Jack of All Trades, Dual Mind, Mind Link, Severed from Dreams e Inspiring Leader', () => {
+    const { p, d } = crear('bard|xphb', 4, { str: 8, dex: 14, con: 14, int: 10, wis: 10, cha: 16 }, { 'cls:Bard:sub': ['college of the moon|frhof'] })
+    p.especie = 'kalashtar|efa'
+    autocompletar(p, d)
+    const dote = resolver(p, d).elecciones.find((e) => e.opciones.some((o) => o.valor === 'inspiring leader|xphb'))!
+    p.elecciones[dote.id] = ['inspiring leader|xphb']
+    autocompletar(p, d)
+    const h = derivar(p, d)
+    // Jack of All Trades: mitad del PB (2 → 1) en las habilidades sin competencia
+    const sinComp = h.habilidades.find((s) => !s.competente)!
+    expect(sinComp.mitad).toBe(true)
+    expect(sinComp.bono).toBe(h.car[sinComp.car].mod + 1)
+    expect(h.habilidades.filter((s) => s.competente).every((s) => !s.mitad)).toBe(true)
+    // Dual Mind y Mind Link
+    expect(h.car.wis.ventajaSalv).toBeDefined()
+    expect(h.car.cha.ventajaSalv).toBeDefined()
+    expect(h.car.str.ventajaSalv).toBeUndefined()
+    expect(h.sentidos.find((s) => s.nombre === 'Telepathy')?.valor).toBe(40)
+    expect(h.resistencias).toContain('psychic')
+    // Severed from Dreams: una habilidad que se cambia tras un descanso largo
+    const sueños = resolver(p, d).elecciones.find((e) => e.id === 'esp:Severed from Dreams')!
+    expect(sueños.cambia).toBe('largo')
+    expect(sueños.completa).toBe(true)
+    expect(h.habilidades.find((s) => s.clave === p.elecciones['esp:Severed from Dreams'][0])?.competente).toBe(true)
+    // Inspiring Leader: nivel + CHA en HP temporales, calculado en la nota
+    expect(h.notas.some((n) => n.texto.includes(`${4 + h.car.cha.mod} HP temporales`))).toBe(true)
+    expect(h.notas.some((n) => n.texto.startsWith('Inspired Eclipse'))).toBe(true)
   })
 
   it('Warforged: +1 AC', () => {
