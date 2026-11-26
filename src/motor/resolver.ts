@@ -309,7 +309,8 @@ function procesarEspecie(ctx: Ctx, e: Entidad) {
         ...ctx.d.habilidades.map((h) => ({ valor: h.clave, etiqueta: nombreHabilidad(ctx.d, h.clave), ...(conHerr ? { grupo: 'Habilidades' } : {}) })),
         ...(conHerr ? opcionesHerramienta('any').map((t) => ({ valor: `herramienta:${t}`, etiqueta: titulo(t), grupo: 'Herramientas' })) : []),
       ]
-      const vals = ctx.elegir({ id: `esp:${x.name}`, tipo: conHerr ? 'opcion' : 'habilidad', etiqueta: m.habilidadCambiante.etiqueta, origen, nivel: 0, n: 1, cambia: 'largo', opciones })
+      // Tipo «habilidad» también con herramientas (como Skilled): así se marcan las que ya domina
+      const vals = ctx.elegir({ id: `esp:${x.name}`, tipo: 'habilidad', etiqueta: m.habilidadCambiante.etiqueta, origen, nivel: 0, n: 1, cambia: 'largo', opciones })
       for (const v of vals)
         if (v.startsWith('herramienta:')) ctx.efecto({ tipo: 'competencia', categoria: 'herramienta', valor: v.slice(12) }, origen)
         else ctx.efecto({ tipo: 'competencia', categoria: 'habilidad', valor: v }, origen)

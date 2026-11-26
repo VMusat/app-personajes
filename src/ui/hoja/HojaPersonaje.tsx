@@ -22,6 +22,7 @@ import { AvisoMesa } from '../VistaMesa'
 import DISOLUCION from '../../setting/disolucion.json'
 import { aplicarEquipo, equipoPendiente } from '../equipo'
 import { Compania } from './Compania'
+import { ListaElecciones } from '../creador/Creador'
 
 export type Act = (f: (p: Personaje) => void) => void
 export type PropsPestaña = { p: Personaje; h: Hoja; actualizar: Act }
@@ -311,6 +312,11 @@ function BarraVital({ p, h, actualizar }: PropsPestaña) {
 
 function ModalDescanso({ tipo, p, h, actualizar, alCerrar }: PropsPestaña & { tipo: 'corto' | 'largo'; alCerrar: () => void }) {
   const tirar = useEstado((s) => s.tirar)
+  const datos = useEstado((s) => s.datos)
+  // Lo que se puede cambiar tras un descanso largo (Skill Versatility, Severed from Dreams, maestrías...).
+  // Los conjuros preparados tienen su propia ventana en la pestaña Conjuros.
+  const cambiables = h.resolucion.elecciones.filter((e) => e.cambia === 'largo' && !['preparados', 'trucos', 'libro'].includes(e.tipo))
+  const preparaConjuros = h.resolucion.elecciones.some((e) => e.cambia === 'largo' && e.tipo === 'preparados')
   const [fueraMiasma, setFueraMiasma] = useState(true)
   const [amanecer, setAmanecer] = useState(true)
   const conMod = h.car.con.mod
@@ -377,6 +383,13 @@ function ModalDescanso({ tipo, p, h, actualizar, alCerrar }: PropsPestaña & { t
           <p>Recuperas todos los HP, los Hit Dice, los espacios de conjuro y los recursos. El Exhaustion baja un nivel.</p>
           <label className="interruptor"><input type="checkbox" checked={fueraMiasma} onChange={(e) => setFueraMiasma(e.target.checked)} /> Fuera de la miasma (quita un nivel de Disolución)</label>
           <label className="interruptor"><input type="checkbox" checked={amanecer} onChange={(e) => setAmanecer(e.target.checked)} /> Ha amanecido (recargan los objetos «al amanecer»)</label>
+          {cambiables.length > 0 && datos && (
+            <>
+              <h4>Lo que puedes cambiar al descansar</h4>
+              <ListaElecciones elecciones={cambiables} p={p} datos={datos} fijar={(id, v) => actualizar((x) => void (x.elecciones[id] = v))} />
+            </>
+          )}
+          {preparaConjuros && <p className="sutil">Los conjuros preparados se cambian en la pestaña Conjuros.</p>}
         </>
       )}
       <div className="fila-botones">

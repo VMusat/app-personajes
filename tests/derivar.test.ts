@@ -269,6 +269,8 @@ describe('hoja derivada', () => {
     const e = resolver(p, d).elecciones.find((x) => x.id === 'esp:Skill Versatility')!
     expect(e.cambia).toBe('largo')
     expect(e.opciones.some((o) => o.valor === 'stealth')).toBe(true)
+    // El trasfondo de soldado ya da Athletics: aparece como «Ya competente»
+    expect(e.opciones.find((o) => o.valor === 'athletics')?.bloqueada).toBe('Ya competente')
     expect(derivar(p, d).competencias.herramientas).toContain("smith's tools")
   })
 
