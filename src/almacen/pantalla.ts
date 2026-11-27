@@ -64,6 +64,21 @@ export interface PantallaDM {
   actualizado: string
 }
 
+/** Imagen que se incrusta en las notas de sesión (los mapas de Recursos/Mapas): solo el DM, porque llevan secretos. */
+export interface ImagenSesion {
+  /** Se saca del nombre del archivo. */
+  id: string
+  /** Nombre del archivo tal como lo incrusta la nota: «La Cuadra.svg» en «![[La Cuadra.svg]]». */
+  nombre: string
+  /** La imagen como data URL. */
+  datos: string
+  actualizado: string
+}
+
+/** Id de una imagen a partir de su nombre de archivo (sin espacios ni tildes, para el documento de Firestore). */
+export const idImagen = (nombre: string) =>
+  nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-|-$/g, '')
+
 export interface NotaSesion {
   id: string
   titulo: string

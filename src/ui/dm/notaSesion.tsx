@@ -5,6 +5,7 @@
 import { createContext, Fragment, useContext, useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { idDe } from '../guiaMarkdown'
 import { aHtml, aMarkdown, type Ref } from './editarSesion'
+import { FiguraSesion, RE_INCRUSTADA } from './VisorImagen'
 
 export interface ItemLista {
   texto: string
@@ -496,15 +497,26 @@ function PintarBloque({ b, ...props }: { b: BloqueSesion } & PropsNota) {
         </Etiqueta>
       )
     }
-    case 'parrafo':
+    case 'parrafo': {
+      // Las imágenes incrustadas («![[La Cuadra.svg]]») se ven como imagen, y se amplían
+      const figuras = [...b.texto.matchAll(RE_INCRUSTADA)].map((m) => m[1])
+      const resto = b.texto.replace(RE_INCRUSTADA, '').trim()
+      const imagenes = figuras.map((n, i) => <FiguraSesion key={i} nombre={n} />)
       return ed ? (
-        <div className="sesion-editable-fila">
-          <Editable como="div" md={b.texto} linea={b.ref.n} borrarVacio alGuardar={(md) => ed.reemplazar(b.ref, md, true)} />
-          <button className="boton-icono sesion-borrar" title="Borrar" onClick={() => ed.borrar(b.n, b.fin)}>🗑</button>
-        </div>
+        <>
+          <div className="sesion-editable-fila">
+            <Editable como="div" md={b.texto} linea={b.ref.n} borrarVacio alGuardar={(md) => ed.reemplazar(b.ref, md, true)} />
+            <button className="boton-icono sesion-borrar" title="Borrar" onClick={() => ed.borrar(b.n, b.fin)}>🗑</button>
+          </div>
+          {imagenes}
+        </>
       ) : (
-        <p>{enLineaSesion(b.texto)}</p>
+        <>
+          {resto && <p>{enLineaSesion(resto)}</p>}
+          {imagenes}
+        </>
       )
+    }
     case 'separador':
       return <hr />
     case 'lista':

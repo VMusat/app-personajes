@@ -6,7 +6,7 @@ import { derivar, type Hoja } from '../../motor/derivar'
 import type { Personaje } from '../../motor/personaje'
 import { nuevoId } from '../../motor/personaje'
 import { MODO_INICIATIVA, TIPO_ALIADO } from '../../motor/compania'
-import { pantallaVacia, tituloNota, type CriaturaEscenario, type NotaSesion, type PantallaDM as Pantalla } from '../../almacen/pantalla'
+import { idImagen, pantallaVacia, tituloNota, type CriaturaEscenario, type ImagenSesion, type NotaSesion, type PantallaDM as Pantalla } from '../../almacen/pantalla'
 import { claveEntrada, coste, criaturaVacia, entradas, nombreSinergia, recarga, resumenAccion, sinEnlaces, sinergiaActiva, usosPorDia, type Entrada } from '../../almacen/criaturas'
 import { construirMesa, curarPj, dañarPj, formatoTiempo, restanteReloj, type MesaPublica } from '../../almacen/mesa'
 import { formulaD20, formulaValida, resolverTirada, tirarDado } from '../../dados/tiradas'
@@ -19,6 +19,7 @@ import { añadirApuntes, borrar as borrarLineas, cambiarTipo, escribirFila, inse
 import { FichaCriatura, TextoConDados, useCriaturas } from './FichaCriatura'
 import { lineaApunte, PanelApuntes, PanelRelojes, useAhora } from './Herramientas'
 import { EditorCriatura } from './Bestiario'
+import { ImagenesCtx } from './VisorImagen'
 
 // ── Estado del escenario con guardado diferido (como las hojas de personaje)
 
@@ -265,6 +266,10 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
   const [editando, setEditando] = useState(false)
   const [enfocar, setEnfocar] = useState<number>()
   const [verFiltros, setVerFiltros] = useState(false)
+  // Imágenes de las notas (los mapas): se importan junto con las notas y se guardan solo para el DM
+  const [imagenes, setImagenes] = useState<ImagenSesion[]>([])
+  useEffect(() => repo?.imagenes(setImagenes), [repo])
+  const mapaImagenes = useMemo(() => Object.fromEntries(imagenes.map((i) => [i.nombre.toLowerCase(), i.datos])), [imagenes])
   const entrada = useRef<HTMLInputElement>(null)
   const nota = notas.find((n) => n.id === pantalla.sesion) ?? notas[notas.length - 1]
   // Texto más reciente de la nota: los cambios seguidos se encadenan sin esperar al almacén
@@ -452,6 +457,20 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
   }
 
   const importar = async (archivos: FileList | File[]) => {
+    // Primero las imágenes (los mapas de Recursos/Mapas), para que la nota las encuentre al pintarse
+    for (const f of Array.from(archivos).filter((f) => /\.(svg|png|jpe?g|webp|gif)$/i.test(f.name))) {
+      if (f.size > 700_000) {
+        alert(`«${f.name}» pesa ${Math.round(f.size / 1024)} KB, y el máximo es unos 700 KB. Redúcela o expórtala como .jpg.`)
+        continue
+      }
+      const datos = await new Promise<string>((ok, mal) => {
+        const lector = new FileReader()
+        lector.onload = () => ok(String(lector.result))
+        lector.onerror = () => mal(lector.error)
+        lector.readAsDataURL(f)
+      })
+      await repo?.guardarImagen({ id: idImagen(f.name), nombre: f.name, datos, actualizado: new Date().toISOString() })
+    }
     for (const f of Array.from(archivos).filter((f) => /\.md$/i.test(f.name))) {
       const contenido = await f.text()
       const titulo = tituloNota(contenido, f.name)
@@ -497,6 +516,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
   const puedeDeshacer = (historial.current[nota?.id ?? '']?.length ?? 0) > 0
 
   return (
+    <ImagenesCtx.Provider value={mapaImagenes}>
     <div
       className={`panel-nota ${arrastrando ? 'arrastrando' : ''}`}
       onDragOver={(e) => {
@@ -524,8 +544,8 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             </button>
           )}
           {editando && puedeDeshacer && <button className="boton secundario" onClick={deshacer} title="Deshacer el último cambio">↶ Deshacer</button>}
-          <button className="boton secundario" onClick={() => entrada.current?.click()} title="Importar o actualizar una nota de Sesiones/ de la bóveda">Importar .md</button>
-          <input ref={entrada} type="file" accept=".md" multiple hidden onChange={(e) => e.target.files && void importar(e.target.files)} />
+          <button className="boton secundario" onClick={() => entrada.current?.click()} title="Importar o actualizar notas de Sesiones/ y sus mapas de Recursos/Mapas">Importar</button>
+          <input ref={entrada} type="file" accept=".md,.svg,.png,.jpg,.jpeg,.webp" multiple hidden onChange={(e) => e.target.files && void importar(e.target.files)} />
           {nota && (
             <button
               className={`boton ${sinExportar ? '' : 'secundario'}`}
@@ -592,7 +612,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
       )}
       {!nota ? (
         <p className="sutil">
-          Arrastra aquí una nota de <code>Sesiones/</code> de la bóveda, o pulsa «Importar .md». Se guarda solo para el DM. Si la cambias en Obsidian, vuelve a importarla: se actualiza y conserva lo tachado.
+          Arrastra aquí una nota de <code>Sesiones/</code> de la bóveda, con sus mapas de <code>Recursos/Mapas</code>, o pulsa «Importar». Se guarda solo para el DM. Si la cambias en Obsidian, vuelve a importarla: se actualiza y conserva lo tachado.
         </p>
       ) : (
         <>
@@ -657,6 +677,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
         </>
       )}
     </div>
+    </ImagenesCtx.Provider>
   )
 }
 

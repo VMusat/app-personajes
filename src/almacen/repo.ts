@@ -2,7 +2,7 @@
 // Dos implementaciones con la misma interfaz: Firebase (compartido) y local (este navegador).
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from './objetosCampaña'
-import type { NotaSesion, PantallaDM } from './pantalla'
+import type { ImagenSesion, NotaSesion, PantallaDM } from './pantalla'
 import type { Criatura } from './criaturas'
 import type { MesaPublica } from './mesa'
 
@@ -70,6 +70,9 @@ export interface Repo {
   sesiones(cb: (ns: NotaSesion[]) => void, alError?: (e: Error) => void): Cancelar
   guardarSesion(n: NotaSesion): Promise<void>
   borrarSesion(id: string): Promise<void>
+  /** Imágenes de las notas de sesión, como los mapas (solo DM). */
+  imagenes(cb: (is: ImagenSesion[]) => void, alError?: (e: Error) => void): Cancelar
+  guardarImagen(i: ImagenSesion): Promise<void>
   /** Bestiario: el catálogo de criaturas (solo DM). */
   criaturas(cb: (cs: Criatura[]) => void, alError?: (e: Error) => void): Cancelar
   guardarCriatura(c: Criatura): Promise<void>
@@ -105,6 +108,7 @@ export function repoLocal(): Repo {
     tiradas: new Set<(t: TiradaCompartida[]) => void>(),
     pantalla: new Set<(p: PantallaDM | null) => void>(),
     sesiones: new Set<(ns: NotaSesion[]) => void>(),
+    imagenes: new Set<(is: ImagenSesion[]) => void>(),
     criaturas: new Set<(cs: Criatura[]) => void>(),
     mesa: new Set<(m: MesaPublica | null) => void>(),
   }
@@ -120,6 +124,8 @@ export function repoLocal(): Repo {
     oyentes.pantalla.forEach((cb) => cb(pd))
     const ns = leer<NotaSesion[]>('sesiones', [])
     oyentes.sesiones.forEach((cb) => cb(ns))
+    const is = leer<ImagenSesion[]>('imagenes', [])
+    oyentes.imagenes.forEach((cb) => cb(is))
     const cs = leer<Criatura[]>('criaturas', [])
     oyentes.criaturas.forEach((cb) => cb(cs))
     const m = leer<MesaPublica | null>('mesa', null)
@@ -211,6 +217,15 @@ export function repoLocal(): Repo {
     },
     async borrarSesion(id) {
       escribir('sesiones', leer<NotaSesion[]>('sesiones', []).filter((x) => x.id !== id))
+      avisar()
+    },
+    imagenes(cb) {
+      oyentes.imagenes.add(cb)
+      cb(leer('imagenes', []))
+      return () => oyentes.imagenes.delete(cb)
+    },
+    async guardarImagen(i) {
+      escribir('imagenes', [...leer<ImagenSesion[]>('imagenes', []).filter((x) => x.id !== i.id), i])
       avisar()
     },
     criaturas(cb) {

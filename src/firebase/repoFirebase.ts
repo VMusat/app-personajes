@@ -13,7 +13,7 @@ import { CAMPAÑA_ID, firebaseConfig } from './config'
 import type { InfoCampaña, Repo, SolicitudAcceso, TiradaCompartida, Usuario } from '../almacen/repo'
 import type { Personaje } from '../motor/personaje'
 import type { ObjetoCampaña } from '../almacen/objetosCampaña'
-import type { NotaSesion, PantallaDM } from '../almacen/pantalla'
+import type { ImagenSesion, NotaSesion, PantallaDM } from '../almacen/pantalla'
 import type { Criatura } from '../almacen/criaturas'
 import type { MesaPublica } from '../almacen/mesa'
 
@@ -158,6 +158,20 @@ export function repoFirebase(): Repo {
     },
     async borrarSesion(id) {
       await deleteDoc(doc(campRef, 'dm', `sesion-${id}`))
+    },
+    imagenes(cb, alError) {
+      if (!usuario || !esDM()) {
+        cb([])
+        return () => {}
+      }
+      return onSnapshot(
+        query(collection(campRef, 'dm'), where('tipo', '==', 'imagen')),
+        (snap) => cb(snap.docs.map((d) => JSON.parse(d.data().datos) as ImagenSesion)),
+        (e) => alError?.(e),
+      )
+    },
+    async guardarImagen(i) {
+      await setDoc(doc(campRef, 'dm', `imagen-${i.id}`), { tipo: 'imagen', nombre: i.nombre, datos: JSON.stringify(i) })
     },
     criaturas(cb, alError) {
       if (!usuario || !esDM()) {

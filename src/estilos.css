@@ -629,6 +629,21 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .escenario-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .escenarios-pie { justify-content: space-between; margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--borde); }
 .nota-sesion { font-size: 0.97rem; line-height: 1.5; }
+/* Imágenes incrustadas (mapas) y su visor */
+.sesion-figura { margin: 10px 0; display: flex; flex-direction: column; gap: 4px; }
+.sesion-figura-boton { display: block; padding: 0; border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; background: #e8dcc0; cursor: zoom-in; }
+.sesion-figura-boton img { display: block; width: 100%; max-height: 420px; object-fit: contain; }
+.sesion-figura-boton:hover, .sesion-figura-boton:focus-visible { border-color: var(--acento); box-shadow: 0 0 0 2px var(--acento-suave); }
+.sesion-figura figcaption { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.82rem; color: var(--texto-suave); }
+.sesion-figura.falta { padding: 8px 10px; border: 1px dashed var(--borde); border-radius: 8px; font-size: 0.85rem; color: var(--texto-suave); }
+.visor-imagen { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; background: rgba(12, 10, 16, 0.94); padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.visor-barra { display: flex; align-items: center; gap: 6px; padding: 8px 12px; color: #f3ecda; }
+.visor-nombre { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.visor-barra .boton { min-width: 2.6em; font-variant-numeric: tabular-nums; }
+.visor-lienzo { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; user-select: none; }
+.visor-lienzo:active { cursor: grabbing; }
+.visor-lienzo img { width: 100%; height: 100%; object-fit: contain; transform-origin: center; will-change: transform; }
+.visor-ayuda { margin: 0; padding: 6px 12px 10px; font-size: 0.8rem; color: #b8b0c8; text-align: center; }
 .nota-sesion .sesion-titulo { margin: 1.2em 0 0.4em; }
 .nota-sesion h2.sesion-titulo { font-size: 1.5rem; }
 .nota-sesion h3.sesion-titulo { font-size: 1.2rem; border-bottom: 1px solid var(--borde); padding-bottom: 4px; }
