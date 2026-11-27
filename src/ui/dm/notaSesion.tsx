@@ -2,7 +2,7 @@
 // Entiende: títulos, párrafos, listas anidadas con tareas «- [ ]» (que se tachan), tablas, separadores
 // y callouts plegables de Obsidian: [!narracion], [!dialogo], [!tirada], [!reto], [!salvacion], [!dm], [!info].
 // Cada elemento recuerda sus líneas en el texto, para editarlo en el sitio sin tocar el resto (modo edición).
-import { createContext, Fragment, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, Fragment, useContext, useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { idDe } from '../guiaMarkdown'
 import { aHtml, aMarkdown, type Ref } from './editarSesion'
 
@@ -274,7 +274,16 @@ export interface Edicion {
   fila: (f: { n: number; d: number }, celdas: string[]) => void
   /** Línea recién insertada que hay que enfocar. */
   enfocar?: number
+  /** Mueve un evento (bloque de primer nivel que empieza en la línea n) un puesto arriba o abajo dentro de su escena. */
+  mover?: (n: number, dir: -1 | 1) => void
+  /** Mueve el evento de la línea `origen` antes o después del de la línea `destino` (misma escena). */
+  moverA?: (origen: number, destino: number, antes: boolean) => void
+  /** Si el evento de la línea n puede subir o bajar dentro de su escena. */
+  vecinos?: (n: number) => { arriba: boolean; abajo: boolean }
 }
+
+/** Tipo de dato del arrastre de eventos (para no confundirlo con soltar archivos). */
+const TIPO_ARRASTRE = 'application/x-evento-sesion'
 
 const EdicionCtx = createContext<Edicion | null>(null)
 
@@ -380,6 +389,12 @@ export interface PropsNota {
   alTachar: (n: number, hecha: boolean) => void
   /** Filtro de tipos de desplegable que se ven («todos» si está vacío). */
   ocultos: string[]
+  /** Fija un evento en lo alto de la pantalla (o lo quita); sin esta función no se muestra la chincheta. */
+  fijar?: (b: BloqueSesion) => void
+  /** Líneas de inicio de los eventos fijados. */
+  fijados?: number[]
+  /** Abre los desplegables aunque vengan plegados (los eventos fijados). */
+  abrirTodo?: boolean
 }
 
 export function PintarSesion({ bloques: bs, edicion, ...props }: { bloques: BloqueSesion[]; edicion?: Edicion } & PropsNota) {
@@ -397,12 +412,77 @@ function Bloques({ bs, prefijo, dentro, despuesDe, ...props }: { bs: BloqueSesio
       {ed && despuesDe !== undefined && <Insertar despues={despuesDe} prefijo={prefijo} dentro={dentro} />}
       {bs.map((b, i) => (
         <Fragment key={i}>
-          <PintarBloque b={b} {...props} />
+          {dentro ? <PintarBloque b={b} {...props} /> : <Evento b={b} {...props} />}
           {ed && <Insertar despues={b.fin} prefijo={prefijo} dentro={dentro} />}
         </Fragment>
       ))}
     </>
   )
+}
+
+/** Un evento de primer nivel: en edición se mueve (asa, ▲ ▼); fuera de ella se puede fijar arriba (📌). */
+function Evento({ b, ...props }: { b: BloqueSesion } & PropsNota) {
+  const ed = useContext(EdicionCtx)
+  const [sobre, setSobre] = useState<'antes' | 'despues'>()
+  if (b.tipo === 'callout' && props.ocultos.includes(b.clase)) return null
+  const lado = (e: DragEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    return e.clientY < r.top + r.height / 2 ? 'antes' : 'despues'
+  }
+  const movible = b.tipo !== 'separador' && !(b.tipo === 'titulo' && b.nivel <= 2)
+  if (ed?.mover && movible) {
+    const v = ed.vecinos?.(b.n) ?? { arriba: false, abajo: false }
+    return (
+      <div
+        className={`sesion-evento movible ${sobre ? `sobre-${sobre}` : ''}`}
+        onDragOver={(e) => {
+          if (!e.dataTransfer.types.includes(TIPO_ARRASTRE)) return
+          e.preventDefault()
+          e.stopPropagation()
+          setSobre(lado(e))
+        }}
+        onDragLeave={() => setSobre(undefined)}
+        onDrop={(e) => {
+          const origen = e.dataTransfer.getData(TIPO_ARRASTRE)
+          setSobre(undefined)
+          if (!origen) return
+          e.preventDefault()
+          e.stopPropagation()
+          ed.moverA?.(Number(origen), b.n, lado(e) === 'antes')
+        }}
+      >
+        <div className="sesion-mover">
+          <span
+            className="sesion-asa"
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData(TIPO_ARRASTRE, String(b.n))
+              e.dataTransfer.effectAllowed = 'move'
+              const evento = (e.currentTarget as HTMLElement).closest('.sesion-evento')
+              if (evento) e.dataTransfer.setDragImage(evento, 12, 12)
+            }}
+            title="Arrastra para moverlo dentro de la escena"
+            aria-hidden="true"
+          >⠿</span>
+          <button className="boton-icono" disabled={!v.arriba} onClick={() => ed.mover!(b.n, -1)} title="Subir dentro de la escena" aria-label="Subir">▲</button>
+          <button className="boton-icono" disabled={!v.abajo} onClick={() => ed.mover!(b.n, 1)} title="Bajar dentro de la escena" aria-label="Bajar">▼</button>
+        </div>
+        <div className="sesion-evento-cuerpo">
+          <PintarBloque b={b} {...props} />
+        </div>
+      </div>
+    )
+  }
+  if (!ed && props.fijar && b.tipo !== 'separador' && b.tipo !== 'titulo') {
+    const activo = !!props.fijados?.includes(b.n)
+    return (
+      <div className="sesion-evento fijable">
+        <button className={`sesion-fijar ${activo ? 'activo' : ''}`} onClick={() => props.fijar!(b)} aria-pressed={activo} title={activo ? 'Quitar de arriba' : 'Fijar arriba de la pantalla'}>📌</button>
+        <PintarBloque b={b} {...props} />
+      </div>
+    )
+  }
+  return <PintarBloque b={b} {...props} />
 }
 
 function PintarBloque({ b, ...props }: { b: BloqueSesion } & PropsNota) {
@@ -476,7 +556,7 @@ function CalloutEditable({ b, ...props }: { b: Extract<BloqueSesion, { tipo: 'ca
 }
 
 function Desplegable({ b, ...props }: { b: Extract<BloqueSesion, { tipo: 'callout' }> } & PropsNota) {
-  const [abierto, setAbierto] = useState(b.plegado !== true)
+  const [abierto, setAbierto] = useState(!!props.abrirTodo || b.plegado !== true)
   const e = ESTILO[b.clase] ?? { icono: '', nombre: b.clase }
   const cuerpo = <Bloques bs={b.hijos} prefijo="" dentro {...props} />
   if (b.plegado === null)

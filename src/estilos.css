@@ -594,7 +594,31 @@ button.tarjeta-eleccion:disabled { opacity: 0.5; cursor: not-allowed; }
 .panel-nota.arrastrando { outline: 2px dashed var(--acento); outline-offset: 4px; border-radius: var(--radio); }
 .nota-controles { flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .nota-controles select { flex: 1; min-width: 200px; }
-.filtros-nota { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.filtros-nota { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; padding: 8px; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--fondo-2); }
+.pestaña-filtros { margin-left: auto; font: inherit; font-size: 0.85rem; color: var(--texto-suave); background: var(--fondo-2); border: 1px solid var(--borde); border-radius: var(--radio); padding: 0.3em 0.8em; cursor: pointer; }
+.pestaña-filtros:hover, .pestaña-filtros.abierta { color: var(--texto); }
+.pestaña-filtros.con-ocultos { color: var(--acento); border-color: var(--acento); }
+/* Eventos fijados arriba: se quedan pegados mientras la nota se desliza */
+.nota-fijados { position: sticky; z-index: 1; display: flex; flex-direction: column; gap: 6px; max-height: 45vh; overflow-y: auto; margin-bottom: 10px; padding: 6px 0; background: var(--fondo); border-bottom: 2px solid var(--acento); box-shadow: var(--sombra); }
+.nota-fijado { border: 1px solid var(--borde); border-radius: 8px; padding: 2px 8px 4px; background: var(--fondo-2); }
+.nota-fijado-barra { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--texto-suave); }
+.nota-fijado-barra span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nota-fijado .sesion-callout { margin: 2px 0; }
+.sesion-evento { position: relative; }
+.sesion-fijar { position: absolute; top: 4px; right: 4px; z-index: 1; opacity: 0; font-size: 0.75rem; line-height: 1.2; padding: 1px 4px; border: 1px solid var(--borde); border-radius: 6px; background: var(--fondo); cursor: pointer; transition: opacity 0.1s; }
+.sesion-evento.fijable:hover > .sesion-fijar, .sesion-fijar:focus-visible, .sesion-fijar.activo { opacity: 1; }
+.sesion-fijar.activo { border-color: var(--acento); background: var(--acento-suave); }
+/* Mover eventos dentro de la escena (modo edición) */
+.sesion-evento.movible { display: flex; align-items: flex-start; gap: 4px; }
+.sesion-evento-cuerpo { flex: 1; min-width: 0; }
+.sesion-mover { display: flex; flex-direction: column; align-items: center; padding-top: 4px; opacity: 0; transition: opacity 0.1s; }
+.sesion-evento.movible:hover > .sesion-mover, .sesion-mover:focus-within { opacity: 1; }
+.sesion-asa { cursor: grab; user-select: none; color: var(--texto-suave); line-height: 1; padding: 2px; }
+.sesion-mover .boton-icono { font-size: 0.65rem; line-height: 1.2; padding: 0 3px; }
+.sesion-mover .boton-icono:disabled { opacity: 0.25; cursor: default; }
+.sesion-evento.sobre-antes { box-shadow: 0 -3px 0 var(--acento); }
+.sesion-evento.sobre-despues { box-shadow: 0 3px 0 var(--acento); }
+@media (hover: none) { .sesion-fijar, .sesion-mover { opacity: 0.6; } }
 .filtros-nota .chip { cursor: pointer; border-left-width: 4px; }
 .escenarios-nota { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); width: 100%; max-width: 100%; box-sizing: border-box; gap: 4px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); min-width: 0; }
 .escenarios-nota .chip { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }

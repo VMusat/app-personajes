@@ -122,3 +122,19 @@ describe('iniciativa', () => {
     expect(siguienteTurno(f, 'pj:vito', 2, true)).toEqual({ turno: 'al:vito:lechuza', ronda: 1 })
   })
 })
+
+describe('mover eventos de una escena', () => {
+  it('intercambia dos eventos conservando lo de en medio y traslada las líneas', async () => {
+    const { intercambiar } = await import('../src/ui/dm/editarSesion')
+    const nota = ['## Escena', '- [ ] Primero', '', '> [!dm]- Caja', '> dentro', '', '- [ ] Último'].join('\n')
+    const bs = leerSesion(nota)
+    const [, primero, caja] = bs
+    const c = intercambiar(nota, primero, caja)
+    expect(c.texto.split('\n')).toEqual(['## Escena', '> [!dm]- Caja', '> dentro', '', '- [ ] Primero', '', '- [ ] Último'])
+    expect(c.mapa(1)).toBe(4) // «Primero» baja tras la caja y la línea en blanco
+    expect(c.mapa(3)).toBe(1) // la caja sube
+    expect(c.mapa(2)).toBe(3) // la línea en blanco se queda entre los dos
+    expect(c.mapa(6)).toBe(6) // lo de después no se mueve
+    expect(secciones(leerSesion(c.texto))[0].tareas.length).toBe(2)
+  })
+})

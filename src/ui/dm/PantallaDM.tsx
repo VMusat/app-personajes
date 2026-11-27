@@ -1,6 +1,6 @@
 // Pantalla del DM: la nota de sesión a un lado y la mesa al otro (PJs en vivo, iniciativa y escenario de criaturas).
 // El escenario se guarda en el almacén (solo DM); los PJs, sus aliados y sus formas llegan en vivo de sus hojas.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { ir, useEstado } from '../../estado/store'
 import { derivar, type Hoja } from '../../motor/derivar'
 import type { Personaje } from '../../motor/personaje'
@@ -14,8 +14,8 @@ import { Buscador, Modal, normalizar, Pestañas } from '../comun'
 import { CONDICIONES, conSigno } from '../glosario'
 import { descargar } from '../hoja/exportar'
 import { idAliado, idCriatura, idPj, ordenIniciativa, siguienteTurno, type FilaIniciativa, type PjMesa } from './iniciativa'
-import { leerSesion, lineasDeTareas, PintarSesion, secciones, textoPlano, type Edicion } from './notaSesion'
-import { añadirApuntes, borrar as borrarLineas, cambiarTipo, escribirFila, insertar, reemplazar, trasladarTachadas, TITULO_APUNTES, type Cambio } from './editarSesion'
+import { ESTILO, leerSesion, lineasDeTareas, PintarSesion, secciones, textoPlano, type BloqueSesion, type Edicion } from './notaSesion'
+import { añadirApuntes, borrar as borrarLineas, cambiarTipo, escribirFila, insertar, intercambiar, reemplazar, trasladarTachadas, TITULO_APUNTES, type Cambio } from './editarSesion'
 import { FichaCriatura, TextoConDados, useCriaturas } from './FichaCriatura'
 import { lineaApunte, PanelApuntes, PanelRelojes, useAhora } from './Herramientas'
 import { EditorCriatura } from './Bestiario'
@@ -229,12 +229,42 @@ const TIPOS_DESPLEGABLE = [
   { clase: 'dm', texto: 'DM' },
 ]
 
+/** Los eventos que se pueden mover en la escena del evento de la línea n: lo de primer nivel menos los títulos de escena y los separadores. */
+function movibles(bs: BloqueSesion[], n: number): BloqueSesion[] {
+  const i = bs.findIndex((b) => b.n === n)
+  if (i < 0) return []
+  const s = secciones(bs).find((x) => i >= x.desde && i < x.hasta)
+  return bs.slice(s?.desde ?? 0, s?.hasta ?? bs.length).filter((b) => b.tipo !== 'separador' && !(b.tipo === 'titulo' && b.nivel <= 2))
+}
+
+/** Nombre corto de un evento para la franja de fijados. */
+function etiquetaEvento(b: BloqueSesion): string {
+  const corto = (t: string) => {
+    const x = textoPlano(t)
+    return x.length > 70 ? `${x.slice(0, 68)}…` : x
+  }
+  switch (b.tipo) {
+    case 'callout':
+      return `${ESTILO[b.clase]?.icono ?? ''} ${corto(b.titulo || ESTILO[b.clase]?.nombre || b.clase)}`.trim()
+    case 'lista':
+      return corto(b.items[0]?.texto ?? 'Lista')
+    case 'tabla':
+      return corto(`Tabla: ${b.cabecera.join(' · ')}`)
+    case 'parrafo':
+    case 'titulo':
+      return corto(b.texto)
+    default:
+      return 'Evento'
+  }
+}
+
 function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; pantalla: Pantalla; actualizar: Act }) {
   const repo = useEstado((s) => s.repo)
   const [ocultos, setOcultos] = useState<string[]>([])
   const [arrastrando, setArrastrando] = useState(false)
   const [editando, setEditando] = useState(false)
   const [enfocar, setEnfocar] = useState<number>()
+  const [verFiltros, setVerFiltros] = useState(false)
   const entrada = useRef<HTMLInputElement>(null)
   const nota = notas.find((n) => n.id === pantalla.sesion) ?? notas[notas.length - 1]
   // Texto más reciente de la nota: los cambios seguidos se encadenan sin esperar al almacén
@@ -278,6 +308,50 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
     elegirEscenarios(ids.includes(id) ? ids.filter((x) => x !== id) : secs.filter((s) => s.id === id || ids.includes(s.id)).map((s) => s.id))
   }
   const sinExportar = !!nota?.editada && (!nota.importada || nota.editada > nota.importada)
+
+  // ── Eventos fijados arriba: se recuerdan por su línea y su texto (para encontrarlos si la nota cambia)
+  const lineasTexto = useMemo(() => actual.split(/\r?\n/), [actual])
+  const [fijadosGuardados, setFijadosGuardados] = useState<{ n: number; firma: string }[]>([])
+  const claveFijados = nota ? `pantalla-fijados:${nota.id}` : ''
+  useEffect(() => {
+    if (!claveFijados) return
+    try {
+      setFijadosGuardados(JSON.parse(localStorage.getItem(claveFijados) ?? '[]'))
+    } catch {
+      setFijadosGuardados([])
+    }
+  }, [claveFijados])
+  const fijados = fijadosGuardados
+    .map((f) => bloques.find((b) => b.n === f.n && lineasTexto[b.n] === f.firma) ?? bloques.find((b) => lineasTexto[b.n] === f.firma))
+    .filter((b, i, xs): b is BloqueSesion => !!b && xs.indexOf(b) === i)
+  const guardarFijados = (lista: { n: number; firma: string }[]) => {
+    setFijadosGuardados(lista)
+    try {
+      localStorage.setItem(claveFijados, JSON.stringify(lista))
+    } catch {
+      /* sin almacenamiento: solo dura esta visita */
+    }
+  }
+  const fijar = (b: BloqueSesion) => {
+    const actuales = fijados.map((x) => ({ n: x.n, firma: lineasTexto[x.n] }))
+    guardarFijados(actuales.some((x) => x.n === b.n) ? actuales.filter((x) => x.n !== b.n) : [...actuales, { n: b.n, firma: lineasTexto[b.n] }])
+  }
+  // La franja de fijados va justo debajo de la cabecera cuando la cabecera se queda pegada (pantallas anchas)
+  const cabecera = useRef<HTMLDivElement>(null)
+  const [altoCabecera, setAltoCabecera] = useState(0)
+  useLayoutEffect(() => {
+    const el = cabecera.current
+    if (!el) return
+    const medir = () => setAltoCabecera(getComputedStyle(el).position === 'sticky' ? el.offsetHeight : 0)
+    medir()
+    const ro = new ResizeObserver(medir)
+    ro.observe(el)
+    window.addEventListener('resize', medir)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', medir)
+    }
+  }, [])
 
   const guardarTexto = (nuevo: string, tachadasNuevas: number[]) => {
     if (!nota) return
@@ -324,6 +398,51 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
     borrar: (n, fin) => aplicar((t) => borrarLineas(t, n, fin)),
     tipo: (n, tipo) => aplicar((t) => cambiarTipo(t, n, tipo)),
     fila: (f, celdas) => aplicar((t) => escribirFila(t, f, celdas)),
+    mover: (n, dir) => {
+      const lista = movibles(bloques, n)
+      const p = lista.findIndex((b) => b.n === n)
+      if (p >= 0 && lista[p + dir]) moverEvento(p, p + dir, n)
+    },
+    moverA: (origen, destino, antes) => {
+      const lista = movibles(bloques, origen)
+      const po = lista.findIndex((b) => b.n === origen)
+      const pt = lista.findIndex((b) => b.n === destino)
+      if (po < 0 || pt < 0) return
+      let final = antes ? pt : pt + 1
+      if (final > po) final--
+      if (final !== po) moverEvento(po, final, origen)
+    },
+    vecinos: (n) => {
+      const lista = movibles(bloques, n)
+      const p = lista.findIndex((b) => b.n === n)
+      return { arriba: p > 0, abajo: p >= 0 && p < lista.length - 1 }
+    },
+  }
+
+  /** Lleva el evento del puesto `desde` al puesto `hasta` de su escena, de uno en uno. */
+  function moverEvento(desde: number, hasta: number, linea: number) {
+    aplicar((t) => {
+      let txt = t
+      let mapa: Cambio['mapa'] = (x) => x
+      let pos = desde
+      let n = linea
+      while (pos !== hasta) {
+        const lista = movibles(leerSesion(txt), n)
+        const paso = hasta > pos ? 1 : -1
+        const [a, b] = paso > 0 ? [lista[pos], lista[pos + 1]] : [lista[pos - 1], lista[pos]]
+        if (!a || !b) break
+        const c = intercambiar(txt, a, b)
+        const previo = mapa
+        mapa = (x) => {
+          const y = previo(x)
+          return y === null ? null : c.mapa(y)
+        }
+        n = c.mapa(n) ?? n
+        txt = c.texto
+        pos += paso
+      }
+      return { texto: txt, mapa }
+    })
   }
 
   const deshacer = () => {
@@ -393,7 +512,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
         void importar(e.dataTransfer.files)
       }}
     >
-      <div className="nota-cabecera">
+      <div className="nota-cabecera" ref={cabecera}>
         <div className="fila nota-controles">
           <select value={nota?.id ?? ''} onChange={(e) => actualizar((p) => void (p.sesion = e.target.value))}>
             {notas.length === 0 && <option value="">Sin notas de sesión</option>}
@@ -423,15 +542,25 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
           {nota && tachadas.length > 0 && !editando && (
             <button className="boton secundario" onClick={() => actualizar((p) => void (p.tachadas[nota.id] = []))}>Destachar todo</button>
           )}
+          <button
+            className={`pestaña-filtros ${verFiltros ? 'abierta' : ''} ${ocultos.length ? 'con-ocultos' : ''}`}
+            aria-expanded={verFiltros}
+            onClick={() => setVerFiltros((v) => !v)}
+            title="Qué tipos de tarjeta se ven"
+          >
+            Filtros{ocultos.length ? ` · ${ocultos.length} oculto${ocultos.length > 1 ? 's' : ''}` : ''} {verFiltros ? '▴' : '▾'}
+          </button>
         </div>
-        <div className="filtros-nota">
-          {TIPOS_DESPLEGABLE.map((t) => (
-            <label key={t.clase} className={`chip c-${t.clase}`}>
-              <input type="checkbox" checked={!ocultos.includes(t.clase)} onChange={(e) => setOcultos((o) => (e.target.checked ? o.filter((x) => x !== t.clase) : [...o, t.clase]))} />
-              {t.texto}
-            </label>
-          ))}
-        </div>
+        {verFiltros && (
+          <div className="filtros-nota">
+            {TIPOS_DESPLEGABLE.map((t) => (
+              <label key={t.clase} className={`chip c-${t.clase}`}>
+                <input type="checkbox" checked={!ocultos.includes(t.clase)} onChange={(e) => setOcultos((o) => (e.target.checked ? o.filter((x) => x !== t.clase) : [...o, t.clase]))} />
+                {t.texto}
+              </label>
+            ))}
+          </div>
+        )}
         {editando && (
           <p className="sutil ayuda-edicion">
             Pulsa en cualquier texto para cambiarlo (<kbd>Ctrl</kbd>+<kbd>B</kbd> negrita, <kbd>Ctrl</kbd>+<kbd>I</kbd> cursiva). <kbd>Intro</kbd> guarda y, en una línea, crea otra debajo; <kbd>Esc</kbd> deshace. Con <b>＋</b> añades líneas y tarjetas.
@@ -466,11 +595,42 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
           Arrastra aquí una nota de <code>Sesiones/</code> de la bóveda, o pulsa «Importar .md». Se guarda solo para el DM. Si la cambias en Obsidian, vuelve a importarla: se actualiza y conserva lo tachado.
         </p>
       ) : (
+        <>
+        {fijados.length > 0 && (
+          <div className="nota-fijados" style={{ top: altoCabecera }} aria-label="Eventos fijados">
+            {fijados.map((b) => (
+              <div key={b.n} className="nota-fijado">
+                <div className="nota-fijado-barra">
+                  <span>📌 {etiquetaEvento(b)}</span>
+                  <button className="boton-icono" onClick={() => fijar(b)} title="Quitar de arriba" aria-label="Quitar de arriba">✕</button>
+                </div>
+                <div className="nota-sesion">
+                  <PintarSesion
+                    bloques={[b]}
+                    tachadas={tachadas}
+                    ocultos={[]}
+                    abrirTodo
+                    alTachar={(n, hecha) =>
+                      actualizar((p) => {
+                        const t = new Set(p.tachadas[nota.id] ?? [])
+                        if (hecha) t.add(n)
+                        else t.delete(n)
+                        p.tachadas[nota.id] = [...t]
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <article ref={articulo} className={`nota-sesion ${editando ? 'editando' : ''}`}>
           <PintarSesion
             bloques={visibles}
             tachadas={tachadas}
             ocultos={ocultos}
+            fijar={editando ? undefined : fijar}
+            fijados={fijados.map((b) => b.n)}
             edicion={editando ? edicion : undefined}
             alTachar={(n, hecha) =>
               actualizar((p) => {
@@ -494,6 +654,7 @@ function PanelNota({ notas, pantalla, actualizar }: { notas: NotaSesion[]; panta
             </div>
           )}
         </article>
+        </>
       )}
     </div>
   )

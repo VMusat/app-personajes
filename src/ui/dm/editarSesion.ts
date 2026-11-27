@@ -72,6 +72,25 @@ export function cambiarTipo(texto: string, n: number, tipo: string): Cambio {
   return { texto: lineas.join(nl), mapa: (x) => x }
 }
 
+/**
+ * Intercambia dos trozos de la nota, `a` antes que `b` (líneas n..fin incluidas), y deja en su sitio
+ * lo que hay entre ellos (líneas en blanco, separadores). Sirve para mover un evento dentro de su escena.
+ */
+export function intercambiar(texto: string, a: { n: number; fin: number }, b: { n: number; fin: number }): Cambio {
+  const { lineas, nl } = partir(texto)
+  const A = lineas.slice(a.n, a.fin + 1)
+  const G = lineas.slice(a.fin + 1, b.n)
+  const B = lineas.slice(b.n, b.fin + 1)
+  lineas.splice(a.n, b.fin - a.n + 1, ...B, ...G, ...A)
+  const la = A.length
+  const lb = B.length
+  const lg = G.length
+  return {
+    texto: lineas.join(nl),
+    mapa: (x) => (x < a.n || x > b.fin ? x : x <= a.fin ? x + lb + lg : x < b.n ? x + lb - la : x - (b.n - a.n)),
+  }
+}
+
 /** Escribe una fila de tabla con sus celdas; las barras de los enlaces se escapan («[[a\|b]]»). */
 export function escribirFila(texto: string, fila: { n: number; d: number }, celdas: string[]): Cambio {
   const { lineas, nl } = partir(texto)
